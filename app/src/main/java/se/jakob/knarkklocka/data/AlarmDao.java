@@ -13,7 +13,7 @@ import java.util.List;
 @Dao
 public interface AlarmDao {
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(Alarm alarm);
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
