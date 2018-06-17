@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/timer_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,17 +9,20 @@
     tools:context="se.jakob.knarkklocka.TimerActivity"
     tools:showIn="@layout/activity_timer">
 
-    <TextView
+
+    <Chronometer
         android:id="@+id/time_display"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginTop="16dp"
-        android:fontFamily="sans-serif"
-        android:text="Hello World!"
+        android:countDown="true"
+        android:fontFamily="@font/varela_round"
+        android:onClick="showTimePickerDialog"
         android:textAlignment="center"
-        android:textSize="36sp"
-        android:typeface="normal"
+        android:textColor="@color/colorText"
+        android:textSize="70sp"
+        android:typeface="serif"
         app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -42,7 +46,11 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="16dp"
+            android:background="@color/colorDecorative"
+            android:fontFamily="@font/varela_round"
+            android:onClick="sleep"
             android:text="@string/remove"
+            android:textColor="@color/colorText"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/button_add_timer"
             app:layout_constraintStart_toStartOf="parent"
@@ -64,12 +72,13 @@
 
         <Button
             android:id="@+id/button_snooze_timer"
-            android:layout_width="80dp"
+            android:layout_width="85dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
+            android:fontFamily="@font/varela_round"
             android:text="@string/snooze"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
