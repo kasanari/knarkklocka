@@ -18,10 +18,11 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.Word
     private final LayoutInflater mInflater;
     private List<Alarm> mAlarms; // Cached copy of alarms
 
-    AlarmListAdapter(Context context) {
+    public AlarmListAdapter(Context context) {
         mInflater = LayoutInflater.from(context);
     }
 
+    @NonNull
     @Override
     public WordViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView = mInflater.inflate(R.layout.recyclerview_item, parent, false);
