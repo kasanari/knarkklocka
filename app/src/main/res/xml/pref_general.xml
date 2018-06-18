@@ -21,7 +21,7 @@
 
     <se.jakob.knarkklocka.NumberPickerPreference
         android:key="timer_length"
-        android:title="Give me a number" />
+        android:title="@string/pref_timer_length" />
 
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
          dismiss it. -->
