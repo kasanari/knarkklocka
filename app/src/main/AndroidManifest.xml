@@ -2,33 +2,83 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="se.jakob.knarkklocka">
 
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:fullBackupContent="@xml/backup_descriptor">
+        android:theme="@style/AppTheme">
+
+
+        <!--*********Activities********-->
+
         <activity
             android:name=".TimerActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".SettingsActivity"
+            android:screenOrientation="portrait"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".TimerActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="se.jakob.knarkklocka.TimerActivity" />
         </activity>
+
+        <activity
+            android:name=".AlarmActivity"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:resizeableActivity="false"
+            android:screenOrientation="portrait"
+            android:taskAffinity=""
+            android:windowSoftInputMode="stateAlwaysHidden" />
+        <activity
+            android:name=".HistoryActivity"
+            android:parentActivityName=".TimerActivity"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="se.jakob.knarkklocka.TimerActivity" />
+        </activity>
+
+        <!--*********Services********-->
+
+        <service
+            android:name=".AlarmService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <service
+            android:name=".TimerIntentService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <service
+            android:name=".LocalService"
+            android:enabled="true" />
+
+        <!--*********Broadcast Receivers********-->
+
+        <receiver android:name=".AlarmReceiver" />
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
+
     </application>
 
 </manifest>
