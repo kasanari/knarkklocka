@@ -5,11 +5,11 @@ import android.arch.lifecycle.ViewModel;
 
 import java.util.List;
 
-public class AlarmViewModel extends ViewModel {
+public class AlarmHistoryViewModel extends ViewModel {
     private AlarmRepository mRepository;
     private LiveData<List<Alarm>> mAllAlarms;
 
-    public AlarmViewModel(AlarmRepository repository) {
+    public AlarmHistoryViewModel(AlarmRepository repository) {
         mRepository = repository;
         mAllAlarms = mRepository.getAllAlarms();
     }
