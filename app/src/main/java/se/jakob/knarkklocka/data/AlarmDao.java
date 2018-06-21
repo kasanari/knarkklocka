@@ -10,6 +10,8 @@ import android.arch.persistence.room.Update;
 
 import java.util.List;
 
+//Class to allow interaction of database
+
 @Dao
 public interface AlarmDao {
 
