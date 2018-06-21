@@ -17,7 +17,10 @@ import java.util.Date;
 public abstract class AlarmDatabase extends RoomDatabase {
     private static final String LOG_TAG = AlarmDatabase.class.getSimpleName();
     private static final Object LOCK = new Object();
-    private static volatile AlarmDatabase INSTANCE; //
+    private static volatile AlarmDatabase INSTANCE; //Instance of the database
+
+    public abstract AlarmDao alarmDao(); //Getter for Dao, use to access the database
+
     private static RoomDatabase.Callback sRoomDatabaseCallback =
             new RoomDatabase.Callback() {
 
@@ -43,7 +46,6 @@ public abstract class AlarmDatabase extends RoomDatabase {
         return INSTANCE;
     }
 
-    public abstract AlarmDao alarmDao(); //Getter for Dao
 
     private static class PopulateDbAsync extends AsyncTask<Void, Void, Void> {
 
