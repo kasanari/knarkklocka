@@ -66,4 +66,20 @@ public class Alarm {
     public int getSnoozes() {return snoozes;}
 
     public void setSnoozes(int snoozes) {this.snoozes = snoozes;}
+
+    public String getStateString(int state) {
+        switch (state) {
+            case Alarm.STATE_ACTIVE:
+                return "Active";
+            case Alarm.STATE_WAITING:
+                return "Waiting";
+            case Alarm.STATE_DEAD:
+                return "Dead";
+            case Alarm.STATE_SNOOZING:
+                return "Snoozed";
+            default:
+                return "Invalid State";
+        }
+    }
 }
+

@@ -13,7 +13,7 @@ import java.util.List;
 
 import se.jakob.knarkklocka.R;
 
-public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.WordViewHolder> {
+public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.AlarmViewHolder> {
 
     private final LayoutInflater mInflater;
     private List<Alarm> mAlarms; // Cached copy of alarms
@@ -24,25 +24,29 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.Word
 
     @NonNull
     @Override
-    public WordViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public AlarmViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView = mInflater.inflate(R.layout.recyclerview_item, parent, false);
-        return new WordViewHolder(itemView);
+        return new AlarmViewHolder(itemView);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull WordViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull AlarmViewHolder holder, int position) {
         if (mAlarms != null) {
             Alarm current = mAlarms.get(position);
             DateFormat dateFormat = DateFormat.getTimeInstance();
             String dateString = dateFormat.format(current.getEndTime());
-            holder.alarmItemView.setText(dateString);
+            holder.dueTimeItemView.setText(dateString);
+
+            int state = current.getState();
+            String stateString = current.getStateString(state);
+            holder.stateItemView.setText(stateString);
         } else {
             // Covers the case of data not being ready yet.
-            holder.alarmItemView.setText("No Alarm");
+            holder.dueTimeItemView.setText("No Alarms");
         }
     }
 
-    void setWords(List<Alarm> words) {
+    public void setAlarms(List<Alarm> words) {
         mAlarms = words;
         notifyDataSetChanged();
     }
@@ -56,12 +60,14 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.Word
         else return 0;
     }
 
-    class WordViewHolder extends RecyclerView.ViewHolder {
-        private final TextView alarmItemView;
+    class AlarmViewHolder extends RecyclerView.ViewHolder {
+        private final TextView dueTimeItemView;
+        private final TextView stateItemView;
 
-        private WordViewHolder(View itemView) {
+        private AlarmViewHolder(View itemView) {
             super(itemView);
-            alarmItemView = itemView.findViewById(R.id.textView);
+            dueTimeItemView = itemView.findViewById(R.id.tv_alarm_due);
+            stateItemView = itemView.findViewById(R.id.tv_alarm_state);
         }
     }
 }
