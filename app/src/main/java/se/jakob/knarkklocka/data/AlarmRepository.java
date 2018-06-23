@@ -11,7 +11,7 @@ public class AlarmRepository {
     private LiveData<List<Alarm>> mAllAlarms;
 
     AlarmRepository(Application application) {
-        AlarmRoomDatabase db = AlarmRoomDatabase.getDatabase(application);
+        AlarmDatabase db = AlarmDatabase.getDatabase(application);
         mAlarmDao = db.alarmDao();
         mAllAlarms = mAlarmDao.loadAllAlarms();
     }
@@ -20,12 +20,19 @@ public class AlarmRepository {
         return mAllAlarms;
     }
 
+    LiveData<Alarm> getAlarmsByState(int state) {
+        return mAlarmDao.loadAlarmsByState(state);
+    }
+
     public void insert(Alarm alarm) {
         new insertAsyncTask(mAlarmDao).execute(alarm);
     }
 
-    private static class insertAsyncTask extends AsyncTask<Alarm, Void, Void> {
+    public void delete(Alarm alarm) {
+        new deleteAsyncTask(mAlarmDao).execute(alarm);
+    }
 
+    private static class insertAsyncTask extends AsyncTask<Alarm, Void, Void> {
         private AlarmDao mAsyncTaskDao;
 
         insertAsyncTask(AlarmDao dao) {
@@ -35,6 +42,20 @@ public class AlarmRepository {
         @Override
         protected Void doInBackground(final Alarm... params) {
             mAsyncTaskDao.insert(params[0]);
+            return null;
+        }
+    }
+
+    private static class deleteAsyncTask extends AsyncTask<Alarm, Void, Void> {
+        private AlarmDao mAsyncTaskDao;
+
+        deleteAsyncTask(AlarmDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(final Alarm... params) {
+            mAsyncTaskDao.deleteAlarm(params[0]);
             return null;
         }
     }
