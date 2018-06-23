@@ -138,13 +138,6 @@ public class TimerActivity extends AppCompatActivity implements
         //startService(startNewTimerIntent);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_timer, menu);
-        return true;
-    }
-
     public void showTimePickerDialog(View v) {
         DialogFragment newFragment = new TimePickerFragment();
         newFragment.show(getSupportFragmentManager(), "timePicker");
@@ -152,19 +145,28 @@ public class TimerActivity extends AppCompatActivity implements
 
     public void sleep(View v) {
         //setChronometer(0);
-        Snackbar.make(v, "Removed timer", Snackbar.LENGTH_LONG).show();
+
         countdown_view.stop();
         //TransitionManager.beginDelayedTransition(timer_content_group, new Slide(Gravity.TOP));
         //snooze_timer_button.setVisibility(View.INVISIBLE);
         //dismiss_timer_button.setVisibility(View.INVISIBLE);
         //countdown_view.setVisibility(View.INVISIBLE);
         //chronometer_container.setVisibility(View.GONE);
-
-        mainAlarmViewModel.delete();
+        if (mainAlarmViewModel.getAlarm().getValue() != null) {
+            mainAlarmViewModel.delete();
+            Snackbar.make(v, "Removed timer", Snackbar.LENGTH_LONG).show();
+        }
 
         Intent stopTimerIntent = new Intent(this, TimerIntentService.class);
         stopTimerIntent.setAction(TimerUtils.ACTION_REMOVE_TIMER);
         startService(stopTimerIntent);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_timer, menu);
+        return true;
     }
 
     @Override
