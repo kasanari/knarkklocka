@@ -1,26 +1,27 @@
 package se.jakob.knarkklocka.data;
 
+import android.app.Application;
+import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.ViewModel;
 
 import java.util.List;
 
-public class AlarmHistoryViewModel extends ViewModel {
+public class AlarmHistoryViewModel extends AndroidViewModel {
     private AlarmRepository mRepository;
     private LiveData<List<Alarm>> mAllAlarms;
 
-    public AlarmHistoryViewModel(AlarmRepository repository) {
-        mRepository = repository;
+    public AlarmHistoryViewModel(Application application) {
+        super(application);
+        mRepository = new AlarmRepository(application);
         mAllAlarms = mRepository.getAllAlarms();
     }
 
-    LiveData<List<Alarm>> getmAllAlarms() {
+    public LiveData<List<Alarm>> getAllAlarms() {
         return mAllAlarms;
     }
 
     public void insert(Alarm alarm) {
         mRepository.insert(alarm);
     }
-
 
 }
