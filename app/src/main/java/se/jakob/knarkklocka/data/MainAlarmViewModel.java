@@ -23,6 +23,8 @@ public class MainAlarmViewModel extends AndroidViewModel {
     }
 
     public void delete() {
-        mRepository.delete(mAlarm.getValue());
+        if (mAlarm.getValue() != null) {
+            mRepository.delete(mAlarm.getValue());
+        }
     }
 }
