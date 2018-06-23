@@ -58,7 +58,8 @@ public abstract class AlarmDatabase extends RoomDatabase {
         @Override
         protected Void doInBackground(final Void... params) {
             mDao.deleteAll();
-            Alarm alarm = new Alarm(Alarm.STATE_DEAD, new Date(500), new Date(500));
+            Alarm alarm;
+            alarm = new Alarm(Alarm.STATE_DEAD, new Date(500), new Date(500));
             mDao.insert(alarm);
             alarm = new Alarm(Alarm.STATE_DEAD, new Date(600), new Date(600));
             mDao.insert(alarm);
