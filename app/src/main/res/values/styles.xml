@@ -10,6 +10,7 @@
         <item name="android:textColorPrimary">@color/colorText</item>
         <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
         <item name="android:colorForeground">@color/colorText</item>
+        <item name="coordinatorLayoutStyle">@style/Widget.Design.CoordinatorLayout</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
