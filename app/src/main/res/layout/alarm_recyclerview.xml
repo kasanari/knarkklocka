@@ -8,7 +8,7 @@
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/darker_gray"
+        android:paddingTop="5dp"
         tools:listitem="@layout/recyclerview_item" />
 
 </android.support.constraint.ConstraintLayout>
