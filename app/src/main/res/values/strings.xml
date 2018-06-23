@@ -7,6 +7,11 @@
     <string name="dismiss">Dismiss</string>
     <string name="title_activity_settings">Settings</string>
 
+    <string name="state_waiting">Waiting</string>
+    <string name="state_dead">Dead</string>
+    <string name="state_active">Active</string>
+    <string name="state_snoozed">Snoozed</string>
+
     <!-- Strings related to Settings -->
 
     <!-- Example General settings -->
