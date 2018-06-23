@@ -64,27 +64,19 @@ public class TimerActivity extends AppCompatActivity implements
             public void onChanged(@Nullable final Alarm alarm) {
                 if (alarm != null) {
                     DateFormat dateFormat = DateFormat.getTimeInstance();
-                    String dateString = dateFormat.format(alarm.getEndTime());
+                    Date endTime = alarm.getEndTime();
+                    String dateString = dateFormat.format(endTime);
                     due_time_view.setText(dateString);
                     due_time_view.setVisibility(View.VISIBLE);
+                    countdown_view.setVisibility(View.VISIBLE);
+                    setChronometer(endTime);
+                    countdown_view.start();
                 } else {
                     due_time_view.setVisibility(View.INVISIBLE);
+                    countdown_view.setVisibility(View.INVISIBLE);
                 }
             }
         });
-
-        long trigger_time = TimerUtils.getRemainingTime(this);
-
-        if (trigger_time > 0) {
-            setChrono(trigger_time);
-            countdown_view.start();
-        } else {
-            //chronometer_container.setVisibility(View.GONE);
-            //snooze_timer_button.setVisibility(View.INVISIBLE);
-            //dismiss_timer_button.setVisibility(View.INVISIBLE);
-        }
-
-        setChrono(TimerUtils.getRemainingTime(this));
 
         /*Setup the shared preference listener*/
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -121,8 +113,8 @@ public class TimerActivity extends AppCompatActivity implements
         //TimerUtils.vibrateOnce(this);
     }
 
-    public void setChrono(long duration) {
-        countdown_view.setBase(SystemClock.elapsedRealtime() + duration);
+    public void setChronometer(Date base) {
+        countdown_view.setBase(base.getTime());
     }
 
     public void setAlarm() {
@@ -159,7 +151,7 @@ public class TimerActivity extends AppCompatActivity implements
     }
 
     public void sleep(View v) {
-        setChrono(0);
+        //setChronometer(0);
         Snackbar.make(v, "Removed timer", Snackbar.LENGTH_LONG).show();
         countdown_view.stop();
         //TransitionManager.beginDelayedTransition(timer_content_group, new Slide(Gravity.TOP));
@@ -178,17 +170,6 @@ public class TimerActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-
-        long trigger_time = TimerUtils.getRemainingTime(this);
-
-        if (trigger_time > 0) {
-            setChrono(trigger_time);
-            countdown_view.start();
-        } else {
-            //countdown_view.setVisibility(View.INVISIBLE);
-            //snooze_timer_button.setVisibility(View.INVISIBLE);
-            //dismiss_timer_button.setVisibility(View.INVISIBLE);
-        }
     }
 
     @Override
