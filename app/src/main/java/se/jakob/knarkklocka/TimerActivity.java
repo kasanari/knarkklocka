@@ -124,6 +124,9 @@ public class TimerActivity extends AppCompatActivity implements
         //TransitionManager.beginDelayedTransition(timer_content_group, new Slide(Gravity.BOTTOM));
         //snooze_timer_button.setVisibility(View.VISIBLE);
         //dismiss_timer_button.setVisibility(View.VISIBLE);
+        if (isAlarmRunning()) {
+            mainAlarmViewModel.delete();
+        }
         long timer_duration = PreferenceUtils.getTimerLength(this);
         Date starttime = new Date(SystemClock.elapsedRealtime());
         Date endtime = new Date(SystemClock.elapsedRealtime() + timer_duration);
@@ -152,7 +155,7 @@ public class TimerActivity extends AppCompatActivity implements
         //dismiss_timer_button.setVisibility(View.INVISIBLE);
         //countdown_view.setVisibility(View.INVISIBLE);
         //chronometer_container.setVisibility(View.GONE);
-        if (mainAlarmViewModel.getAlarm().getValue() != null) {
+        if (isAlarmRunning()) {
             mainAlarmViewModel.delete();
             Snackbar.make(v, "Removed timer", Snackbar.LENGTH_LONG).show();
         }
@@ -160,6 +163,10 @@ public class TimerActivity extends AppCompatActivity implements
         Intent stopTimerIntent = new Intent(this, TimerIntentService.class);
         stopTimerIntent.setAction(TimerUtils.ACTION_REMOVE_TIMER);
         startService(stopTimerIntent);
+    }
+
+    public boolean isAlarmRunning() {
+        return mainAlarmViewModel.getAlarm().getValue() != null;
     }
 
     @Override
