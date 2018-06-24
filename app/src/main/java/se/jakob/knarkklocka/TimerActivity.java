@@ -143,11 +143,6 @@ public class TimerActivity extends AppCompatActivity implements
                 TimerUtils.setNewAlarm(getApplicationContext(), id, alarm.getEndTime());
             }
         });
-
-        //Intent startNewTimerIntent = new Intent(this, TimerIntentService.class);
-        //startNewTimerIntent.setAction(TimerUtils.ACTION_SET_NEW_TIMER);
-        //startNewTimerIntent.putExtra(TimerUtils.EXTRA_ALARM_ID, id);
-        //startService(startNewTimerIntent);
     }
 
     public void showTimePickerDialog(View v) {
@@ -156,9 +151,6 @@ public class TimerActivity extends AppCompatActivity implements
     }
 
     public void sleep(View v) {
-        //setChronometer(0);
-
-        countdown_view.stop();
         //TransitionManager.beginDelayedTransition(timer_content_group, new Slide(Gravity.TOP));
         //snooze_timer_button.setVisibility(View.INVISIBLE);
         //dismiss_timer_button.setVisibility(View.INVISIBLE);
@@ -176,10 +168,6 @@ public class TimerActivity extends AppCompatActivity implements
                 }
             });
         }
-
-        Intent stopTimerIntent = new Intent(this, TimerIntentService.class);
-        stopTimerIntent.setAction(TimerUtils.ACTION_REMOVE_TIMER);
-        startService(stopTimerIntent);
     }
 
     public boolean isAlarmRunning() {
