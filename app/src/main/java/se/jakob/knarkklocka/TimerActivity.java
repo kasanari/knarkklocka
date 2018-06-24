@@ -165,8 +165,16 @@ public class TimerActivity extends AppCompatActivity implements
         //countdown_view.setVisibility(View.INVISIBLE);
         //chronometer_container.setVisibility(View.GONE);
         if (isAlarmRunning()) {
-            mainAlarmViewModel.delete();
-            Snackbar.make(v, "Removed timer", Snackbar.LENGTH_LONG).show();
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    Alarm currentAlarm = mainAlarmViewModel.getAlarm().getValue();
+                    if (currentAlarm != null) {
+                        mainAlarmViewModel.delete();
+                        TimerUtils.cancelAlarm(getApplicationContext(), currentAlarm.getId());
+                    }
+                }
+            });
         }
 
         Intent stopTimerIntent = new Intent(this, TimerIntentService.class);
