@@ -4,6 +4,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.icu.util.Calendar;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -69,7 +70,8 @@ public class TimerActivity extends AppCompatActivity implements
                     due_time_view.setText(dateString);
                     due_time_view.setVisibility(View.VISIBLE);
                     countdown_view.setVisibility(View.VISIBLE);
-                    setChronometer(endTime);
+                    long timeDelta = endTime.getTime() - System.currentTimeMillis();
+                    countdown_view.setBase(SystemClock.elapsedRealtime() + timeDelta);
                     countdown_view.start();
                 } else {
                     due_time_view.setVisibility(View.INVISIBLE);
@@ -127,17 +129,24 @@ public class TimerActivity extends AppCompatActivity implements
         if (isAlarmRunning()) {
             mainAlarmViewModel.delete();
         }
-        long timer_duration = PreferenceUtils.getTimerLength(this);
-        Date starttime = new Date(SystemClock.elapsedRealtime());
-        Date endtime = new Date(SystemClock.elapsedRealtime() + timer_duration);
-        Alarm alarm = new Alarm(Alarm.STATE_WAITING, starttime, endtime);
-        mainAlarmViewModel.insert(alarm);
+        //long timer_duration = PreferenceUtils.getTimerLength(this);
+        int timer_duration = 10;
+        Calendar currentTime = Calendar.getInstance();
+        Calendar endTime = Calendar.getInstance();
+        endTime.add(Calendar.SECOND, timer_duration);
+        final Alarm alarm = new Alarm(Alarm.STATE_WAITING, currentTime.getTime(), endTime.getTime());
 
-        countdown_view.setBase(SystemClock.elapsedRealtime() + timer_duration);
-        countdown_view.start();
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                long id = mainAlarmViewModel.insert(alarm);
+                TimerUtils.setNewAlarm(getApplicationContext(), id, alarm.getEndTime());
+            }
+        });
 
         //Intent startNewTimerIntent = new Intent(this, TimerIntentService.class);
         //startNewTimerIntent.setAction(TimerUtils.ACTION_SET_NEW_TIMER);
+        //startNewTimerIntent.putExtra(TimerUtils.EXTRA_ALARM_ID, id);
         //startService(startNewTimerIntent);
     }
 
@@ -179,6 +188,9 @@ public class TimerActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+        if (isAlarmRunning()) {
+            countdown_view.start();
+        }
     }
 
     @Override
