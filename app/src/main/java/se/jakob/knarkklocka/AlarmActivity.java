@@ -184,7 +184,14 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     public void dismiss() {
         //mService.stopAlarm();
         //unbindAlarmService();
+        if (isAlarmRunning()) {
+            mainAlarmViewModel.delete();
+        }
         finish();
+    }
+
+    public boolean isAlarmRunning() {
+        return mainAlarmViewModel.getAlarm().getValue() != null;
     }
 
     private void hideNavigationBar() {
