@@ -15,22 +15,30 @@
  */
 package se.jakob.knarkklocka;
 
-import android.app.Activity;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.Chronometer;
+
+import java.util.Date;
 
 import se.jakob.knarkklocka.LocalService.LocalBinder;
+import se.jakob.knarkklocka.data.Alarm;
+import se.jakob.knarkklocka.data.MainAlarmViewModel;
 import se.jakob.knarkklocka.utils.TimerUtils;
 
-public class AlarmActivity extends Activity implements View.OnClickListener {
+public class AlarmActivity extends AppCompatActivity implements View.OnClickListener {
 
     /**
      * Bound AlarmService
@@ -44,6 +52,11 @@ public class AlarmActivity extends Activity implements View.OnClickListener {
 
     private Button mSnoozeButton;
     private Button mDismissButton;
+
+    private MainAlarmViewModel mainAlarmViewModel;
+
+    private Chronometer mAlarmChronometer;
+
     /**
      * Defines callbacks for service binding, passed to bindService()
      */
@@ -105,22 +118,44 @@ public class AlarmActivity extends Activity implements View.OnClickListener {
         mSnoozeButton.setOnClickListener(this);
         mDismissButton.setOnClickListener(this);
 
+        mAlarmChronometer = findViewById(R.id.alarm_chronometer);
+
+        mainAlarmViewModel = ViewModelProviders.of(this).get(MainAlarmViewModel.class);
+        mainAlarmViewModel.getAlarm().observe(this, new Observer<Alarm>() {
+            @Override
+            public void onChanged(@Nullable final Alarm alarm) {
+                if (alarm != null) {
+                    //DateFormat dateFormat = DateFormat.getTimeInstance();
+                    Date endTime = alarm.getEndTime();
+                    //String dateString = dateFormat.format(endTime);
+                    //due_time_view.setText(dateString);
+                    //due_time_view.setVisibility(View.VISIBLE);
+                    mAlarmChronometer.setVisibility(View.VISIBLE);
+                    long timeDelta = endTime.getTime() - System.currentTimeMillis();
+                    mAlarmChronometer.setBase(SystemClock.elapsedRealtime() + timeDelta);
+                    mAlarmChronometer.start();
+                } else {
+                    //due_time_view.setVisibility(View.INVISIBLE);
+                    mAlarmChronometer.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        final Intent intent = new Intent(this, LocalService.class);
-        boolean success = bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        //final Intent intent = new Intent(this, LocalService.class);
+        //boolean success = bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         //mService.startAlarm();
-        dismiss();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         //mService.stopAlarm();
-        unbindAlarmService();
+        //unbindAlarmService();
         mBound = false;
     }
 
@@ -142,13 +177,13 @@ public class AlarmActivity extends Activity implements View.OnClickListener {
         startNewTimerIntent.setAction(TimerUtils.ACTION_SNOOZE_TIMER);
         startService(startNewTimerIntent);
         //mService.stopAlarm();
-        unbindAlarmService();
+        //unbindAlarmService();
         finish();
     }
 
     public void dismiss() {
         //mService.stopAlarm();
-        unbindAlarmService();
+        //unbindAlarmService();
         finish();
     }
 
