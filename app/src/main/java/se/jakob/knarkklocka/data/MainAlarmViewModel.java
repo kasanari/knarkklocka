@@ -4,6 +4,8 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 
+import java.util.Date;
+
 public class MainAlarmViewModel extends AndroidViewModel {
     private LiveData<Alarm> mAlarm;
     private AlarmRepository mRepository;
@@ -18,13 +20,23 @@ public class MainAlarmViewModel extends AndroidViewModel {
         return mAlarm;
     }
 
-    public void insert(Alarm alarm) {
-        mRepository.insert(alarm);
+    public long insert(Alarm alarm) {
+        return mRepository.insert(alarm);
     }
 
     public void delete() {
         if (mAlarm.getValue() != null) {
             mRepository.delete(mAlarm.getValue());
+        }
+    }
+
+    public void snooze(Date endTime) {
+        if (mAlarm.getValue() != null) {
+            Alarm alarm = mAlarm.getValue();
+            alarm.setState(Alarm.STATE_SNOOZING);
+            alarm.incrementSnoozes();
+            alarm.setEndTime(endTime);
+            mRepository.update(alarm);
         }
     }
 }
