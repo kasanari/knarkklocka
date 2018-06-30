@@ -67,6 +67,10 @@ public class Alarm {
 
     public void setSnoozes(int snoozes) {this.snoozes = snoozes;}
 
+    public void incrementSnoozes() {
+        this.snoozes += 1;
+    }
+
     public String getStateString(int state) {
         switch (state) {
             case Alarm.STATE_ACTIVE:
