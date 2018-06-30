@@ -13,7 +13,7 @@ public class MainAlarmViewModel extends AndroidViewModel {
     public MainAlarmViewModel(Application application) {
         super(application);
         mRepository = new AlarmRepository(application);
-        this.mAlarm = mRepository.getAlarmsByState(Alarm.STATE_WAITING);
+        this.mAlarm = mRepository.getActiveAlarm();
     }
 
     public LiveData<Alarm> getAlarm() {
@@ -30,6 +30,14 @@ public class MainAlarmViewModel extends AndroidViewModel {
         }
     }
 
+    public void kill() {
+        if (isAlarmRunning()) {
+            Alarm alarm = mAlarm.getValue();
+            alarm.setState(Alarm.STATE_DEAD);
+            mRepository.update(alarm);
+        }
+    }
+
     public void snooze(Date endTime) {
         if (mAlarm.getValue() != null) {
             Alarm alarm = mAlarm.getValue();
@@ -38,5 +46,9 @@ public class MainAlarmViewModel extends AndroidViewModel {
             alarm.setEndTime(endTime);
             mRepository.update(alarm);
         }
+    }
+
+    public boolean isAlarmRunning() {
+        return mAlarm.getValue() != null;
     }
 }
