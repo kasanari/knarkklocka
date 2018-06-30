@@ -14,6 +14,8 @@ public final class PreferenceUtils {
     private static final long DEFAULT_TIMER_LENGTH = 4 * DateUtils.HOUR_IN_MILLIS;
     private static final long DEFAULT_SNOOZE_LENGTH = 5 * DateUtils.MINUTE_IN_MILLIS;
 
+    private static boolean shortMode = true;
+
     synchronized private static void setTimerLength(Context context, int hours) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = prefs.edit();
@@ -23,9 +25,14 @@ public final class PreferenceUtils {
 
     public static long getTimerLength(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-         //long length = prefs.getLong(KEY_TIMER_LENGTH, DEFAULT_TIMER_LENGTH);
-         double hours = 0.001;
-         return (long) (hours * DateUtils.HOUR_IN_MILLIS);
+        long length;
+        if (shortMode) {
+            double val = 0.005;
+            length = (long) (val * DateUtils.HOUR_IN_MILLIS);
+        } else {
+            length = prefs.getLong(KEY_TIMER_LENGTH, DEFAULT_TIMER_LENGTH);
+        }
+        return length;
     }
 
     synchronized public static void setCustomTimerLength(Context context, long length) {
@@ -42,6 +49,13 @@ public final class PreferenceUtils {
 
     public static long getSnoozeLength(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getLong(KEY_SNOOZE_LENGTH, DEFAULT_SNOOZE_LENGTH);
+        long length;
+        if (shortMode) {
+            double val = 0.005;
+            length = (long) (val * DateUtils.HOUR_IN_MILLIS);
+        } else {
+            length = prefs.getLong(KEY_SNOOZE_LENGTH, DEFAULT_SNOOZE_LENGTH);
+        }
+        return length;
     }
 }
