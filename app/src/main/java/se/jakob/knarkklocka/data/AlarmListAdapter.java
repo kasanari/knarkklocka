@@ -35,11 +35,16 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.Alar
             Alarm current = mAlarms.get(position);
             DateFormat dateFormat = DateFormat.getTimeInstance();
             String dateString = dateFormat.format(current.getEndTime());
-            holder.dueTimeItemView.setText(dateString);
+            String string = current.getId() + " " + dateString;
+            holder.dueTimeItemView.setText(string);
 
             int state = current.getState();
             String stateString = current.getStateString(state);
             holder.stateItemView.setText(stateString);
+
+            int snoozes = current.getSnoozes();
+            String snoozeString = "Snoozes: " + snoozes;
+            holder.snoozeItemView.setText(snoozeString);
         } else {
             // Covers the case of data not being ready yet.
             holder.dueTimeItemView.setText("No Alarms");
@@ -63,11 +68,13 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.Alar
     class AlarmViewHolder extends RecyclerView.ViewHolder {
         private final TextView dueTimeItemView;
         private final TextView stateItemView;
+        private final TextView snoozeItemView;
 
         private AlarmViewHolder(View itemView) {
             super(itemView);
             dueTimeItemView = itemView.findViewById(R.id.tv_alarm_due);
             stateItemView = itemView.findViewById(R.id.tv_alarm_state);
+            snoozeItemView = itemView.findViewById(R.id.tv_alarm_snoozes);
         }
     }
 }
