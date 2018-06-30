@@ -35,4 +35,7 @@ public interface AlarmDao {
 
     @Query("SELECT * FROM alarm_table WHERE alarm_state = :state")
     LiveData<Alarm> loadAlarmsByState(int state);
+
+    @Query("SELECT * FROM alarm_table WHERE alarm_state IN (:states) LIMIT 1")
+    LiveData<Alarm> loadActiveAlarm(int... states);
 }
