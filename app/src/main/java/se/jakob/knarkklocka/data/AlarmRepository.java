@@ -24,12 +24,17 @@ public class AlarmRepository {
         return mAlarmDao.loadAlarmsByState(state);
     }
 
-    public void insert(Alarm alarm) {
-        new insertAsyncTask(mAlarmDao).execute(alarm);
+    public long insert(Alarm alarm) {
+        return mAlarmDao.insert(alarm);
+        //new insertAsyncTask(mAlarmDao).execute(alarm);
     }
 
     public void delete(Alarm alarm) {
         new deleteAsyncTask(mAlarmDao).execute(alarm);
+    }
+
+    public void update(Alarm alarm) {
+        mAlarmDao.updateAlarm(alarm);
     }
 
     private static class insertAsyncTask extends AsyncTask<Alarm, Void, Void> {
