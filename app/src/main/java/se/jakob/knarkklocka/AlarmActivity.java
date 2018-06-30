@@ -17,12 +17,8 @@ package se.jakob.knarkklocka;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -33,20 +29,10 @@ import android.widget.Chronometer;
 
 import java.util.Date;
 
-import se.jakob.knarkklocka.LocalService.LocalBinder;
 import se.jakob.knarkklocka.data.Alarm;
 import se.jakob.knarkklocka.data.MainAlarmViewModel;
-import se.jakob.knarkklocka.utils.TimerUtils;
 
 public class AlarmActivity extends AppCompatActivity implements View.OnClickListener {
-
-    /**
-     * Bound AlarmService
-     */
-    LocalService mService;
-
-    /** Whether the AlarmService is currently bound */
-    private boolean mBound = false;
 
     private static final String TAG = "AlarmActivity";
 
@@ -56,41 +42,6 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     private MainAlarmViewModel mainAlarmViewModel;
 
     private Chronometer mAlarmChronometer;
-
-    /**
-     * Defines callbacks for service binding, passed to bindService()
-     */
-    private ServiceConnection mConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            LocalBinder binder = (LocalBinder) service;
-            mService = binder.getService();
-            mBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
-        }
-    };
-
-    /**
-     * Bind AlarmService if not yet bound.
-     */
-    private void bindAlarmService() {
-        final Intent intent = new Intent(this, AlarmService.class);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    /**
-     * Unbind AlarmService if bound.
-     */
-    private void unbindAlarmService() {
-        unbindService(mConnection);
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -146,44 +97,18 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onStart() {
         super.onStart();
-        //final Intent intent = new Intent(this, LocalService.class);
-        //boolean success = bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        //mService.startAlarm();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        //mService.stopAlarm();
-        //unbindAlarmService();
-        mBound = false;
     }
 
-    /*
-    @Override
-    protected void onResume() {
-        super.onResume();
-        bindAlarmService();
-    }*/
-
-    /*@Override
-    protected void onPause() {
-        super.onPause();
-        //unbindAlarmService();
-    }*/
-
     public void snooze() {
-        Intent startNewTimerIntent = new Intent(this, TimerIntentService.class);
-        startNewTimerIntent.setAction(TimerUtils.ACTION_SNOOZE_TIMER);
-        startService(startNewTimerIntent);
-        //mService.stopAlarm();
-        //unbindAlarmService();
         finish();
     }
 
     public void dismiss() {
-        //mService.stopAlarm();
-        //unbindAlarmService();
         if (isAlarmRunning()) {
             mainAlarmViewModel.delete();
         }
