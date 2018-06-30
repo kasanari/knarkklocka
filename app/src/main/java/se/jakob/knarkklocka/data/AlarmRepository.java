@@ -24,6 +24,10 @@ public class AlarmRepository {
         return mAlarmDao.loadAlarmsByState(state);
     }
 
+    LiveData<Alarm> getActiveAlarm() {
+        return mAlarmDao.loadActiveAlarm(Alarm.STATE_WAITING, Alarm.STATE_SNOOZING);
+    }
+
     public long insert(Alarm alarm) {
         return mAlarmDao.insert(alarm);
         //new insertAsyncTask(mAlarmDao).execute(alarm);
