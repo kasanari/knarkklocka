@@ -18,6 +18,7 @@ package se.jakob.knarkklocka;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.icu.util.Calendar;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
@@ -31,6 +32,7 @@ import java.util.Date;
 
 import se.jakob.knarkklocka.data.Alarm;
 import se.jakob.knarkklocka.data.MainAlarmViewModel;
+import se.jakob.knarkklocka.utils.TimerUtils;
 
 public class AlarmActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -71,6 +73,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
 
         mAlarmChronometer = findViewById(R.id.alarm_chronometer);
 
+        /*Setup ViewModel and Observer*/
         mainAlarmViewModel = ViewModelProviders.of(this).get(MainAlarmViewModel.class);
         mainAlarmViewModel.getAlarm().observe(this, new Observer<Alarm>() {
             @Override
@@ -105,7 +108,23 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     }
 
     public void snooze() {
-        finish();
+        if (isAlarmRunning()) {
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    Alarm currentAlarm = mainAlarmViewModel.getAlarm().getValue();
+                    Calendar snoozeTime = Calendar.getInstance();
+                    snoozeTime.add(Calendar.SECOND, 10);
+                    if (currentAlarm != null) {
+                        mainAlarmViewModel.snooze(snoozeTime.getTime());
+                        TimerUtils.setNewAlarm(getApplicationContext(), currentAlarm.getId(), snoozeTime.getTime());
+                        finish();
+                    }
+                }
+            });
+        } else {
+            finish();
+        }
     }
 
     public void dismiss() {
@@ -116,7 +135,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     }
 
     public boolean isAlarmRunning() {
-        return mainAlarmViewModel.getAlarm().getValue() != null;
+        return mainAlarmViewModel.isAlarmRunning();
     }
 
     private void hideNavigationBar() {
