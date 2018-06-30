@@ -16,7 +16,7 @@ import java.util.List;
 public interface AlarmDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(Alarm alarm);
+    long insert(Alarm alarm);
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     void updateAlarm(Alarm alarm);
