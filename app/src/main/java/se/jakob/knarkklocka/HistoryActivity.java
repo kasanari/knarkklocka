@@ -20,7 +20,7 @@ public class HistoryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.alarm_recyclerview);
+        setContentView(R.layout.activity_history);
         RecyclerView recyclerView = findViewById(R.id.recyclerview);
         final AlarmListAdapter adapter = new AlarmListAdapter(this);
         recyclerView.setAdapter(adapter);
