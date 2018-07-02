@@ -1,2 +1,2 @@
 # knarkklocka
-En app för en vän
+Relativ och kontinuerlig timer
