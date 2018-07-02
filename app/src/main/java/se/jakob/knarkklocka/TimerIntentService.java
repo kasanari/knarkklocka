@@ -14,6 +14,9 @@ public class TimerIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         String action = intent.getAction();
-        if (action != null){TimerUtils.executeTask(this, action);}
+        int id = intent.getIntExtra(TimerUtils.EXTRA_ALARM_ID, -1);
+        if (action != null) {
+            TimerUtils.executeTask(this, action, id);
+        }
     }
 }
