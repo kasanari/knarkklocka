@@ -105,6 +105,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onStop() {
         super.onStop();
+        snooze();
     }
 
     public void snooze() {
@@ -114,7 +115,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
                 public void run() {
                     Alarm currentAlarm = mainAlarmViewModel.getAlarm().getValue();
                     Calendar snoozeTime = Calendar.getInstance();
-                    snoozeTime.add(Calendar.SECOND, 10);
+                    snoozeTime.add(Calendar.SECOND, 5);
                     if (currentAlarm != null) {
                         mainAlarmViewModel.snooze(snoozeTime.getTime());
                         TimerUtils.setNewAlarm(getApplicationContext(), currentAlarm.getId(), snoozeTime.getTime());
@@ -129,7 +130,20 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
 
     public void dismiss() {
         if (isAlarmRunning()) {
-            mainAlarmViewModel.delete();
+            int timer_duration = 10;
+            Calendar currentTime = Calendar.getInstance();
+            Calendar endTime = Calendar.getInstance();
+            endTime.add(Calendar.SECOND, timer_duration);
+            final Alarm alarm = new Alarm(Alarm.STATE_WAITING, currentTime.getTime(), endTime.getTime());
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    mainAlarmViewModel.kill();
+                    long id = mainAlarmViewModel.insert(alarm);
+                    TimerUtils.setNewAlarm(getApplicationContext(), id, alarm.getEndTime());
+                    finish();
+                }
+            });
         }
         finish();
     }
