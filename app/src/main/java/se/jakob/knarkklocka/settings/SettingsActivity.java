@@ -1,11 +1,11 @@
-package se.jakob.knarkklocka;
+package se.jakob.knarkklocka.settings;
 
 
 import android.app.ActionBar;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import android.support.v4.app.NavUtils;
 
 
 public class SettingsActivity extends AppCompatActivity {

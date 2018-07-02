@@ -1,7 +1,9 @@
-package se.jakob.knarkklocka;
+package se.jakob.knarkklocka.settings;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
+
+import se.jakob.knarkklocka.R;
 
 /**
  * Fragment for general settings
