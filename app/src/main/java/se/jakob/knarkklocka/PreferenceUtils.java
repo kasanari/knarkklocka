@@ -23,6 +23,14 @@ public final class PreferenceUtils {
         editor.apply();
     }
 
+    private static long getDefault(String key) {
+        switch (key) {
+            case KEY_CUSTOM_TIMER_LENGTH: return DEFAULT_TIMER_LENGTH_HOURS;
+            case KEY_SNOOZE_LENGTH: return DEFAULT_SNOOZE_LENGTH_MINUTES;
+            case KEY_TIMER_LENGTH: return DEFAULT_TIMER_LENGTH_HOURS;
+        }
+        return -1;
+    }
     public static long getTimerLength(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         long length;
