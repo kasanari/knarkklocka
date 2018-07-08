@@ -10,13 +10,15 @@ public class AlarmRepository {
     private AlarmDao mAlarmDao;
     private LiveData<List<Alarm>> mAllAlarms;
 
-    AlarmRepository(Application application) {
+    public AlarmRepository(Application application) {
         AlarmDatabase db = AlarmDatabase.getDatabase(application);
         mAlarmDao = db.alarmDao();
         mAllAlarms = mAlarmDao.loadAllAlarms();
     }
 
-    LiveData<List<Alarm>> getAllAlarms() {
+    public LiveData<Alarm> getAlarmByID(long id){return mAlarmDao.loadAlarmById(id);}
+
+    public LiveData<List<Alarm>> getAllAlarms() {
         return mAllAlarms;
     }
 
@@ -24,8 +26,12 @@ public class AlarmRepository {
         return mAlarmDao.loadAlarmsByState(state);
     }
 
+    public LiveData<Alarm> getWaitingAlarm() {
+        return mAlarmDao.loadSingleAlarmByState(Alarm.STATE_WAITING, Alarm.STATE_SNOOZING);
+    }
+
     LiveData<Alarm> getActiveAlarm() {
-        return mAlarmDao.loadActiveAlarm(Alarm.STATE_WAITING, Alarm.STATE_SNOOZING);
+        return mAlarmDao.loadSingleAlarmByState(Alarm.STATE_ACTIVE);
     }
 
     public long insert(Alarm alarm) {
