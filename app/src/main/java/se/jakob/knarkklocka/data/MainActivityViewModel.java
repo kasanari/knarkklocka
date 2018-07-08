@@ -6,14 +6,14 @@ import android.arch.lifecycle.LiveData;
 
 import java.util.Date;
 
-public class MainAlarmViewModel extends AndroidViewModel {
+public class MainActivityViewModel extends AndroidViewModel {
     private LiveData<Alarm> mAlarm;
     private AlarmRepository mRepository;
 
-    public MainAlarmViewModel(Application application) {
+    public MainActivityViewModel(Application application) {
         super(application);
         mRepository = new AlarmRepository(application);
-        this.mAlarm = mRepository.getActiveAlarm();
+        this.mAlarm = mRepository.getWaitingAlarm();
     }
 
     public LiveData<Alarm> getAlarm() {
