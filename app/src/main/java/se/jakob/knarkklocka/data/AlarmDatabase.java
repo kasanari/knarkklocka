@@ -12,6 +12,8 @@ import android.util.Log;
 
 import java.util.Date;
 
+import se.jakob.knarkklocka.BuildConfig;
+
 @TypeConverters(DateConverter.class)
 @Database(entities = {Alarm.class}, version = 1, exportSchema = false)
 public abstract class AlarmDatabase extends RoomDatabase {
@@ -21,9 +23,9 @@ public abstract class AlarmDatabase extends RoomDatabase {
 
     public abstract AlarmDao alarmDao(); //Getter for Dao, use to access the database
 
+    /*For debug purposes, populates the database with alarms*/
     private static RoomDatabase.Callback sRoomDatabaseCallback =
             new RoomDatabase.Callback() {
-
                 @Override
                 public void onOpen(@NonNull SupportSQLiteDatabase db) {
                     super.onOpen(db);
@@ -36,25 +38,28 @@ public abstract class AlarmDatabase extends RoomDatabase {
             synchronized (LOCK) {
                 if (INSTANCE == null) {
                     Log.d(LOG_TAG, "Creating new database instance");
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                            AlarmDatabase.class, "alarm_database")
-                            .addCallback(sRoomDatabaseCallback)
-                            .build();
+                    if (BuildConfig.DEBUG) {
+                        INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
+                                AlarmDatabase.class, "alarm_database_debug")
+                                .addCallback(sRoomDatabaseCallback)
+                                .build();
+                    } else {
+                        INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
+                                AlarmDatabase.class, "alarm_database")
+                                .build();
+                    }
                 }
             }
         }
         return INSTANCE;
     }
 
-
+    /*For debug purposes, populates the database with alarms*/
     private static class PopulateDbAsync extends AsyncTask<Void, Void, Void> {
-
         private final AlarmDao mDao;
-
         PopulateDbAsync(AlarmDatabase db) {
             mDao = db.alarmDao();
         }
-
         @Override
         protected Void doInBackground(final Void... params) {
             mDao.deleteAll();
