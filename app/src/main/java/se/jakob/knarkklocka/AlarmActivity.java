@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -31,7 +32,7 @@ import android.widget.Chronometer;
 import java.util.Date;
 
 import se.jakob.knarkklocka.data.Alarm;
-import se.jakob.knarkklocka.data.MainAlarmViewModel;
+import se.jakob.knarkklocka.data.AlarmActivityViewModel;
 import se.jakob.knarkklocka.utils.TimerUtils;
 
 public class AlarmActivity extends AppCompatActivity implements View.OnClickListener {
@@ -41,7 +42,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     private Button mSnoozeButton;
     private Button mDismissButton;
 
-    private MainAlarmViewModel mainAlarmViewModel;
+    private AlarmActivityViewModel alarmActivityViewModel;
 
     private Chronometer mAlarmChronometer;
 
@@ -74,11 +75,12 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         mAlarmChronometer = findViewById(R.id.alarm_chronometer);
 
         /*Setup ViewModel and Observer*/
-        mainAlarmViewModel = ViewModelProviders.of(this).get(MainAlarmViewModel.class);
-        mainAlarmViewModel.getAlarm().observe(this, new Observer<Alarm>() {
+        alarmActivityViewModel = ViewModelProviders.of(this).get(AlarmActivityViewModel.class);
+        alarmActivityViewModel.getAlarm().observe(this, new Observer<Alarm>() {
             @Override
             public void onChanged(@Nullable final Alarm alarm) {
                 if (alarm != null) {
+                    Log.d(TAG, alarm.toString());
                     //DateFormat dateFormat = DateFormat.getTimeInstance();
                     Date endTime = alarm.getEndTime();
                     //String dateString = dateFormat.format(endTime);
@@ -113,11 +115,11 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
             AppExecutors.getInstance().diskIO().execute(new Runnable() {
                 @Override
                 public void run() {
-                    Alarm currentAlarm = mainAlarmViewModel.getAlarm().getValue();
+                    Alarm currentAlarm = alarmActivityViewModel.getAlarm().getValue();
                     Calendar snoozeTime = Calendar.getInstance();
                     snoozeTime.add(Calendar.SECOND, 5);
                     if (currentAlarm != null) {
-                        mainAlarmViewModel.snooze(snoozeTime.getTime());
+                        alarmActivityViewModel.snooze(snoozeTime.getTime());
                         TimerUtils.setNewAlarm(getApplicationContext(), currentAlarm.getId(), snoozeTime.getTime());
                         finish();
                     }
@@ -138,8 +140,8 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
             AppExecutors.getInstance().diskIO().execute(new Runnable() {
                 @Override
                 public void run() {
-                    mainAlarmViewModel.kill();
-                    long id = mainAlarmViewModel.insert(alarm);
+                    alarmActivityViewModel.kill();
+                    long id = alarmActivityViewModel.insert(alarm);
                     TimerUtils.setNewAlarm(getApplicationContext(), id, alarm.getEndTime());
                     finish();
                 }
@@ -149,7 +151,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     }
 
     public boolean isAlarmRunning() {
-        return mainAlarmViewModel.isAlarmRunning();
+        return alarmActivityViewModel.isAlarmRunning();
     }
 
     private void hideNavigationBar() {
