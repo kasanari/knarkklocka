@@ -129,10 +129,11 @@ public class TimerActivity extends AppCompatActivity implements
         if (isAlarmRunning()) {
             mainAlarmViewModel.delete();
         }
-        int timer_duration = PreferenceUtils.getMainTimerLength(this);
+        //long timer_duration = PreferenceUtils.getTimerLength(this);
+        int timer_duration = 10;
         Calendar currentTime = Calendar.getInstance();
         Calendar endTime = Calendar.getInstance();
-        endTime.add(Calendar.MILLISECOND, timer_duration);
+        endTime.add(Calendar.SECOND, timer_duration);
         final Alarm alarm = new Alarm(Alarm.STATE_WAITING, currentTime.getTime(), endTime.getTime());
 
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
@@ -155,6 +156,7 @@ public class TimerActivity extends AppCompatActivity implements
         //dismiss_timer_button.setVisibility(View.INVISIBLE);
         //countdown_view.setVisibility(View.INVISIBLE);
         //chronometer_container.setVisibility(View.GONE);
+        Log.d(TAG, "Sleep mode engaged...");
         if (isAlarmRunning()) {
             AppExecutors.getInstance().diskIO().execute(new Runnable() {
                 @Override
