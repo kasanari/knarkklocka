@@ -6,10 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import java.text.DateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import se.jakob.knarkklocka.AlarmActivity;
 import se.jakob.knarkklocka.AlarmService;
+import se.jakob.knarkklocka.BuildConfig;
 import se.jakob.knarkklocka.LogUtils;
 import se.jakob.knarkklocka.PreferenceUtils;
 import se.jakob.knarkklocka.TimerActivity;
@@ -46,7 +49,7 @@ public class TimerUtils {
     }
 
     /**
-     * Returns the pending intent that starts the Alarm service
+     * Returns the pending intent that starts the Alarm Service
      **/
     private static PendingIntent getAlarmServiceIntent(Context context, long id) {
         Intent alarmIntent = new Intent(context, AlarmService.class);
@@ -55,7 +58,7 @@ public class TimerUtils {
     }
 
     /**
-     * Returns the pending intent that starts the Alarm service
+     * Returns the pending intent that starts the Alarm Activity
      **/
     private static PendingIntent getAlarmActivityIntent(Context context, long id) {
         Intent alarmIntent = new Intent(context, AlarmActivity.class);
@@ -90,7 +93,11 @@ public class TimerUtils {
 
         if (alarmManager != null) {
             alarmManager.setAlarmClock(alarmInfo, pendingAlarmIntent);
-            Log.d(TAG, "Set an alarm");
+            if (BuildConfig.DEBUG) {
+                DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT);
+                String debugString = String.format(Locale.getDefault(), "Set alarm with id %d due %s", id, df.format(endTime));
+                Log.d(TAG, debugString);
+            }
         }
     }
 
@@ -99,13 +106,15 @@ public class TimerUtils {
         setNewAlarm(context, id, new Date(length));
     }
 
-
     public static void cancelAlarm(Context context, long id) {
-        AlarmManager alarm = context.getSystemService(AlarmManager.class);
-        PendingIntent pendingAlarmIntent = getAlarmActivityIntent(context, id);
-        if (alarm != null) {
-            alarm.cancel(pendingAlarmIntent);
-            LogUtils.d("Cancelled alarm");
+        AlarmManager alarmManager = context.getSystemService(AlarmManager.class);
+        PendingIntent pendingAlarmIntent = getAlarmServiceIntent(context, id);
+        if (alarmManager != null) {
+            alarmManager.cancel(pendingAlarmIntent);
+            if (BuildConfig.DEBUG) {
+                String debugString = String.format(Locale.getDefault(), "Cancelled alarm with id %d", id);
+                Log.d(TAG, debugString);
+            }
         }
     }
 
