@@ -31,11 +31,11 @@ public interface AlarmDao {
     LiveData<List<Alarm>> loadAllAlarms();
 
     @Query("SELECT * FROM alarm_table WHERE id = :id")
-    LiveData<Alarm> loadAlarmById(int id);
+    LiveData<Alarm> loadAlarmById(long id);
 
     @Query("SELECT * FROM alarm_table WHERE alarm_state = :state")
     LiveData<Alarm> loadAlarmsByState(int state);
 
     @Query("SELECT * FROM alarm_table WHERE alarm_state IN (:states) LIMIT 1")
-    LiveData<Alarm> loadActiveAlarm(int... states);
+    LiveData<Alarm> loadSingleAlarmByState(int... states);
 }
