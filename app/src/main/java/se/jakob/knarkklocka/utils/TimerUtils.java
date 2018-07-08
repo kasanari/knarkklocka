@@ -80,8 +80,8 @@ public class TimerUtils {
     public static void setNewAlarm(Context context, long id, Date endTime) {
         AlarmManager alarmManager = context.getSystemService(AlarmManager.class);
 
-        /*Setup AlarmService to start when alarm goes off*/
-        PendingIntent pendingAlarmIntent = getAlarmActivityIntent(context, id);//getAlarmServiceIntent(context);
+        /*Set AlarmService to start when alarm goes off*/
+        PendingIntent pendingAlarmIntent = getAlarmServiceIntent(context, id);
 
         /*Setup alarm clock info*/
         //long wakeup_time = System.currentTimeMillis() + length;
