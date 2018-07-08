@@ -7,6 +7,7 @@ import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
 import java.util.Date;
+import java.util.Locale;
 
 @Entity(tableName = "alarm_table")
 public class Alarm {
@@ -17,7 +18,7 @@ public class Alarm {
     public static final int STATE_SNOOZING = 3;
 
     @PrimaryKey(autoGenerate = true)
-    private int id;
+    private long id;
     @ColumnInfo(name = "alarm_state")
     private int state;
     @NonNull
@@ -37,7 +38,7 @@ public class Alarm {
         this.snoozes = 0;
     }
 
-    public Alarm(int id, int state, @NonNull Date startTime, @NonNull Date endTime) {
+    public Alarm(long id, int state, @NonNull Date startTime, @NonNull Date endTime) {
         this.id = id;
         this.state = state;
         this.startTime = startTime;
@@ -49,7 +50,7 @@ public class Alarm {
 
     public void setState(int state) {this.state = state;}
 
-    public int getId() {return id;}
+    public long getId() {return id;}
 
     public void setId(int id) {this.id = id;}
 
@@ -84,6 +85,13 @@ public class Alarm {
             default:
                 return "Invalid State";
         }
+    }
+
+    @Override
+    public String toString() {
+        String alarmString = String.format(Locale.getDefault(), "Alarm \n id: %d \n startTime: %s \n endTime: %s \n state: %s",
+                this.id, this.startTime.toString(), this.endTime.toString(), getStateString(this.state));
+        return alarmString;
     }
 }
 
