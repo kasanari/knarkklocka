@@ -15,6 +15,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,13 +27,14 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import se.jakob.knarkklocka.data.Alarm;
-import se.jakob.knarkklocka.data.MainAlarmViewModel;
+import se.jakob.knarkklocka.data.MainActivityViewModel;
+import se.jakob.knarkklocka.settings.SettingsActivity;
 import se.jakob.knarkklocka.utils.TimerUtils;
 
 public class TimerActivity extends AppCompatActivity implements
         SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private static final String LIFECYCLE_DURATION_KEY = "duration";
+    private static final String TAG = "TimerActivity";
     TextView due_time_view;
     Chronometer countdown_view;
     ConstraintLayout timer_content_group;
@@ -41,7 +43,7 @@ public class TimerActivity extends AppCompatActivity implements
 
     Button dismiss_timer_button;
     Button snooze_timer_button;
-    private MainAlarmViewModel mainAlarmViewModel;
+    private MainActivityViewModel mainActivityViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,10 +59,10 @@ public class TimerActivity extends AppCompatActivity implements
         //snooze_timer_button.setVisibility(View.INVISIBLE);
         //dismiss_timer_button.setVisibility(View.INVISIBLE);
 
-        mainAlarmViewModel = ViewModelProviders.of(this).get(MainAlarmViewModel.class);
+        mainActivityViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
         due_time_view = findViewById(R.id.tv_main_due);
 
-        mainAlarmViewModel.getAlarm().observe(this, new Observer<Alarm>() {
+        mainActivityViewModel.getAlarm().observe(this, new Observer<Alarm>() {
             @Override
             public void onChanged(@Nullable final Alarm alarm) {
                 if (alarm != null) {
@@ -127,22 +129,22 @@ public class TimerActivity extends AppCompatActivity implements
         //snooze_timer_button.setVisibility(View.VISIBLE);
         //dismiss_timer_button.setVisibility(View.VISIBLE);
         if (isAlarmRunning()) {
-            mainAlarmViewModel.delete();
+            mainActivityViewModel.delete();
         }
-        //long timer_duration = PreferenceUtils.getTimerLength(this);
-        int timer_duration = 10;
+        int timer_duration = PreferenceUtils.getMainTimerLength(this);
         Calendar currentTime = Calendar.getInstance();
         Calendar endTime = Calendar.getInstance();
-        endTime.add(Calendar.SECOND, timer_duration);
+        endTime.add(Calendar.MILLISECOND, timer_duration);
         final Alarm alarm = new Alarm(Alarm.STATE_WAITING, currentTime.getTime(), endTime.getTime());
 
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                long id = mainAlarmViewModel.insert(alarm);
+                long id = mainActivityViewModel.insert(alarm);
                 TimerUtils.setNewAlarm(getApplicationContext(), id, alarm.getEndTime());
             }
         });
+
     }
 
     public void showTimePickerDialog(View v) {
@@ -161,9 +163,9 @@ public class TimerActivity extends AppCompatActivity implements
             AppExecutors.getInstance().diskIO().execute(new Runnable() {
                 @Override
                 public void run() {
-                    Alarm currentAlarm = mainAlarmViewModel.getAlarm().getValue();
+                    Alarm currentAlarm = mainActivityViewModel.getAlarm().getValue();
                     if (currentAlarm != null) {
-                        mainAlarmViewModel.delete();
+                        mainActivityViewModel.delete();
                         TimerUtils.cancelAlarm(getApplicationContext(), currentAlarm.getId());
                     }
                 }
@@ -172,7 +174,7 @@ public class TimerActivity extends AppCompatActivity implements
     }
 
     public boolean isAlarmRunning() {
-        return mainAlarmViewModel.getAlarm().getValue() != null;
+        return mainActivityViewModel.getAlarm().getValue() != null;
     }
 
     @Override
