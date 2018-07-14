@@ -20,7 +20,10 @@
         android:title="@string/pref_timer_length" />-->
 
     <se.jakob.knarkklocka.NumberPickerPreference
-        android:key="timer_length"
+        android:key="@string/pref_snooze_length_key"
+        android:title="@string/pref_timer_length" />
+    <se.jakob.knarkklocka.NumberPickerPreference
+        android:key="@string/pref_snooze_length"
         android:title="@string/pref_timer_length" />
 
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
