@@ -3,13 +3,12 @@ package se.jakob.knarkklocka;
 import android.arch.lifecycle.LifecycleService;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
-import java.util.List;
 
 import se.jakob.knarkklocka.data.Alarm;
 import se.jakob.knarkklocka.data.AlarmRepository;
@@ -28,9 +27,7 @@ public class AlarmService extends LifecycleService {
     public void onCreate() {
         super.onCreate();
         Log.d("Testing", "Service got created");
-        this.wakeLock = AlarmAlertWakeLocker.createPartialWakeLock(this);
         mRepository = new AlarmRepository(getApplication());
-
     }
 
     public void startAlarmActivity() {
@@ -41,6 +38,9 @@ public class AlarmService extends LifecycleService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.ON_AFTER_RELEASE, TAG);
+        wakeLock.acquire(30000);
         long alarmID = intent.getLongExtra(EXTRA_ALARM_ID, -1);
         currentAlarm = mRepository.getAlarmByID(alarmID);
         currentAlarm.observe(this, new Observer<Alarm>() {
@@ -53,8 +53,8 @@ public class AlarmService extends LifecycleService {
                         public void run() {
                             alarm.setState(Alarm.STATE_ACTIVE);
                             mRepository.update(alarm);
-                            AlarmAlertWakeLocker.releaseCpuLock();
                             stopSelf();
+                            wakeLock.release();
                         }
                     });
                     startAlarmActivity();
