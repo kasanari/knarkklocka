@@ -15,16 +15,19 @@
  */
 package se.jakob.knarkklocka;
 
+import android.app.AlarmManager;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.icu.util.Calendar;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Chronometer;
@@ -46,19 +49,35 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
 
     private Chronometer mAlarmChronometer;
 
+    private AlarmManager.OnAlarmListener alarmCallback = new AlarmManager.OnAlarmListener() {
+        @Override
+        public void onAlarm() {
+            snooze();
+        }
+    };
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "Starting AlarmActivity");
         setContentView(R.layout.activity_alarm);
 
         /* Turn on vibration */
         Klaxon.vibrateOnce(this);
 
-        /* Keep screen turned on */
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-                | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
+        /*Ensure screen turns on*/
+        final Window win = getWindow();
+        if (Build.VERSION.SDK_INT >= 27) {
+            setShowWhenLocked(true); //Replaces FLAG_SHOW_WHEN_LOCKED
+            setTurnScreenOn(true); //Replaces FLAG_TURN_SCREEN_ON
+            win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                    | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
+        } else {
+            win.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+            win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                    | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                    | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
+        }
 
         /*Hide navigation bar*/
         hideNavigationBar();
@@ -67,26 +86,27 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
 
         mDismissButton = findViewById(R.id.dismiss);
-        mSnoozeButton =  findViewById(R.id.snooze);
+        mSnoozeButton = findViewById(R.id.snooze);
 
         mSnoozeButton.setOnClickListener(this);
         mDismissButton.setOnClickListener(this);
 
         mAlarmChronometer = findViewById(R.id.alarm_chronometer);
-
+        //AlarmManager alarmManager = getSystemService(AlarmManager.class);
+        //alarmManager.setExact(RTC_WAKEUP,System.currentTimeMillis() + 10 * SECOND_IN_MILLIS, "tag", alarmCallback, null);
+        mAlarmChronometer.setVisibility(View.VISIBLE);
         /*Setup ViewModel and Observer*/
         alarmActivityViewModel = ViewModelProviders.of(this).get(AlarmActivityViewModel.class);
         alarmActivityViewModel.getAlarm().observe(this, new Observer<Alarm>() {
             @Override
             public void onChanged(@Nullable final Alarm alarm) {
                 if (alarm != null) {
-                    Log.d(TAG, alarm.toString());
+
                     //DateFormat dateFormat = DateFormat.getTimeInstance();
                     Date endTime = alarm.getEndTime();
                     //String dateString = dateFormat.format(endTime);
                     //due_time_view.setText(dateString);
                     //due_time_view.setVisibility(View.VISIBLE);
-                    mAlarmChronometer.setVisibility(View.VISIBLE);
                     long timeDelta = endTime.getTime() - System.currentTimeMillis();
                     mAlarmChronometer.setBase(SystemClock.elapsedRealtime() + timeDelta);
                     mAlarmChronometer.start();
@@ -107,7 +127,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onStop() {
         super.onStop();
-        snooze();
+        //snooze();
     }
 
     public void snooze() {
