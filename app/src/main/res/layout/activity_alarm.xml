@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:keepScreenOn="true"
+    android:id="@+id/alarm_content"
     tools:context=".AlarmActivity">
 
     <android.support.constraint.ConstraintLayout
@@ -21,7 +22,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:layout_marginTop="16dp"
-            android:text="I am an alarm"
+            android:text="ALARM!"
             android:textAlignment="center"
             android:textSize="30sp"
             app:layout_constraintBottom_toTopOf="@+id/alarm_chronometer"
