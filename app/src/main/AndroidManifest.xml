@@ -5,6 +5,7 @@
 
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:allowBackup="true"
@@ -15,7 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
         <!-- *********Activities******** -->
 
         <activity
@@ -31,7 +34,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name=".settings.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".TimerActivity"
             android:screenOrientation="portrait">
@@ -42,6 +45,7 @@
         <activity
             android:name=".AlarmActivity"
             android:excludeFromRecents="true"
+            android:launchMode="singleTask"
             android:noHistory="true"
             android:resizeableActivity="false"
             android:screenOrientation="portrait"
@@ -67,18 +71,9 @@
             android:name=".TimerIntentService"
             android:enabled="true"
             android:exported="false" />
-        <service
-            android:name=".LocalService"
-            android:enabled="true" />
 
         <!-- *********Broadcast Receivers******** -->
-
-        <receiver android:name=".AlarmReceiver" />
-
-        <meta-data
-            android:name="preloaded_fonts"
-            android:resource="@array/preloaded_fonts" />
-
+        <receiver android:name=".AlarmBroadcastReceiver" />
     </application>
 
 </manifest>
