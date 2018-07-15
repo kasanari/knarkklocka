@@ -12,6 +12,35 @@
         <item name="android:colorForeground">@color/colorText</item>
         <item name="colorButtonNormal">@color/colorDecorative</item>
         <item name="coordinatorLayoutStyle">@style/Widget.Design.CoordinatorLayout</item>
+        <!-- AppCompat Dialog Attributes -->
+        <item name="android:dialogTheme">@style/AppCompatDialog</item>
+        <item name="android:alertDialogTheme">@style/AppCompatAlert</item>
+    </style>
+
+    <!-- Generic Dialog Theme -->
+    <style name="AppCompatDialog" parent="Theme.AppCompat.Dialog">
+        <item name="android:textColorPrimary">@color/colorPrimary</item>
+        <!-- Used for the background -->
+        <item name="android:background">@color/colorBackground</item>
+        <!-- Used for the buttons -->
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlHighlight">@color/colorPrimary</item>
+
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+    </style>
+
+    <!-- Alert Dialog Theme -->
+    <style name="AppCompatAlert" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="android:textColorPrimary">@color/colorPrimary</item>
+        <!-- Used for the background -->
+        <item name="android:background">@color/colorBackground</item>
+        <!-- Used for the buttons -->
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlHighlight">@color/colorPrimary</item>
+
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
