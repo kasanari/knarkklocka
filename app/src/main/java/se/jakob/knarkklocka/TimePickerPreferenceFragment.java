@@ -27,7 +27,7 @@ public class TimePickerPreferenceFragment extends DialogFragment implements Time
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
         long hoursInMillis = hourOfDay * HOUR_IN_MILLIS;
         long minutesInMillis = minute * MINUTE_IN_MILLIS;
-        long duration = hoursInMillis + minutesInMillis;
+        int duration = (int) (hoursInMillis + minutesInMillis);
         PreferenceUtils.setCustomTimerLength(getActivity(), duration);
         Chronometer chronometer = getActivity().findViewById(R.id.time_display);
         if (chronometer != null) {
