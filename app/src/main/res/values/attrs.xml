@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="NumberPickerPreference">
+    <declare-styleable name="TimerLengthPreference">
         <attr name="minValue" format="integer|reference" />
         <attr name="maxValue" format="integer|reference" />
         <attr name="wrapSelectorWheel" format="boolean" />
