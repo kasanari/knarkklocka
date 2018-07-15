@@ -17,35 +17,49 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 /**
  * A {@link android.preference.Preference} that displays a number picker as a dialog.
  */
-public class NumberPickerPreference extends DialogPreference {
+public class TimerLengthPreference extends DialogPreference {
 
-    private TimePicker picker = null;
+    private TimePicker timePicker;
+    private NumberPicker hourPicker;
+    private NumberPicker minutePicker;
 
     private long length;
 
-    public NumberPickerPreference(Context ctxt) {
+    public TimerLengthPreference(Context ctxt) {
         this(ctxt, null);
     }
 
-    public NumberPickerPreference(Context ctxt, AttributeSet attrs) {
+    public TimerLengthPreference(Context ctxt, AttributeSet attrs) {
         this(ctxt, attrs, android.R.attr.dialogPreferenceStyle);
     }
 
-    public NumberPickerPreference(Context ctxt, AttributeSet attrs, int defStyle) {
+    public TimerLengthPreference(Context ctxt, AttributeSet attrs, int defStyle) {
         super(ctxt, attrs, defStyle);
+        setDialogLayoutResource(R.layout.dialog_numberpicker);
+        //final Context themeContext = getContext();
+        //final LayoutInflater inflater = LayoutInflater.from(themeContext);
+        //final View view = inflater.inflate(R.layout.time_picker, null);
         setPositiveButtonText("Set");
         setNegativeButtonText("Cancel");
+
         length = 0;
     }
 
-    @Override
+   /* @Override
     protected View onCreateDialogView() {
-        picker = new TimePicker(getContext());
+        picker = new TimePicker(getContext(), null, android.R.style.Theme_Holo_Light_Panel);
+        picker.setIs24HourView(true);
         return (picker);
     }
-
+*/
     @Override
     protected void onBindDialogView(View view) {
+        hourPicker = view.findViewById(R.id.np_hours);
+        minutePicker = view.findViewById(R.id.np_minutes);
+        hourPicker.setMaxValue(100);
+        hourPicker.setMinValue(0);
+        minutePicker.setMaxValue(100);
+        minutePicker.setMinValue(0);
         super.onBindDialogView(view);
     }
 
@@ -53,8 +67,8 @@ public class NumberPickerPreference extends DialogPreference {
     protected void onDialogClosed(boolean positiveResult) {
         super.onDialogClosed(positiveResult);
         if (positiveResult) {
-            int hour = picker.getHour();
-            int minute = picker.getMinute();
+            int hour = hourPicker.getValue();
+            int minute = minutePicker.getValue();
             length = hour*HOUR_IN_MILLIS + minute*MINUTE_IN_MILLIS;
 
             setSummary(getSummary());
