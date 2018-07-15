@@ -85,7 +85,7 @@ public class TimerUtils {
     }
 
     public static void setNewAlarm(Context context, long id) {
-        int timer_duration = PreferenceUtils.getMainTimerLength(context);
+        long timer_duration = PreferenceUtils.getMainTimerLength(context);
         setNewAlarm(context, id, new Date(timer_duration));
     }
 
@@ -111,7 +111,7 @@ public class TimerUtils {
     }
 
     public static void setSnooze(Context context, long id) {
-        int length = PreferenceUtils.getSnoozeTimerLength(context);
+        long length = PreferenceUtils.getSnoozeTimerLength(context);
         setNewAlarm(context, id, new Date(length));
     }
 
