@@ -10,23 +10,23 @@ import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
 public final class PreferenceUtils {
 
-    private static final String KEY_MAIN_TIMER_LENGTH = "timer-length";
+    private static final String KEY_MAIN_TIMER_LENGTH = "timer_length";
     private static final String KEY_CUSTOM_TIMER_LENGTH = "custom-timer-length";
     private static final String KEY_SNOOZE_TIMER_LENGTH = "snooze-length";
 
-    private static final int DEFAULT_MAIN_TIMER_LENGTH = 4 * (int) HOUR_IN_MILLIS;
-    private static final int DEFAULT_SNOOZE_TIMER_LENGTH = 5 * (int) MINUTE_IN_MILLIS;
+    private static final long DEFAULT_MAIN_TIMER_LENGTH = 4 * HOUR_IN_MILLIS;
+    private static final long DEFAULT_SNOOZE_TIMER_LENGTH = 5 * MINUTE_IN_MILLIS;
 
-    private static boolean shortMode = true;
+    private static boolean shortMode = false;
 
-    synchronized private static void setTimerLength(Context context, String key, int length) {
+    synchronized private static void setTimerLength(Context context, String key, long length) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt(key, length);
+        editor.putLong(key, length);
         editor.apply();
     }
 
-    private static int getDefaultLength(String key) {
+    private static long getDefaultLength(String key) {
         switch (key) {
             case KEY_CUSTOM_TIMER_LENGTH:
                 return DEFAULT_MAIN_TIMER_LENGTH;
@@ -38,7 +38,7 @@ public final class PreferenceUtils {
         return -1;
     }
 
-    private static int getShortDefault(String key) {
+    private static long getShortDefault(String key) {
         switch (key) {
             case KEY_CUSTOM_TIMER_LENGTH:
                 return 10 * (int) SECOND_IN_MILLIS;
@@ -50,34 +50,34 @@ public final class PreferenceUtils {
         return -1;
     }
 
-    private static int getTimerLength(Context context, String key) {
+    private static long getTimerLength(Context context, String key) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        int length;
+        long length;
         if (shortMode) {
             length = getShortDefault(key);
         } else {
-            length = prefs.getInt(key, getDefaultLength(key));
+            length = prefs.getLong(key, getDefaultLength(key));
         }
         return length;
     }
 
-    synchronized public static void setSnoozeTimerLength(Context context, int length) {
+    synchronized public static void setSnoozeTimerLength(Context context, long length) {
         setTimerLength(context, KEY_SNOOZE_TIMER_LENGTH, length);
     }
 
-    synchronized public static void setCustomTimerLength(Context context, int length) {
+    synchronized public static void setCustomTimerLength(Context context, long length) {
         setTimerLength(context, KEY_CUSTOM_TIMER_LENGTH, length);
     }
 
-    public static int getMainTimerLength(Context context) {
+    public static long getMainTimerLength(Context context) {
         return getTimerLength(context, KEY_MAIN_TIMER_LENGTH);
     }
 
-    public static int getCustomTimerLength(Context context) {
+    public static long getCustomTimerLength(Context context) {
         return getTimerLength(context, KEY_CUSTOM_TIMER_LENGTH);
     }
 
-    public static int getSnoozeTimerLength(Context context) {
+    public static long getSnoozeTimerLength(Context context) {
         return getTimerLength(context, KEY_SNOOZE_TIMER_LENGTH);
     }
 }
