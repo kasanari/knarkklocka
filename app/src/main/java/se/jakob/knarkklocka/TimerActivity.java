@@ -131,10 +131,10 @@ public class TimerActivity extends AppCompatActivity implements
         if (isAlarmRunning()) {
             mainActivityViewModel.delete();
         }
-        int timer_duration = PreferenceUtils.getMainTimerLength(this);
+        long timer_duration = PreferenceUtils.getMainTimerLength(this);
         Calendar currentTime = Calendar.getInstance();
         Calendar endTime = Calendar.getInstance();
-        endTime.add(Calendar.MILLISECOND, timer_duration);
+        endTime.add(Calendar.MILLISECOND, (int)timer_duration);
         final Alarm alarm = new Alarm(Alarm.STATE_WAITING, currentTime.getTime(), endTime.getTime());
 
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
