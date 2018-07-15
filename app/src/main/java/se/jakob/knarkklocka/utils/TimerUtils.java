@@ -11,9 +11,9 @@ import java.util.Date;
 import java.util.Locale;
 
 import se.jakob.knarkklocka.AlarmActivity;
+import se.jakob.knarkklocka.AlarmBroadcastReceiver;
 import se.jakob.knarkklocka.AlarmService;
 import se.jakob.knarkklocka.BuildConfig;
-import se.jakob.knarkklocka.LogUtils;
 import se.jakob.knarkklocka.PreferenceUtils;
 import se.jakob.knarkklocka.TimerActivity;
 
@@ -64,6 +64,15 @@ public class TimerUtils {
         Intent alarmIntent = new Intent(context, AlarmActivity.class);
         alarmIntent.putExtra(EXTRA_ALARM_ID, id);
         return PendingIntent.getActivity(context, ALARM_INTENT_ID, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    /**
+     * Returns the pending intent that starts the Alarm Activity
+     **/
+    private static PendingIntent getAlarmReceiverIntent(Context context, long id) {
+        Intent alarmIntent = new Intent(context, AlarmBroadcastReceiver.class);
+        alarmIntent.putExtra(EXTRA_ALARM_ID, id);
+        return PendingIntent.getBroadcast(context, ALARM_INTENT_ID, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     /**
