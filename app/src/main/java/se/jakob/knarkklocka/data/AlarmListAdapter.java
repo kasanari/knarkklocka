@@ -1,6 +1,7 @@
 package se.jakob.knarkklocka.data;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,7 +10,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 import se.jakob.knarkklocka.R;
 
@@ -17,9 +20,11 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.Alar
 
     private final LayoutInflater mInflater;
     private List<Alarm> mAlarms; // Cached copy of alarms
+    private Resources res;
 
     public AlarmListAdapter(Context context) {
         mInflater = LayoutInflater.from(context);
+        res = context.getResources();
     }
 
     @NonNull
@@ -33,7 +38,7 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.Alar
     public void onBindViewHolder(@NonNull AlarmViewHolder holder, int position) {
         if (mAlarms != null) {
             Alarm current = mAlarms.get(position);
-            DateFormat dateFormat = DateFormat.getTimeInstance();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
             String dateString = dateFormat.format(current.getEndTime());
             String string = current.getId() + " " + dateString;
             holder.dueTimeItemView.setText(string);
@@ -42,8 +47,10 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.Alar
             String stateString = current.getStateString(state);
             holder.stateItemView.setText(stateString);
 
+
             int snoozes = current.getSnoozes();
-            String snoozeString = "Snoozes: " + snoozes;
+            String snoozeString = res.getQuantityString(R.plurals.snoozes, snoozes, snoozes);
+            //String snoozeString = "Snoozes: " + snoozes;
             holder.snoozeItemView.setText(snoozeString);
         } else {
             // Covers the case of data not being ready yet.
