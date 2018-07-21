@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <plurals name="numberOfSongsAvailable">
+    <plurals name="hours">
         <!--
              As a developer, you should always supply "one" and "other"
              strings. Your translators will know which strings are actually
@@ -9,7 +9,17 @@
              doesn't mean 1 (as explained above).
           -->
         <item quantity="zero">%d hours</item>
-        <item quantity="one">%d song found.</item>
-        <item quantity="other">%d songs found.</item>
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="minutes">
+        <item quantity="zero">%d minutes</item>
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
+    <plurals name="snoozes">
+        <item quantity="zero">%d snoozes</item>
+        <item quantity="one">%d snooze</item>
+        <item quantity="other">%d snoozes</item>
     </plurals>
 </resources>
