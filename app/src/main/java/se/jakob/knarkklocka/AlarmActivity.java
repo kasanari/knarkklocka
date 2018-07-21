@@ -52,6 +52,9 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     private AlarmManager.OnAlarmListener alarmCallback = new AlarmManager.OnAlarmListener() {
         @Override
         public void onAlarm() {
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "Timeout reached. Snoozing...");
+            }
             snooze();
         }
     };
