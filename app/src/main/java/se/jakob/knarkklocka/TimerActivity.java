@@ -31,53 +31,70 @@ import se.jakob.knarkklocka.data.MainActivityViewModel;
 import se.jakob.knarkklocka.settings.SettingsActivity;
 import se.jakob.knarkklocka.utils.TimerUtils;
 
+import static se.jakob.knarkklocka.data.Alarm.STATE_ACTIVE;
+import static se.jakob.knarkklocka.data.Alarm.STATE_DEAD;
+import static se.jakob.knarkklocka.data.Alarm.STATE_SNOOZING;
+import static se.jakob.knarkklocka.data.Alarm.STATE_WAITING;
+
 public class TimerActivity extends AppCompatActivity implements
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = "TimerActivity";
-    TextView due_time_view;
-    Chronometer countdown_view;
+    TextView tv_due_time;
+    Chronometer chronometer;
     ConstraintLayout timer_content_group;
     ConstraintLayout chronometer_container;
-    FloatingActionButton start_timer_fab;
+    FloatingActionButton fab_start_timer;
 
-    Button dismiss_timer_button;
-    Button snooze_timer_button;
+    Button button_sleep_mode;
     private MainActivityViewModel mainActivityViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timer);
-        timer_content_group = findViewById(R.id.timer_content);
-        chronometer_container = findViewById(R.id.chronometer_container);
-        countdown_view = findViewById(R.id.time_display);
-        //chronometer_container.setVisibility(View.GONE);
 
-        snooze_timer_button = findViewById(R.id.button_snooze_timer);
-        dismiss_timer_button = findViewById(R.id.button_remove_timer);
-        //snooze_timer_button.setVisibility(View.INVISIBLE);
-        //dismiss_timer_button.setVisibility(View.INVISIBLE);
+        timer_content_group     =   findViewById(R.id.timer_content);
+        chronometer_container   =   findViewById(R.id.chronometer_container);
+        chronometer             =   findViewById(R.id.time_display);
+        tv_due_time             =   findViewById(R.id.tv_main_due);
+        button_sleep_mode       =   findViewById(R.id.button_remove_timer);
+
+        button_sleep_mode.setVisibility(View.INVISIBLE);
+        tv_due_time.setVisibility(View.INVISIBLE);
+        chronometer.setVisibility(View.INVISIBLE);
 
         mainActivityViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
-        due_time_view = findViewById(R.id.tv_main_due);
 
         mainActivityViewModel.getAlarm().observe(this, new Observer<Alarm>() {
             @Override
             public void onChanged(@Nullable final Alarm alarm) {
                 if (alarm != null) {
-                    DateFormat dateFormat = DateFormat.getTimeInstance();
-                    Date endTime = alarm.getEndTime();
-                    String dateString = dateFormat.format(endTime);
-                    due_time_view.setText(dateString);
-                    due_time_view.setVisibility(View.VISIBLE);
-                    countdown_view.setVisibility(View.VISIBLE);
-                    long timeDelta = endTime.getTime() - System.currentTimeMillis();
-                    countdown_view.setBase(SystemClock.elapsedRealtime() + timeDelta);
-                    countdown_view.start();
+                    int state = alarm.getState();
+                    switch (state) {
+                        case STATE_ACTIVE: break;
+                        case STATE_DEAD:
+                            fab_start_timer.setVisibility(View.VISIBLE);
+                            button_sleep_mode.setVisibility(View.VISIBLE);
+                            break;
+                        case STATE_SNOOZING:
+                            setupChronometer(alarm);
+                            button_sleep_mode.setVisibility(View.VISIBLE);
+                            fab_start_timer.setVisibility(View.VISIBLE);
+                            fab_start_timer.setImageResource(R.drawable.ic_restart_black_24dp);
+                            break;
+                        case STATE_WAITING:
+                            setupChronometer(alarm);
+                            button_sleep_mode.setVisibility(View.VISIBLE);
+                            fab_start_timer.setVisibility(View.INVISIBLE);
+                            fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp);
+                            break;
+                    }
                 } else {
-                    due_time_view.setVisibility(View.INVISIBLE);
-                    countdown_view.setVisibility(View.INVISIBLE);
+                    fab_start_timer.setVisibility(View.VISIBLE);
+                    button_sleep_mode.setVisibility(View.INVISIBLE);
+                    tv_due_time.setVisibility(View.INVISIBLE);
+                    chronometer.setVisibility(View.INVISIBLE);
                 }
             }
         });
@@ -93,8 +110,10 @@ public class TimerActivity extends AppCompatActivity implements
 
 
         /*Floating action button to start a new timer*/
-        start_timer_fab = findViewById(R.id.button_add_timer);
-        start_timer_fab.setOnClickListener(new View.OnClickListener() {
+        fab_start_timer = findViewById(R.id.button_add_timer);
+
+        /*
+        fab_start_timer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //callVibrate();
@@ -102,34 +121,51 @@ public class TimerActivity extends AppCompatActivity implements
                 Snackbar.make(view, "Set new timer!", Snackbar.LENGTH_LONG).show();
             }
 
+        });*/
+
+        fab_start_timer.setOnLongClickListener(new View.OnLongClickListener() {
+            public boolean onLongClick(View v) {
+                //showTimePickerDialog(v);
+                callVibrate();
+                setAlarm();
+                Snackbar.make(v, "Started new timer!", Snackbar.LENGTH_LONG).show();
+                return true;
+            }
         });
 
-        start_timer_fab.setOnLongClickListener(new View.OnLongClickListener() {
+        button_sleep_mode.setOnLongClickListener(new View.OnLongClickListener() {
             public boolean onLongClick(View v) {
-                showTimePickerDialog(v);
+                sleep(v);
                 return true;
             }
         });
 
     }
 
-    public void callVibrate() {
-        //TimerUtils.vibrateOnce(this);
+    private void callVibrate() {
+        Klaxon.vibrateOnce(this);
+    }
+
+    private void setupChronometer(Alarm alarm) {
+        DateFormat dateFormat = DateFormat.getTimeInstance();
+        Date endTime = alarm.getEndTime();
+        String dateString = dateFormat.format(endTime);
+        tv_due_time.setText(dateString);
+        tv_due_time.setVisibility(View.VISIBLE);
+        chronometer.setVisibility(View.VISIBLE);
+        long timeDelta = endTime.getTime() - System.currentTimeMillis();
+        chronometer.setBase(SystemClock.elapsedRealtime() + timeDelta);
+        chronometer.start();
     }
 
     public void setChronometer(Date base) {
-        countdown_view.setBase(base.getTime());
+        chronometer.setBase(base.getTime());
     }
 
     public void setAlarm() {
         //TransitionManager.beginDelayedTransition(chronometer_container, new Slide(Gravity.TOP));
-        //countdown_view.setVisibility(View.VISIBLE);
-        //chronometer_container.setVisibility(View.VISIBLE);
-        //TransitionManager.beginDelayedTransition(timer_content_group, new Slide(Gravity.BOTTOM));
-        //snooze_timer_button.setVisibility(View.VISIBLE);
-        //dismiss_timer_button.setVisibility(View.VISIBLE);
-        if (isAlarmRunning()) {
-            mainActivityViewModel.delete();
+        if (alarmIsRunning()) {
+            mainActivityViewModel.kill();
         }
         long timer_duration = PreferenceUtils.getMainTimerLength(this);
         Calendar currentTime = Calendar.getInstance();
@@ -154,12 +190,10 @@ public class TimerActivity extends AppCompatActivity implements
 
     public void sleep(View v) {
         //TransitionManager.beginDelayedTransition(timer_content_group, new Slide(Gravity.TOP));
-        //snooze_timer_button.setVisibility(View.INVISIBLE);
-        //dismiss_timer_button.setVisibility(View.INVISIBLE);
-        //countdown_view.setVisibility(View.INVISIBLE);
-        //chronometer_container.setVisibility(View.GONE);
-        Log.d(TAG, "Sleep mode engaged...");
-        if (isAlarmRunning()) {
+        fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp);
+        if (alarmIsRunning()) {
+            Log.d(TAG, "Sleep mode engaged...");
+            Snackbar.make(v, "Goodnight", Snackbar.LENGTH_LONG).show();
             AppExecutors.getInstance().diskIO().execute(new Runnable() {
                 @Override
                 public void run() {
@@ -173,7 +207,7 @@ public class TimerActivity extends AppCompatActivity implements
         }
     }
 
-    public boolean isAlarmRunning() {
+    public boolean alarmIsRunning() {
         return mainActivityViewModel.getAlarm().getValue() != null;
     }
 
@@ -187,28 +221,28 @@ public class TimerActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        if (isAlarmRunning()) {
-            countdown_view.start();
+        if (alarmIsRunning()) {
+            chronometer.start();
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        countdown_view.stop();
+        chronometer.stop();
 
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        countdown_view.stop();
+        chronometer.stop();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        countdown_view.stop();
+        chronometer.stop();
     }
 
     @Override
