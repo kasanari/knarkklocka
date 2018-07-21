@@ -1,6 +1,7 @@
 package se.jakob.knarkklocka;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
@@ -36,30 +37,27 @@ public class TimerLengthPreference extends DialogPreference {
     public TimerLengthPreference(Context ctxt, AttributeSet attrs, int defStyle) {
         super(ctxt, attrs, defStyle);
         setDialogLayoutResource(R.layout.dialog_numberpicker);
-        //final Context themeContext = getContext();
-        //final LayoutInflater inflater = LayoutInflater.from(themeContext);
-        //final View view = inflater.inflate(R.layout.time_picker, null);
-        setPositiveButtonText("Set");
-        setNegativeButtonText("Cancel");
-
+        setPositiveButtonText(R.string.positive);
+        setNegativeButtonText(R.string.negative);
         length = 0;
     }
 
-   /* @Override
-    protected View onCreateDialogView() {
-        picker = new TimePicker(getContext(), null, android.R.style.Theme_Holo_Light_Panel);
-        picker.setIs24HourView(true);
-        return (picker);
-    }
-*/
-    @Override
-    protected void onBindDialogView(View view) {
+    private void setupPickers(View view) {
         hourPicker = view.findViewById(R.id.np_hours);
         minutePicker = view.findViewById(R.id.np_minutes);
         hourPicker.setMaxValue(100);
         hourPicker.setMinValue(0);
-        minutePicker.setMaxValue(100);
+        minutePicker.setMaxValue(59);
         minutePicker.setMinValue(0);
+        hourPicker.setWrapSelectorWheel(false);
+        minutePicker.setWrapSelectorWheel(false);
+        hourPicker.setValue(getWholeHours(length));
+        minutePicker.setValue(getWholeMinutes(length));
+    }
+
+    @Override
+    protected void onBindDialogView(View view) {
+        setupPickers(view);
         super.onBindDialogView(view);
     }
 
@@ -69,12 +67,12 @@ public class TimerLengthPreference extends DialogPreference {
         if (positiveResult) {
             int hour = hourPicker.getValue();
             int minute = minutePicker.getValue();
-            length = hour*HOUR_IN_MILLIS + minute*MINUTE_IN_MILLIS;
+            long newLength = hour*HOUR_IN_MILLIS + minute*MINUTE_IN_MILLIS;
 
             setSummary(getSummary());
 
-            if (callChangeListener(length)) {
-                persistLong(length);
+            if (callChangeListener(newLength)) {
+                setValue(newLength);
                 notifyChanged();
             }
         }
@@ -112,10 +110,33 @@ public class TimerLengthPreference extends DialogPreference {
         return this.length;
     }
 
+    private int getWholeMinutes(long length) {
+        return (int)(length/MINUTE_IN_MILLIS %60);
+    }
+
+    private int getWholeHours(long length) {
+        return (int)(length/HOUR_IN_MILLIS);
+    }
+
     @Override
     public CharSequence getSummary() {
-        int hours = (int)(length / HOUR_IN_MILLIS);
-        int minutes = (int) (length / MINUTE_IN_MILLIS % 60);
-        return String.format(Locale.getDefault(),"%d hours and %d minutes", hours, minutes);
+        int hours = getWholeHours(length);
+        int minutes = getWholeMinutes(length);
+        Resources res = getContext().getResources();
+        String summary = "";
+
+        if (hours > 0) {
+            String hoursString = res.getQuantityString(R.plurals.hours, hours, hours);
+            summary += hoursString;
+            if (minutes > 0) {
+                summary += " and ";
+            }
+        }
+        if (minutes > 0) {
+            String minutesString = res.getQuantityString(R.plurals.minutes, minutes, minutes);
+            summary += minutesString;
+        }
+
+        return summary;
     }
 }

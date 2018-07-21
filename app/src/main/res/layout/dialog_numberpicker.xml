@@ -7,30 +7,32 @@
 
     <NumberPicker
         android:id="@+id/np_hours"
+        android:theme="@style/numberpicker"
         android:layout_width="64dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="32dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/textView2"
+        app:layout_constraintEnd_toStartOf="@+id/colon"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.498" />
 
     <NumberPicker
         android:id="@+id/np_minutes"
+        android:theme="@style/numberpicker"
         android:layout_width="64dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="32dp"
         android:layout_marginStart="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textView2"
+        app:layout_constraintStart_toEndOf="@+id/colon"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.498" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/colon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
@@ -40,8 +42,8 @@
         android:textSize="36sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/minutes"
-        app:layout_constraintStart_toEndOf="@+id/hours"
+        app:layout_constraintEnd_toStartOf="@+id/np_minutes"
+        app:layout_constraintStart_toEndOf="@+id/np_hours"
         app:layout_constraintTop_toTopOf="parent"
         tools:text=":" />
 
