@@ -24,6 +24,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -31,19 +32,30 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Chronometer;
+import android.widget.TextView;
 
+import java.text.DateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import se.jakob.knarkklocka.data.Alarm;
 import se.jakob.knarkklocka.data.AlarmActivityViewModel;
 import se.jakob.knarkklocka.utils.TimerUtils;
 
-public class AlarmActivity extends AppCompatActivity implements View.OnClickListener {
+import static android.app.AlarmManager.RTC_WAKEUP;
+import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
+import static android.text.format.DateUtils.SECOND_IN_MILLIS;
+import static se.jakob.knarkklocka.data.Alarm.STATE_ACTIVE;
+import static se.jakob.knarkklocka.data.Alarm.STATE_DEAD;
+import static se.jakob.knarkklocka.data.Alarm.STATE_SNOOZING;
+import static se.jakob.knarkklocka.data.Alarm.STATE_WAITING;
 
+public class AlarmActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener {
     private static final String TAG = "AlarmActivity";
 
     private Button mSnoozeButton;
     private Button mDismissButton;
+    private TextView tv_alarm_text;
 
     private AlarmActivityViewModel alarmActivityViewModel;
 
@@ -68,7 +80,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         setContentView(R.layout.activity_alarm);
 
         /* Turn on vibration */
-        Klaxon.vibrateOnce(this);
+        Klaxon.vibrateAlarm(this);
 
         /*Ensure screen turns on*/
         final Window win = getWindow();
@@ -94,13 +106,23 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
 
         mDismissButton = findViewById(R.id.dismiss);
         mSnoozeButton = findViewById(R.id.snooze);
+        tv_alarm_text = findViewById(R.id.tv_alarm_text);
 
         mSnoozeButton.setOnClickListener(this);
-        mDismissButton.setOnClickListener(this);
+        mDismissButton.setOnLongClickListener(this);
 
         mAlarmChronometer = findViewById(R.id.alarm_chronometer);
-        //AlarmManager alarmManager = getSystemService(AlarmManager.class);
-        //alarmManager.setExact(RTC_WAKEUP,System.currentTimeMillis() + 10 * SECOND_IN_MILLIS, "tag", alarmCallback, null);
+        AlarmManager alarmManager = getSystemService(AlarmManager.class);
+        long timeout;
+        if (BuildConfig.DEBUG) {
+            timeout = 10 * SECOND_IN_MILLIS;
+        } else {
+            timeout = 2 * MINUTE_IN_MILLIS;
+        }
+
+        if (alarmManager != null) {
+            alarmManager.setExact(RTC_WAKEUP, System.currentTimeMillis() + timeout, "tag", alarmCallback, null);
+        }
         mAlarmChronometer.setVisibility(View.VISIBLE);
         /*Setup ViewModel and Observer*/
         alarmActivityViewModel = ViewModelProviders.of(this).get(AlarmActivityViewModel.class);
@@ -108,22 +130,52 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onChanged(@Nullable final Alarm alarm) {
                 if (alarm != null) {
-
-                    //DateFormat dateFormat = DateFormat.getTimeInstance();
-                    Date endTime = alarm.getEndTime();
-                    //String dateString = dateFormat.format(endTime);
-                    //due_time_view.setText(dateString);
-                    //due_time_view.setVisibility(View.VISIBLE);
-                    long timeDelta = endTime.getTime() - System.currentTimeMillis();
-                    mAlarmChronometer.setBase(SystemClock.elapsedRealtime() + timeDelta);
-                    mAlarmChronometer.start();
+                    int state = alarm.getState();
+                    switch (state) {
+                        case STATE_ACTIVE:
+                            setupChronometer(alarm);
+                            alarmIsActive = true;
+                            break;
+                        case STATE_DEAD:
+                            finish();
+                            break;
+                        case STATE_SNOOZING:
+                            finish();
+                            break;
+                        case STATE_WAITING:
+                            finish();
+                            break;
+                    }
                 } else {
-                    //due_time_view.setVisibility(View.INVISIBLE);
                     mAlarmChronometer.setVisibility(View.INVISIBLE);
+                    tv_alarm_text.setVisibility(View.INVISIBLE);
                 }
             }
         });
 
+    }
+
+    private void setupChronometer(Alarm alarm) {
+        mAlarmChronometer.setVisibility(View.VISIBLE);
+        tv_alarm_text.setVisibility(View.VISIBLE);
+        Date endTime = alarm.getEndTime();
+        long timeDelta = endTime.getTime() - System.currentTimeMillis();
+        mAlarmChronometer.setBase(SystemClock.elapsedRealtime() + timeDelta);
+        mAlarmChronometer.setOnChronometerTickListener(
+                new Chronometer.OnChronometerTickListener() {
+                    public void onChronometerTick(Chronometer chronometer) {
+                        int onColor = ContextCompat.getColor(getApplication(), R.color.colorAccent);
+                        int offColor = ContextCompat.getColor(getApplication(), android.R.color.darker_gray);
+                        int currentColor = tv_alarm_text.getCurrentTextColor();
+                        if (currentColor == onColor) {
+                            tv_alarm_text.setTextColor(offColor);
+                        } else {
+                            tv_alarm_text.setTextColor(onColor);
+                        }
+                    }
+                }
+        );
+        mAlarmChronometer.start();
     }
 
     @Override
@@ -136,11 +188,12 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         super.onStop();
         if (alarmIsActive) {
             snooze();
-    }
+        }
     }
 
     public void snooze() {
         if (isAlarmRunning()) {
+            Klaxon.stopVibrate(this);
             AppExecutors.getInstance().diskIO().execute(new Runnable() {
                 @Override
                 public void run() {
@@ -160,12 +213,13 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    public void dismiss() {
+    private void dismiss() {
         if (isAlarmRunning()) {
-            int timer_duration = 10;
+            Klaxon.stopVibrate(this);
+            long timer_duration = PreferenceUtils.getMainTimerLength(this);
             Calendar currentTime = Calendar.getInstance();
             Calendar endTime = Calendar.getInstance();
-            endTime.add(Calendar.SECOND, timer_duration);
+            endTime.add(Calendar.MILLISECOND, (int)timer_duration);
             final Alarm alarm = new Alarm(Alarm.STATE_WAITING, currentTime.getTime(), endTime.getTime());
             AppExecutors.getInstance().diskIO().execute(new Runnable() {
                 @Override
@@ -201,5 +255,13 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
             dismiss();
         }
 
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        if (v == mDismissButton) {
+            dismiss();
+        }
+        return true;
     }
 }
