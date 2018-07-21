@@ -64,7 +64,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "Starting AlarmActivity");
+        Log.d(TAG, "AlarmActivity started");
         setContentView(R.layout.activity_alarm);
 
         /* Turn on vibration */
