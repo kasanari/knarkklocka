@@ -49,6 +49,8 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
 
     private Chronometer mAlarmChronometer;
 
+    private boolean alarmIsActive = false;
+
     private AlarmManager.OnAlarmListener alarmCallback = new AlarmManager.OnAlarmListener() {
         @Override
         public void onAlarm() {
@@ -130,7 +132,9 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onStop() {
         super.onStop();
-        //snooze();
+        if (alarmIsActive) {
+            snooze();
+    }
     }
 
     public void snooze() {
@@ -144,6 +148,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
                     if (currentAlarm != null) {
                         alarmActivityViewModel.snooze(snoozeTime.getTime());
                         TimerUtils.setNewAlarm(getApplicationContext(), currentAlarm.getId(), snoozeTime.getTime());
+                        alarmIsActive = false;
                         finish();
                     }
                 }
@@ -166,11 +171,14 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
                     alarmActivityViewModel.kill();
                     long id = alarmActivityViewModel.insert(alarm);
                     TimerUtils.setNewAlarm(getApplicationContext(), id, alarm.getEndTime());
+                    alarmIsActive = false;
                     finish();
                 }
             });
+        } else {
+            alarmIsActive = false;
+            finish();
         }
-        finish();
     }
 
     public boolean isAlarmRunning() {
