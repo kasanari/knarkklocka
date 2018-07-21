@@ -88,7 +88,7 @@ public class TimerActivity extends AppCompatActivity implements
 
         /*Use toolbar instead of ActionBar*/
         Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle("Den knarkigaste klockan");
+        toolbar.setTitle("Timer setup");
         setSupportActionBar(toolbar);
 
 
