@@ -72,17 +72,19 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
 
         /*Ensure screen turns on*/
         final Window win = getWindow();
+        int flags;
         if (Build.VERSION.SDK_INT >= 27) {
             setShowWhenLocked(true); //Replaces FLAG_SHOW_WHEN_LOCKED
             setTurnScreenOn(true); //Replaces FLAG_TURN_SCREEN_ON
-            win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                    | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
+            flags = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                    | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
         } else {
-            win.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
-            win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            flags = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                     | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-                    | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
+                    | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                    | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
         }
+        win.addFlags(flags);
 
         /*Hide navigation bar*/
         hideNavigationBar();
