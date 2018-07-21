@@ -31,18 +31,15 @@
 
         <Chronometer
             android:id="@+id/time_display"
-            android:layout_width="0dp"
+            android:theme="@style/chronometer"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:layout_marginTop="32dp"
             android:countDown="true"
-            android:fontFamily="@font/varela_round"
             android:onClick="showTimePickerDialog"
-            android:textAlignment="center"
-            android:textSize="70sp"
-            android:typeface="serif"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -53,7 +50,7 @@
         android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="113dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="40dp"
         android:padding="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -66,7 +63,6 @@
             android:layout_marginEnd="8dp"
             android:layout_marginStart="16dp"
             android:fontFamily="@font/varela_round"
-            android:onClick="sleep"
             android:text="@string/remove"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/button_add_timer"
@@ -78,29 +74,14 @@
             android:layout_width="75dp"
             android:layout_height="75dp"
             android:layout_marginBottom="16dp"
-            android:layout_marginEnd="24dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="16dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/button_snooze_timer"
-            app:layout_constraintStart_toEndOf="@+id/button_remove_timer"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_alarm_blue_24dp" />
-
-        <Button
-            android:id="@+id/button_snooze_timer"
-            android:layout_width="85dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:fontFamily="@font/varela_round"
-            android:text="@string/snooze"
+            android:layout_marginTop="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/button_add_timer"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_alarm_blue_24dp" />
 
     </android.support.constraint.ConstraintLayout>
 
