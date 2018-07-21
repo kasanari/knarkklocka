@@ -13,6 +13,8 @@
     <string name="state_snoozed">Snoozed</string>
 
     <!-- Strings related to Settings -->
+    <string name="positive">OK</string>
+    <string name="negative">Cancel</string>
 
     <!-- Example General settings -->
     <string name="pref_header">Settings</string>
@@ -21,36 +23,5 @@
     <string name="pref_timer_length">Timer length</string>
 
     <string name="pref_snooze_length_key">snooze_length</string>
-    <string name="pref_snooze_length">Snooze length</string>
-
-    <!-- Example settings for Data & Sync -->
-    <string name="pref_header_data_sync">Data &amp; sync</string>
-
-    <string name="pref_title_sync_frequency">Sync frequency</string>
-
-    <string-array name="pref_sync_frequency_values">
-        <item>15</item>
-        <item>30</item>
-        <item>60</item>
-        <item>180</item>
-        <item>360</item>
-        <item>-1</item>
-    </string-array>
-
-    <string-array name="list_preference_entries">
-        <item>Entry 1</item>
-        <item>Entry 2</item>
-        <item>Entry 3</item>
-    </string-array>
-
-    <string-array name="list_preference_entry_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-    </string-array>
-
-    <string-array name="multi_select_list_preference_default_value" />
-
-    <string name="pref_title_system_sync_settings">System sync settings</string>
-
+    <string name="pref_snooze_length">Snoozing length</string>
 </resources>
