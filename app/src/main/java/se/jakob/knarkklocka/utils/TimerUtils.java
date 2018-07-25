@@ -127,4 +127,40 @@ public class TimerUtils {
         }
     }
 
+    public static void startMainTimer(final Context context, final AlarmViewModel vm) {
+        restartTimer(context, vm, false);
+    }
+
+    public static void startSnoozeTimer(final Context context, final AlarmViewModel vm) {
+        restartTimer(context, vm, true);
+    }
+
+    private static void restartTimer(final Context context, final AlarmViewModel vm, final boolean isSnooze) {
+        final long timer_duration;
+        if (isSnooze) {
+            timer_duration = PreferenceUtils.getSnoozeTimerLength(context);
+        } else {
+            timer_duration = PreferenceUtils.getMainTimerLength(context);
+        }
+
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                Calendar currentTime = Calendar.getInstance();
+                Calendar endTime = Calendar.getInstance();
+                endTime.add(Calendar.MILLISECOND, (int) timer_duration);
+                if (isSnooze) {
+                    Alarm currentAlarm = vm.getCurrentAlarm();
+                    if (currentAlarm != null) {
+                        vm.snooze(endTime.getTime());
+                        TimerUtils.setNewAlarm(context, currentAlarm.getId(), endTime.getTime());
+                    }
+                } else {
+                    Alarm alarm = new Alarm(Alarm.STATE_WAITING, currentTime.getTime(), endTime.getTime());
+                    long id = vm.add(alarm);
+                    setNewAlarm(context, id, alarm.getEndTime());
+                }
+            }
+        });
+    }
 }

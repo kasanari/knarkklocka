@@ -59,9 +59,14 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
 
     private AlarmActivityViewModel alarmActivityViewModel;
 
+    private static final int WINDOW_FLAGS = WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+            | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
+
     private Chronometer mAlarmChronometer;
 
-    private boolean alarmIsActive = false;
+    //private boolean alarmIsActive = false;
 
     private AlarmManager.OnAlarmListener alarmCallback = new AlarmManager.OnAlarmListener() {
         @Override
@@ -79,24 +84,25 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         Log.d(TAG, "AlarmActivity started");
         setContentView(R.layout.activity_alarm);
 
-        /* Turn on vibration */
-        Klaxon.vibrateAlarm(this);
+        WakeLocker.acquire(this);
 
         /*Ensure screen turns on*/
+
         final Window win = getWindow();
-        int flags;
         if (Build.VERSION.SDK_INT >= 27) {
-            setShowWhenLocked(true); //Replaces FLAG_SHOW_WHEN_LOCKED
             setTurnScreenOn(true); //Replaces FLAG_TURN_SCREEN_ON
-            flags = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                    | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
+            setShowWhenLocked(true); //Replaces FLAG_SHOW_WHEN_LOCKED
+            win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                    | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
         } else {
-            flags = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                    | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-                    | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                    | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
+            win.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+            win.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+            win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                    | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
         }
-        win.addFlags(flags);
+
+        /* Turn on vibration */
+        //Klaxon.vibrateAlarm(this);
 
         /*Hide navigation bar*/
         hideNavigationBar();
@@ -114,15 +120,15 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         mAlarmChronometer = findViewById(R.id.alarm_chronometer);
         AlarmManager alarmManager = getSystemService(AlarmManager.class);
         long timeout;
-        if (BuildConfig.DEBUG) {
-            timeout = 10 * SECOND_IN_MILLIS;
-        } else {
-            timeout = 2 * MINUTE_IN_MILLIS;
-        }
-
-        if (alarmManager != null) {
-            alarmManager.setExact(RTC_WAKEUP, System.currentTimeMillis() + timeout, "tag", alarmCallback, null);
-        }
+//        if (BuildConfig.DEBUG) {
+//            timeout = 10 * SECOND_IN_MILLIS;
+//        } else {
+//            timeout = 2 * MINUTE_IN_MILLIS;
+//        }
+//
+//        if (alarmManager != null) {
+//            alarmManager.setExact(RTC_WAKEUP, System.currentTimeMillis() + timeout, "tag", alarmCallback, null);
+//        }
         mAlarmChronometer.setVisibility(View.VISIBLE);
         /*Setup ViewModel and Observer*/
         alarmActivityViewModel = ViewModelProviders.of(this).get(AlarmActivityViewModel.class);
@@ -134,16 +140,15 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
                     switch (state) {
                         case STATE_ACTIVE:
                             setupChronometer(alarm);
-                            alarmIsActive = true;
                             break;
                         case STATE_DEAD:
-                            finish();
+                            //finish();
                             break;
                         case STATE_SNOOZING:
-                            finish();
+                            //finish();
                             break;
                         case STATE_WAITING:
-                            finish();
+                            //finish();
                             break;
                     }
                 } else {
@@ -186,59 +191,28 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onStop() {
         super.onStop();
-        if (alarmIsActive) {
+        if (alarmIsActive()) {
             snooze();
         }
+        Klaxon.stopVibrate(this);
+        WakeLocker.release();
     }
 
-    public void snooze() {
-        if (isAlarmRunning()) {
-            Klaxon.stopVibrate(this);
-            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    Alarm currentAlarm = alarmActivityViewModel.getAlarm().getValue();
-                    Calendar snoozeTime = Calendar.getInstance();
-                    snoozeTime.add(Calendar.SECOND, 5);
-                    if (currentAlarm != null) {
-                        alarmActivityViewModel.snooze(snoozeTime.getTime());
-                        TimerUtils.setNewAlarm(getApplicationContext(), currentAlarm.getId(), snoozeTime.getTime());
-                        alarmIsActive = false;
-                        finish();
-                    }
-                }
-            });
+    private void snooze() {
+        if (alarmIsActive()) {
+            TimerUtils.startSnoozeTimer(this, alarmActivityViewModel);
+            finish();
         } else {
             finish();
         }
     }
 
     private void dismiss() {
-        if (isAlarmRunning()) {
-            Klaxon.stopVibrate(this);
-            long timer_duration = PreferenceUtils.getMainTimerLength(this);
-            Calendar currentTime = Calendar.getInstance();
-            Calendar endTime = Calendar.getInstance();
-            endTime.add(Calendar.MILLISECOND, (int)timer_duration);
-            final Alarm alarm = new Alarm(Alarm.STATE_WAITING, currentTime.getTime(), endTime.getTime());
-            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    alarmActivityViewModel.kill();
-                    long id = alarmActivityViewModel.insert(alarm);
-                    TimerUtils.setNewAlarm(getApplicationContext(), id, alarm.getEndTime());
-                    alarmIsActive = false;
-                    finish();
-                }
-            });
-        } else {
-            alarmIsActive = false;
-            finish();
+        if (alarmIsActive()) {
+            alarmActivityViewModel.kill();
+            TimerUtils.startMainTimer(this, alarmActivityViewModel);
         }
-    }
-
-    public boolean isAlarmRunning() {
-        return alarmActivityViewModel.isAlarmRunning();
+        finish();
     }
 
     private void hideNavigationBar() {
@@ -255,6 +229,10 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
             dismiss();
         }
 
+    }
+
+    private boolean alarmIsActive() {
+        return alarmActivityViewModel.alarmIsRunning();
     }
 
     @Override

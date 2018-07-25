@@ -167,26 +167,14 @@ public class TimerActivity extends AppCompatActivity implements
         if (alarmIsRunning()) {
             mainActivityViewModel.kill();
         }
-        long timer_duration = PreferenceUtils.getMainTimerLength(this);
-        Calendar currentTime = Calendar.getInstance();
-        Calendar endTime = Calendar.getInstance();
-        endTime.add(Calendar.MILLISECOND, (int)timer_duration);
-        final Alarm alarm = new Alarm(Alarm.STATE_WAITING, currentTime.getTime(), endTime.getTime());
-
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                long id = mainActivityViewModel.insert(alarm);
-                TimerUtils.setNewAlarm(getApplicationContext(), id, alarm.getEndTime());
-            }
-        });
-
+        TimerUtils.startMainTimer(this, mainActivityViewModel);
     }
 
+    /*
     public void showTimePickerDialog(View v) {
         DialogFragment newFragment = new TimePickerFragment();
         newFragment.show(getSupportFragmentManager(), "timePicker");
-    }
+    }*/
 
     public void sleep(View v) {
         //TransitionManager.beginDelayedTransition(timer_content_group, new Slide(Gravity.TOP));

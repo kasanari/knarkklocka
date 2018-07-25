@@ -6,7 +6,7 @@ import android.arch.lifecycle.LiveData;
 
 import java.util.Date;
 
-public class AlarmActivityViewModel extends AndroidViewModel {
+public class AlarmActivityViewModel extends AndroidViewModel implements AlarmViewModel {
     private LiveData<Alarm> mAlarm;
     private AlarmRepository mRepository;
 
@@ -20,7 +20,11 @@ public class AlarmActivityViewModel extends AndroidViewModel {
         return mAlarm;
     }
 
-    public long insert(Alarm alarm) {
+    public Alarm getCurrentAlarm() {
+        return mAlarm.getValue();
+    }
+
+    public long add(Alarm alarm) {
         return mRepository.insert(alarm);
     }
 
