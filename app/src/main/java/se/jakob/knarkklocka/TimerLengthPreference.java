@@ -39,6 +39,7 @@ public class TimerLengthPreference extends DialogPreference {
         setDialogLayoutResource(R.layout.dialog_numberpicker);
         setPositiveButtonText(R.string.positive);
         setNegativeButtonText(R.string.negative);
+        setSummary(getSummary());
         length = 0;
     }
 
