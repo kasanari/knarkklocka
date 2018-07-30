@@ -15,7 +15,6 @@ import se.jakob.knarkklocka.data.AlarmHistoryViewModel;
 import se.jakob.knarkklocka.data.AlarmListAdapter;
 
 public class HistoryActivity extends AppCompatActivity {
-    private AlarmHistoryViewModel mAlarmHistoryViewModel;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -27,7 +26,7 @@ public class HistoryActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // Get a new or existing ViewModel from the ViewModelProvider.
-        mAlarmHistoryViewModel = ViewModelProviders.of(this).get(AlarmHistoryViewModel.class);
+        AlarmHistoryViewModel mAlarmHistoryViewModel = ViewModelProviders.of(this).get(AlarmHistoryViewModel.class);
 
         // Add an observer on the LiveData returned by getAlphabetizedWords.
         // The onChanged() method fires when the observed data changes and the activity is
