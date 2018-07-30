@@ -33,7 +33,7 @@ public class AlarmService extends LifecycleService {
     public int onStartCommand(Intent intent, int flags, int startId) {
         final long id = intent.getLongExtra(EXTRA_ALARM_ID, -1);
         final String action = intent.getAction();
-        if (action != null ) {
+        if (action != null) {
             AppExecutors.getInstance().diskIO().execute(new Runnable() {
                 @Override
                 public void run() {
@@ -45,32 +45,32 @@ public class AlarmService extends LifecycleService {
     }
 
     /*Intent handler meant to be run on separate thread*/
-    public void handleIntent(String action, long id) {
+    private void handleIntent(String action, long id) {
         Alarm alarm = mRepository.getAlarmByID(id);
-            switch (action) {
-                case ACTION_ACTIVATE_ALARM:
-                    if (BuildConfig.DEBUG) {
-                        DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT);
-                        String debugString = String.format(Locale.getDefault(), "Activating alarm with id %d due %s", id, df.format(alarm.getEndTime()));
-                        Log.d(TAG, debugString);
-                    }
+        switch (action) {
+            case ACTION_ACTIVATE_ALARM:
+                if (BuildConfig.DEBUG) {
+                    DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT);
+                    String debugString = String.format(Locale.getDefault(), "Activating alarm with id %d due %s", id, df.format(alarm.getEndTime()));
+                    Log.d(TAG, debugString);
+                }
 
-                    if (alarm.getSnoozes() < 10) {
-                        mRepository.changeAlarmState(id, STATE_ACTIVE);
-                        startAlarm(alarm);
-                    } else {
-                        alarm.setState(Alarm.STATE_DEAD);
-                        mRepository.update(alarm);
-                        stopAlarm();
-                        stopSelf();
-                    }
-                    break;
-
-                case ACTION_STOP_ALARM:
+                if (alarm.getSnoozes() < 10) {
+                    mRepository.changeAlarmState(id, STATE_ACTIVE);
+                    startAlarm(alarm);
+                } else {
+                    alarm.setState(Alarm.STATE_DEAD);
+                    mRepository.update(alarm);
                     stopAlarm();
                     stopSelf();
-                    break;
-            }
+                }
+                break;
+
+            case ACTION_STOP_ALARM:
+                stopAlarm();
+                stopSelf();
+                break;
+        }
     }
 
     private void startAlarm(Alarm alarm) {
@@ -87,7 +87,7 @@ public class AlarmService extends LifecycleService {
 
     @Override
     public void onDestroy() {
-        LogUtils.v("AlarmService.onDestroy() called");
+        Log.d(TAG, "AlarmService.onDestroy() called");
         super.onDestroy();
         stopAlarm();
     }
