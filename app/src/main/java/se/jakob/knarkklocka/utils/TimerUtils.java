@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.icu.util.Calendar;
 import android.util.Log;
 
 import java.text.DateFormat;
@@ -13,9 +14,12 @@ import java.util.Locale;
 import se.jakob.knarkklocka.AlarmActivity;
 import se.jakob.knarkklocka.AlarmBroadcastReceiver;
 import se.jakob.knarkklocka.AlarmService;
+import se.jakob.knarkklocka.AppExecutors;
 import se.jakob.knarkklocka.BuildConfig;
 import se.jakob.knarkklocka.PreferenceUtils;
 import se.jakob.knarkklocka.TimerActivity;
+import se.jakob.knarkklocka.data.Alarm;
+import se.jakob.knarkklocka.data.AlarmViewModel;
 
 /**
  * Created by Jakob Nyberg on 2018-03-26.
@@ -26,13 +30,16 @@ public class TimerUtils {
     public static final String ACTION_SET_NEW_TIMER = "set-new-timer";
     public static final String ACTION_REMOVE_TIMER = "remove-timer";
     public static final String ACTION_SNOOZE_TIMER = "snooze-timer";
+
+    public static final String ACTION_ACTIVATE_ALARM = "activate-alarm";
+    public static final String ACTION_STOP_ALARM = "stop-alarm";
+
     public static final String EXTRA_END_TIME = "end-time";
     public static final String EXTRA_ALARM_ID = "alarm-id";
     private static final String TAG = "TimerUtils";
     private static final int ALARM_INTENT_ID = 76;          //Arbitrary unique ID for the alarm intent
     private static final int TIMER_ACTIVITY_INTENT_ID = 34; //Arbitrary unique ID for the TimerActivity intent
 
-    //private static int testing_time = 5000;
 
     public static void executeTask(Context context, String action, int id) {
         switch (action) {
@@ -49,18 +56,27 @@ public class TimerUtils {
     }
 
     /**
+     * Returns whatever pending intent i am using at the moment
+     **/
+    private static PendingIntent getPI(Context context, long id) {
+        //return getAlarmReceiverIntent(context, id);
+        return getAlarmServiceIntent(context, id);
+    }
+
+    /**
      * Returns the pending intent that starts the Alarm Service
      **/
     private static PendingIntent getAlarmServiceIntent(Context context, long id) {
         Intent alarmIntent = new Intent(context, AlarmService.class);
         alarmIntent.putExtra(EXTRA_ALARM_ID, id);
+        alarmIntent.setAction(ACTION_ACTIVATE_ALARM);
         return PendingIntent.getService(context, ALARM_INTENT_ID, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     /**
      * Returns the pending intent that starts the Alarm Activity
      **/
-    private static PendingIntent getAlarmActivityIntent(Context context, long id) {
+    public static PendingIntent getAlarmActivityIntent(Context context, long id) {
         Intent alarmIntent = new Intent(context, AlarmActivity.class);
         alarmIntent.putExtra(EXTRA_ALARM_ID, id);
         return PendingIntent.getActivity(context, ALARM_INTENT_ID, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -78,7 +94,7 @@ public class TimerUtils {
     /**
      * Returns the pending intent that starts the main timer activity
      **/
-    private static PendingIntent getShowAlarmIntent(Context context, long id) {
+    public static PendingIntent getShowAlarmIntent(Context context, long id) {
         Intent timerIntent = new Intent(context, TimerActivity.class);
         timerIntent.putExtra(EXTRA_ALARM_ID, id);
         return PendingIntent.getActivity(context, TIMER_ACTIVITY_INTENT_ID, timerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -93,7 +109,7 @@ public class TimerUtils {
         AlarmManager alarmManager = context.getSystemService(AlarmManager.class);
 
         /*Set AlarmService to start when alarm goes off*/
-        PendingIntent pendingAlarmIntent = getAlarmServiceIntent(context, id);
+        PendingIntent pendingAlarmIntent = getPI(context, id);
 
         /*Setup alarm clock info*/
         //long wakeup_time = System.currentTimeMillis() + length;
@@ -117,7 +133,7 @@ public class TimerUtils {
 
     public static void cancelAlarm(Context context, long id) {
         AlarmManager alarmManager = context.getSystemService(AlarmManager.class);
-        PendingIntent pendingAlarmIntent = getAlarmServiceIntent(context, id);
+        PendingIntent pendingAlarmIntent = getPI(context, id);
         if (alarmManager != null) {
             alarmManager.cancel(pendingAlarmIntent);
             if (BuildConfig.DEBUG) {
