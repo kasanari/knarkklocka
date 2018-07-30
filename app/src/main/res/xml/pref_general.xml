@@ -20,10 +20,10 @@
         android:singleLine="true"
         android:title="@string/pref_timer_length" />-->
 
-    <se.jakob.knarkklocka.TimerLengthPreference
+    <se.jakob.knarkklocka.settings.TimerLengthPreference
         android:key="@string/pref_timer_length_key"
         android:title="@string/pref_timer_length" />
-    <se.jakob.knarkklocka.TimerLengthPreference
+    <se.jakob.knarkklocka.settings.TimerLengthPreference
         android:key="@string/pref_snooze_length_key"
         android:title="@string/pref_snooze_length" />
 
