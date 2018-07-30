@@ -31,7 +31,10 @@ public interface AlarmDao {
     LiveData<List<Alarm>> loadAllAlarms();
 
     @Query("SELECT * FROM alarm_table WHERE id = :id")
-    LiveData<Alarm> loadAlarmById(long id);
+    LiveData<Alarm> loadLiveAlarmById(long id);
+
+    @Query("SELECT * FROM alarm_table WHERE id = :id")
+    Alarm loadAlarmById(long id);
 
     @Query("SELECT * FROM alarm_table WHERE alarm_state = :state")
     LiveData<Alarm> loadAlarmsByState(int state);
