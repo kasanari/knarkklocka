@@ -139,7 +139,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
                     int state = alarm.getState();
                     switch (state) {
                         case STATE_ACTIVE:
-                            setupChronometer(alarm);
+                            startAlarm(alarm);
                             break;
                         case STATE_DEAD:
                             //finish();
@@ -201,8 +201,8 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     private void snooze() {
         if (alarmIsActive()) {
             TimerUtils.startSnoozeTimer(this, alarmActivityViewModel);
-            finish();
-        } else {
+            stopAlarm();
+        }
             finish();
         }
     }
@@ -211,6 +211,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         if (alarmIsActive()) {
             alarmActivityViewModel.kill();
             TimerUtils.startMainTimer(this, alarmActivityViewModel);
+            stopAlarm();
         }
         finish();
     }
@@ -231,8 +232,18 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
 
     }
 
-    private boolean alarmIsActive() {
-        return alarmActivityViewModel.alarmIsRunning();
+    private void startAlarm(Alarm alarm) {
+        setupChronometer(alarm);
+        alarmIsActive = true;
+    }
+
+    private void stopAlarm() {
+        alarmIsActive = false;
+        alarmActivityViewModel.getAlarm().removeObservers(this);
+        Intent alarmIntent = new Intent(this, AlarmService.class);
+        //alarmIntent.putExtra(EXTRA_ALARM_ID, id);
+        alarmIntent.setAction(ACTION_STOP_ALARM);
+        startService(alarmIntent);
     }
 
     @Override
