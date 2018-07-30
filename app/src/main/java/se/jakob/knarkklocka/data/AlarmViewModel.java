@@ -35,7 +35,7 @@ public class AlarmViewModel extends AndroidViewModel {
     }
 
     public void kill() {
-        if (alarmIsRunning()) {
+        if (mAlarm.getValue() != null) {
             Alarm alarm = mAlarm.getValue();
             alarm.setState(Alarm.STATE_DEAD);
             mRepository.update(alarm);
@@ -51,8 +51,5 @@ public class AlarmViewModel extends AndroidViewModel {
             mRepository.update(alarm);
         }
     }
-
-    public boolean alarmIsRunning() {
-        return mAlarm.getValue() != null;
-    }
+    
 }
