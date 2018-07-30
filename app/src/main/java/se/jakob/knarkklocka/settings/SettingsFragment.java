@@ -1,9 +1,13 @@
 package se.jakob.knarkklocka.settings;
 
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceFragment;
 
+import java.util.Map;
+
 import se.jakob.knarkklocka.R;
+import se.jakob.knarkklocka.utils.Utils;
 
 /**
  * Fragment for general settings
@@ -17,6 +21,9 @@ public class SettingsFragment extends PreferenceFragment{
 
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.pref_general);
+
+        Preference credits = findPreference("key_credits");
+        credits.setTitle(Utils.getCreditsString());
     }
 
 

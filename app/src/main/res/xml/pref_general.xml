@@ -1,5 +1,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+
     <!-- <SwitchPreference
          android:defaultValue="true"
          android:key="example_switch"
@@ -25,6 +26,14 @@
     <se.jakob.knarkklocka.TimerLengthPreference
         android:key="@string/pref_snooze_length_key"
         android:title="@string/pref_snooze_length" />
+
+    <Preference
+        android:selectable="false"
+        android:enabled="true"
+        android:id="@+id/pref_credits"
+        android:key="key_credits"
+        android:title="Made with ❤️ by Jakob Nyberg"
+        android:summary="© 2018" />
 
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
          dismiss it. -->
