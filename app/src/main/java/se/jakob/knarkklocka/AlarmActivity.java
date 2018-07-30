@@ -100,9 +100,6 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
                     | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
         }
 
-        /* Turn on vibration */
-        //Klaxon.vibrateAlarm(this);
-
         /*Hide navigation bar*/
         hideNavigationBar();
 
