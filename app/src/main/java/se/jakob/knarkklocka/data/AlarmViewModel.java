@@ -7,10 +7,10 @@ import android.arch.lifecycle.LiveData;
 import java.util.Date;
 
 public class AlarmViewModel extends AndroidViewModel {
-    protected LiveData<Alarm> mAlarm;
-    protected AlarmRepository mRepository;
+    LiveData<Alarm> mAlarm;
+    AlarmRepository mRepository;
 
-    protected AlarmViewModel(Application application) {
+    AlarmViewModel(Application application) {
         super(application);
         mRepository = new AlarmRepository(application);
         //this.mAlarm = mRepository.getActiveAlarm();
