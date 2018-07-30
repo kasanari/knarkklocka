@@ -12,7 +12,7 @@ import se.jakob.knarkklocka.utils.Utils;
  * Created by Jakob on 2018-03-26.
  */
 
-public class SettingsFragment extends PreferenceFragment{
+public class SettingsFragment extends PreferenceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
