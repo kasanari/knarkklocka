@@ -17,8 +17,6 @@ public final class PreferenceUtils {
     private static final long DEFAULT_MAIN_TIMER_LENGTH = 4 * HOUR_IN_MILLIS;
     private static final long DEFAULT_SNOOZE_TIMER_LENGTH = 5 * MINUTE_IN_MILLIS;
 
-    private static boolean shortMode = false;
-
     synchronized private static void setTimerLength(Context context, String key, long length) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = prefs.edit();
@@ -53,6 +51,7 @@ public final class PreferenceUtils {
     private static long getTimerLength(Context context, String key) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         long length;
+        boolean shortMode = false;
         if (shortMode) {
             length = getShortDefault(key);
         } else {
