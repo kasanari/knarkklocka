@@ -38,13 +38,13 @@ public class TimerActivity extends AppCompatActivity implements
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = "TimerActivity";
-    TextView tv_due_time;
-    Chronometer chronometer;
-    ConstraintLayout timer_content_group;
-    ConstraintLayout chronometer_container;
-    FloatingActionButton fab_start_timer;
+    private TextView tv_due_time;
+    private Chronometer chronometer;
+    private ConstraintLayout timer_content_group;
+    private ConstraintLayout chronometer_container;
+    private FloatingActionButton fab_start_timer;
 
-    Button button_sleep_mode;
+    private Button button_sleep_mode;
     private MainActivityViewModel mainActivityViewModel;
 
     @Override
@@ -52,11 +52,11 @@ public class TimerActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timer);
 
-        timer_content_group     =   findViewById(R.id.timer_content);
-        chronometer_container   =   findViewById(R.id.chronometer_container);
-        chronometer             =   findViewById(R.id.time_display);
-        tv_due_time             =   findViewById(R.id.tv_main_due);
-        button_sleep_mode       =   findViewById(R.id.button_remove_timer);
+        timer_content_group = findViewById(R.id.timer_content);
+        chronometer_container = findViewById(R.id.chronometer_container);
+        chronometer = findViewById(R.id.time_display);
+        tv_due_time = findViewById(R.id.tv_main_due);
+        button_sleep_mode = findViewById(R.id.button_remove_timer);
 
         button_sleep_mode.setVisibility(View.INVISIBLE);
         tv_due_time.setVisibility(View.INVISIBLE);
@@ -70,7 +70,8 @@ public class TimerActivity extends AppCompatActivity implements
                 if (alarm != null) {
                     int state = alarm.getState();
                     switch (state) {
-                        case STATE_ACTIVE: break;
+                        case STATE_ACTIVE:
+                            break;
                         case STATE_DEAD:
                             fab_start_timer.setVisibility(View.VISIBLE);
                             button_sleep_mode.setVisibility(View.VISIBLE);
@@ -167,12 +168,6 @@ public class TimerActivity extends AppCompatActivity implements
         }
         TimerUtils.startMainTimer(this, mainActivityViewModel);
     }
-
-    /*
-    public void showTimePickerDialog(View v) {
-        DialogFragment newFragment = new TimePickerFragment();
-        newFragment.show(getSupportFragmentManager(), "timePicker");
-    }*/
 
     public void sleep(View v) {
         //TransitionManager.beginDelayedTransition(timer_content_group, new Slide(Gravity.TOP));
