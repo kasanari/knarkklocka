@@ -19,7 +19,6 @@ import android.app.AlarmManager;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.icu.util.Calendar;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -34,39 +33,36 @@ import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.TextView;
 
-import java.text.DateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 import se.jakob.knarkklocka.data.Alarm;
 import se.jakob.knarkklocka.data.AlarmActivityViewModel;
 import se.jakob.knarkklocka.utils.TimerUtils;
 
-import static android.app.AlarmManager.RTC_WAKEUP;
-import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
-import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static se.jakob.knarkklocka.data.Alarm.STATE_ACTIVE;
 import static se.jakob.knarkklocka.data.Alarm.STATE_DEAD;
 import static se.jakob.knarkklocka.data.Alarm.STATE_SNOOZING;
 import static se.jakob.knarkklocka.data.Alarm.STATE_WAITING;
+import static se.jakob.knarkklocka.utils.TimerUtils.ACTION_STOP_ALARM;
+import static se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID;
 
 public class AlarmActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener {
-    private static final String TAG = "AlarmActivity";
+    private static final String TAG = "AlarmActivity";   
 
     private Button mSnoozeButton;
     private Button mDismissButton;
     private TextView tv_alarm_text;
 
     private AlarmActivityViewModel alarmActivityViewModel;
-
+    
     private static final int WINDOW_FLAGS = WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
             | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
             | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
             | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
-
+ 
     private Chronometer mAlarmChronometer;
 
-    //private boolean alarmIsActive = false;
+    private boolean alarmIsActive = false;
 
     private AlarmManager.OnAlarmListener alarmCallback = new AlarmManager.OnAlarmListener() {
         @Override
@@ -125,9 +121,13 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
 //        if (alarmManager != null) {
 //            alarmManager.setExact(RTC_WAKEUP, System.currentTimeMillis() + timeout, "tag", alarmCallback, null);
 //        }
-        mAlarmChronometer.setVisibility(View.VISIBLE);
+
+        Intent intent = getIntent();
+        long id = intent.getLongExtra(EXTRA_ALARM_ID, -1);
+
         /*Setup ViewModel and Observer*/
         alarmActivityViewModel = ViewModelProviders.of(this).get(AlarmActivityViewModel.class);
+        alarmActivityViewModel.setAlarm(id);
         alarmActivityViewModel.getAlarm().observe(this, new Observer<Alarm>() {
             @Override
             public void onChanged(@Nullable final Alarm alarm) {
@@ -138,13 +138,13 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
                             startAlarm(alarm);
                             break;
                         case STATE_DEAD:
-                            //finish();
+                            finish();
                             break;
                         case STATE_SNOOZING:
-                            //finish();
+                            finish();
                             break;
                         case STATE_WAITING:
-                            //finish();
+                            finish();
                             break;
                     }
                 } else {
@@ -185,26 +185,23 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        if (alarmIsActive()) {
+    protected void onDestroy() {
+        super.onDestroy();
+        if (alarmIsActive) {
             snooze();
         }
-        Klaxon.stopVibrate(this);
-        WakeLocker.release();
     }
 
     private void snooze() {
-        if (alarmIsActive()) {
+        if (alarmIsActive) {
             TimerUtils.startSnoozeTimer(this, alarmActivityViewModel);
             stopAlarm();
         }
-            finish();
-        }
+        finish();
     }
 
     private void dismiss() {
-        if (alarmIsActive()) {
+        if (alarmIsActive) {
             alarmActivityViewModel.kill();
             TimerUtils.startMainTimer(this, alarmActivityViewModel);
             stopAlarm();
