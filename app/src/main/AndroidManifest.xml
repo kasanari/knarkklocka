@@ -67,10 +67,6 @@
             android:name=".AlarmService"
             android:enabled="true"
             android:exported="false" />
-        <service
-            android:name=".TimerIntentService"
-            android:enabled="true"
-            android:exported="false" />
 
         <!-- *********Broadcast Receivers******** -->
         <receiver android:name=".AlarmBroadcastReceiver" />
