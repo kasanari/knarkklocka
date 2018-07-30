@@ -86,8 +86,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
 
         WakeLocker.acquire(this);
 
-        /*Ensure screen turns on*/
-
+        /*Ensure that screen turns on*/
         final Window win = getWindow();
         if (Build.VERSION.SDK_INT >= 27) {
             setTurnScreenOn(true); //Replaces FLAG_TURN_SCREEN_ON
