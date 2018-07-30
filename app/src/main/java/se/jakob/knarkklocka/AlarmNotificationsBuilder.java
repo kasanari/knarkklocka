@@ -9,16 +9,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Build;
-import android.os.SystemClock;
 import android.support.v4.content.ContextCompat;
 
 import java.util.Date;
 
 import se.jakob.knarkklocka.data.Alarm;
-import se.jakob.knarkklocka.utils.TimerUtils;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
-import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID;
 
 public class AlarmNotificationsBuilder {

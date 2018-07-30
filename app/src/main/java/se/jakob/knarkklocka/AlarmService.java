@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.text.DateFormat;
-import java.util.Calendar;
 import java.util.Locale;
 
 import se.jakob.knarkklocka.data.Alarm;
