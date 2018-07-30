@@ -79,7 +79,7 @@ public class TimerUtils {
     /**
      * Returns the pending intent that starts the main timer activity
      **/
-    public static PendingIntent getShowAlarmIntent(Context context, long id) {
+    private static PendingIntent getShowAlarmIntent(Context context, long id) {
         Intent timerIntent = new Intent(context, TimerActivity.class);
         timerIntent.putExtra(EXTRA_ALARM_ID, id);
         return PendingIntent.getActivity(context, TIMER_ACTIVITY_INTENT_ID, timerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -90,7 +90,7 @@ public class TimerUtils {
         setNewAlarm(context, id, new Date(timer_duration));
     }
 
-    public static void setNewAlarm(Context context, long id, Date endTime) {
+    private static void setNewAlarm(Context context, long id, Date endTime) {
         AlarmManager alarmManager = context.getSystemService(AlarmManager.class);
 
         /*Set AlarmService to start when alarm goes off*/
