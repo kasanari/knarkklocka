@@ -45,7 +45,8 @@
         app:layout_constraintEnd_toStartOf="@+id/np_minutes"
         app:layout_constraintStart_toEndOf="@+id/np_hours"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text=":" />
+        tools:text=":"
+        tools:ignore="HardcodedText" />
 
 
 
