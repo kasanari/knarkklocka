@@ -27,33 +27,18 @@ import se.jakob.knarkklocka.data.AlarmViewModel;
 
 public class TimerUtils {
 
-    public static final String ACTION_SET_NEW_TIMER = "set-new-timer";
-    public static final String ACTION_REMOVE_TIMER = "remove-timer";
-    public static final String ACTION_SNOOZE_TIMER = "snooze-timer";
-
     public static final String ACTION_ACTIVATE_ALARM = "activate-alarm";
     public static final String ACTION_STOP_ALARM = "stop-alarm";
 
     public static final String EXTRA_END_TIME = "end-time";
     public static final String EXTRA_ALARM_ID = "alarm-id";
+
     private static final String TAG = "TimerUtils";
     private static final int ALARM_INTENT_ID = 76;          //Arbitrary unique ID for the alarm intent
     private static final int TIMER_ACTIVITY_INTENT_ID = 34; //Arbitrary unique ID for the TimerActivity intent
 
 
-    public static void executeTask(Context context, String action, int id) {
-        switch (action) {
-            case ACTION_SET_NEW_TIMER:
-                setNewAlarm(context, id);
-                break;
-            case ACTION_REMOVE_TIMER:
-                cancelAlarm(context, id);
-                break;
-            case ACTION_SNOOZE_TIMER:
-                setSnooze(context, id);
-                break;
-        }
-    }
+
 
     /**
      * Returns whatever pending intent i am using at the moment
