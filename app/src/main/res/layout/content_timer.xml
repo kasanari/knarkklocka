@@ -39,7 +39,6 @@
             android:layout_marginRight="16dp"
             android:layout_marginTop="32dp"
             android:countDown="true"
-            android:onClick="showTimePickerDialog"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
