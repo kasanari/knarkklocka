@@ -9,6 +9,9 @@ import java.util.Date;
 public class AlarmActivityViewModel extends AlarmViewModel {
     public AlarmActivityViewModel(Application application) {
         super(application);
-        super.mAlarm = mRepository.getActiveAlarm();
+    }
+
+    public void setAlarm(long id) {
+        super.mAlarm = mRepository.getLiveAlarmByID(id);
     }
 }
