@@ -180,11 +180,6 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         if (alarmIsActive) {
