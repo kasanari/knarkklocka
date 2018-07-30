@@ -16,7 +16,11 @@ public class AlarmRepository {
         mAllAlarms = mAlarmDao.loadAllAlarms();
     }
 
-    public LiveData<Alarm> getAlarmByID(long id){return mAlarmDao.loadAlarmById(id);}
+    public LiveData<Alarm> getLiveAlarmByID(long id){return mAlarmDao.loadLiveAlarmById(id);}
+
+    public Alarm getAlarmByID(long id){
+        return mAlarmDao.loadAlarmById(id);
+    }
 
     public LiveData<List<Alarm>> getAllAlarms() {
         return mAllAlarms;
