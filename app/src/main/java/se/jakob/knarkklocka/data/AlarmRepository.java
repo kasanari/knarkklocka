@@ -30,6 +30,12 @@ public class AlarmRepository {
         return mAlarmDao.loadAlarmsByState(state);
     }
 
+    public void changeAlarmState(long id, int state) {
+        Alarm alarm = getAlarmByID(id);
+        alarm.setState(state);
+        mAlarmDao.updateAlarm(alarm);
+    }
+
     public LiveData<Alarm> getWaitingAlarm() {
         return mAlarmDao.loadSingleAlarmByState(Alarm.STATE_WAITING, Alarm.STATE_SNOOZING);
     }
