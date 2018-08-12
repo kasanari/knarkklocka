@@ -217,6 +217,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void stopAlarm() {
+        stopTimeoutClock();
         alarmIsActive = false;
         alarmActivityViewModel.getAlarm().removeObservers(this);
         Intent alarmIntent = new Intent(this, AlarmService.class);
@@ -237,6 +238,11 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         if (alarmManager != null) {
             alarmManager.setExact(RTC_WAKEUP, System.currentTimeMillis() + timeout, "tag", alarmCallback, null);
         }
+    }
+
+    private void stopTimeoutClock() {
+        AlarmManager alarmManager = getSystemService(AlarmManager.class);
+        alarmManager.cancel(alarmCallback);
     }
 
     @Override
