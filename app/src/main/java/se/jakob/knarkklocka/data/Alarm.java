@@ -72,8 +72,8 @@ public class Alarm {
         this.snoozes += 1;
     }
 
-    public String getStateString(int state) {
-        switch (state) {
+    public String getStateString() {
+        switch (this.state) {
             case Alarm.STATE_ACTIVE:
                 return "Active";
             case Alarm.STATE_WAITING:
@@ -90,7 +90,7 @@ public class Alarm {
     @Override
     public String toString() {
         String alarmString = String.format(Locale.getDefault(), "Alarm \n id: %d \n startTime: %s \n endTime: %s \n state: %s",
-                this.id, this.startTime.toString(), this.endTime.toString(), getStateString(this.state));
+                this.id, this.startTime.toString(), this.endTime.toString(), getStateString());
         return alarmString;
     }
 }

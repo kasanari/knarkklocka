@@ -13,6 +13,7 @@ import java.util.Locale;
 
 import se.jakob.knarkklocka.AlarmActivity;
 import se.jakob.knarkklocka.AlarmBroadcastReceiver;
+import se.jakob.knarkklocka.AlarmNotificationsBuilder;
 import se.jakob.knarkklocka.AlarmService;
 import se.jakob.knarkklocka.AppExecutors;
 import se.jakob.knarkklocka.BuildConfig;
@@ -29,15 +30,13 @@ public class TimerUtils {
 
     public static final String ACTION_ACTIVATE_ALARM = "activate-alarm";
     public static final String ACTION_STOP_ALARM = "stop-alarm";
+    public static final String ACTION_WAITING_ALARM = "wating-alarm";
 
-    public static final String EXTRA_END_TIME = "end-time";
     public static final String EXTRA_ALARM_ID = "alarm-id";
 
     private static final String TAG = "TimerUtils";
     private static final int ALARM_INTENT_ID = 76;          //Arbitrary unique ID for the alarm intent
     private static final int TIMER_ACTIVITY_INTENT_ID = 34; //Arbitrary unique ID for the TimerActivity intent
-
-
 
 
     /**
@@ -55,7 +54,7 @@ public class TimerUtils {
         Intent alarmIntent = new Intent(context, AlarmService.class);
         alarmIntent.putExtra(EXTRA_ALARM_ID, id);
         alarmIntent.setAction(ACTION_ACTIVATE_ALARM);
-        return PendingIntent.getService(context, ALARM_INTENT_ID, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getForegroundService(context, ALARM_INTENT_ID, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     /**
@@ -79,7 +78,7 @@ public class TimerUtils {
     /**
      * Returns the pending intent that starts the main timer activity
      **/
-    private static PendingIntent getShowAlarmIntent(Context context, long id) {
+    public static PendingIntent getShowAlarmIntent(Context context, long id) {
         Intent timerIntent = new Intent(context, TimerActivity.class);
         timerIntent.putExtra(EXTRA_ALARM_ID, id);
         return PendingIntent.getActivity(context, TIMER_ACTIVITY_INTENT_ID, timerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -144,12 +143,14 @@ public class TimerUtils {
                     Alarm currentAlarm = vm.getCurrentAlarm();
                     if (currentAlarm != null) {
                         vm.snooze(endTime.getTime());
+                        AlarmNotificationsBuilder.showSnoozingAlarmNotification(context, currentAlarm);
                         TimerUtils.setNewAlarm(context, currentAlarm.getId(), endTime.getTime());
                     }
                 } else {
                     Alarm alarm = new Alarm(Alarm.STATE_WAITING, currentTime.getTime(), endTime.getTime());
                     long id = vm.add(alarm);
                     setNewAlarm(context, id, alarm.getEndTime());
+                    AlarmNotificationsBuilder.showWaitingAlarmNotification(context, alarm);
                 }
             }
         });

@@ -24,5 +24,9 @@
 
     <string name="pref_snooze_length_key">snooze_length</string>
     <string name="pref_snooze_length">Snoozing length</string>
-    <string name="main_notification_channel_name">Alarms</string>
+
+    <string name="snoozing_notification_channel_name">Snoozing Alarms</string>
+    <string name="waiting_notification_channel_name">Waiting Alarms</string>
+    <string name="active_notification_channel_name">Active Alarms</string>
+
 </resources>

@@ -45,7 +45,10 @@ public class TimerActivity extends AppCompatActivity implements
     private FloatingActionButton fab_start_timer;
 
     private Button button_sleep_mode;
+    private Button button_snooze;
     private MainActivityViewModel mainActivityViewModel;
+
+    private Alarm currentAlarm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +60,7 @@ public class TimerActivity extends AppCompatActivity implements
         chronometer = findViewById(R.id.time_display);
         tv_due_time = findViewById(R.id.tv_main_due);
         button_sleep_mode = findViewById(R.id.button_remove_timer);
+        button_snooze = findViewById(R.id.button_snooze_timer);
 
         button_sleep_mode.setVisibility(View.INVISIBLE);
         tv_due_time.setVisibility(View.INVISIBLE);
@@ -68,9 +72,15 @@ public class TimerActivity extends AppCompatActivity implements
             @Override
             public void onChanged(@Nullable final Alarm alarm) {
                 if (alarm != null) {
+                    currentAlarm = alarm;
                     int state = alarm.getState();
                     switch (state) {
                         case STATE_ACTIVE:
+                            setupChronometer(alarm);
+                            button_snooze.setVisibility(View.VISIBLE);
+                            button_sleep_mode.setVisibility(View.VISIBLE);
+                            fab_start_timer.setVisibility(View.VISIBLE);
+                            fab_start_timer.setImageResource(R.drawable.ic_restart_black_24dp);
                             break;
                         case STATE_DEAD:
                             fab_start_timer.setVisibility(View.VISIBLE);
@@ -78,20 +88,24 @@ public class TimerActivity extends AppCompatActivity implements
                             break;
                         case STATE_SNOOZING:
                             setupChronometer(alarm);
+                            button_snooze.setVisibility(View.INVISIBLE);
                             button_sleep_mode.setVisibility(View.VISIBLE);
                             fab_start_timer.setVisibility(View.VISIBLE);
                             fab_start_timer.setImageResource(R.drawable.ic_restart_black_24dp);
                             break;
                         case STATE_WAITING:
                             setupChronometer(alarm);
+                            button_snooze.setVisibility(View.INVISIBLE);
                             button_sleep_mode.setVisibility(View.VISIBLE);
                             fab_start_timer.setVisibility(View.INVISIBLE);
                             fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp);
                             break;
                     }
                 } else {
+                    fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp);
                     fab_start_timer.setVisibility(View.VISIBLE);
                     button_sleep_mode.setVisibility(View.INVISIBLE);
+                    button_snooze.setVisibility(View.INVISIBLE);
                     tv_due_time.setVisibility(View.INVISIBLE);
                     chronometer.setVisibility(View.INVISIBLE);
                 }
@@ -111,22 +125,11 @@ public class TimerActivity extends AppCompatActivity implements
         /*Floating action button to start a new timer*/
         fab_start_timer = findViewById(R.id.button_add_timer);
 
-        /*
-        fab_start_timer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //callVibrate();
-                setAlarm();
-                Snackbar.make(view, "Set new timer!", Snackbar.LENGTH_LONG).show();
-            }
-
-        });*/
 
         fab_start_timer.setOnLongClickListener(new View.OnLongClickListener() {
             public boolean onLongClick(View v) {
-                //showTimePickerDialog(v);
                 callVibrate();
-                setAlarm();
+                restartAlarm();
                 Snackbar.make(v, "Started new timer!", Snackbar.LENGTH_LONG).show();
                 return true;
             }
@@ -139,8 +142,13 @@ public class TimerActivity extends AppCompatActivity implements
             }
         });
 
-    }
+        button_snooze.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                snooze();
+            }
+        });
 
+    }
     private void callVibrate() {
         Klaxon.vibrateOnce(this);
     }
@@ -161,10 +169,11 @@ public class TimerActivity extends AppCompatActivity implements
         chronometer.setBase(base.getTime());
     }
 
-    public void setAlarm() {
+    public void restartAlarm() {
         //TransitionManager.beginDelayedTransition(chronometer_container, new Slide(Gravity.TOP));
         if (alarmIsRunning()) {
-            mainActivityViewModel.kill();
+            mainActivityViewModel.kill(); /* If there is an alarm running, kill it. */
+            AlarmBroadcasts.broadcastStopAlarm(this); /* Stop any vibration or notifications that are happening right now */
         }
         TimerUtils.startMainTimer(this, mainActivityViewModel);
     }
@@ -173,19 +182,21 @@ public class TimerActivity extends AppCompatActivity implements
         //TransitionManager.beginDelayedTransition(timer_content_group, new Slide(Gravity.TOP));
         fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp);
         if (alarmIsRunning()) {
+            AlarmNotificationsBuilder.clearAllNotifications(this);
             Log.d(TAG, "Sleep mode engaged...");
+            AlarmBroadcasts.broadcastStopAlarm(this); /* Stop any vibration or notifications that are happening right now */
             Snackbar.make(v, "Goodnight", Snackbar.LENGTH_LONG).show();
-            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    Alarm currentAlarm = mainActivityViewModel.getAlarm().getValue();
-                    if (currentAlarm != null) {
-                        mainActivityViewModel.delete();
-                        TimerUtils.cancelAlarm(getApplicationContext(), currentAlarm.getId());
-                    }
-                }
-            });
+            Alarm currentAlarm = mainActivityViewModel.getAlarm().getValue();
+            if (currentAlarm != null) {
+                mainActivityViewModel.delete();
+                TimerUtils.cancelAlarm(getApplicationContext(), currentAlarm.getId());
+            }
         }
+    }
+
+    private void snooze() {
+        AlarmBroadcasts.broadcastStopAlarm(this); /*Stop any vibration or notifications that are happening right now*/
+        TimerUtils.startSnoozeTimer(this, mainActivityViewModel);
     }
 
     public boolean alarmIsRunning() {
@@ -211,19 +222,7 @@ public class TimerActivity extends AppCompatActivity implements
     protected void onPause() {
         super.onPause();
         chronometer.stop();
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        chronometer.stop();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        chronometer.stop();
+        Log.d(TAG, "Application paused chronometer stopped");
     }
 
     @Override

@@ -36,12 +36,16 @@ public class AlarmRepository {
         mAlarmDao.updateAlarm(alarm);
     }
 
-    public LiveData<Alarm> getWaitingAlarm() {
-        return mAlarmDao.loadSingleAlarmByState(Alarm.STATE_WAITING, Alarm.STATE_SNOOZING);
+    public LiveData<Alarm> getCurrentAlarm() {
+        return mAlarmDao.loadSingleAlarmByState(Alarm.STATE_WAITING, Alarm.STATE_SNOOZING, Alarm.STATE_ACTIVE);
     }
 
     LiveData<Alarm> getActiveAlarm() {
         return mAlarmDao.loadSingleAlarmByState(Alarm.STATE_ACTIVE);
+    }
+
+    public void deleteAll() {
+        new clearAsyncTask(mAlarmDao).execute();
     }
 
     public long insert(Alarm alarm) {
@@ -95,6 +99,20 @@ public class AlarmRepository {
         @Override
         protected Void doInBackground(final Alarm... params) {
             mAsyncTaskDao.deleteAlarm(params[0]);
+            return null;
+        }
+    }
+
+    private static class clearAsyncTask extends AsyncTask<Void, Void, Void> {
+        private AlarmDao mAsyncTaskDao;
+
+        clearAsyncTask(AlarmDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            mAsyncTaskDao.deleteAll();
             return null;
         }
     }

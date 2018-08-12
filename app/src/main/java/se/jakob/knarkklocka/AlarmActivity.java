@@ -40,6 +40,7 @@ import se.jakob.knarkklocka.data.AlarmActivityViewModel;
 import se.jakob.knarkklocka.utils.TimerUtils;
 
 import static android.app.AlarmManager.RTC_WAKEUP;
+import static android.provider.AlarmClock.ACTION_SNOOZE_ALARM;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static se.jakob.knarkklocka.data.Alarm.STATE_ACTIVE;
@@ -61,6 +62,8 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     private Chronometer mAlarmChronometer;
 
     private boolean alarmIsActive = false;
+
+    private Alarm currentAlarm;
 
     private AlarmManager.OnAlarmListener alarmCallback = new AlarmManager.OnAlarmListener() {
         @Override
@@ -126,6 +129,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
                     int state = alarm.getState();
                     switch (state) {
                         case STATE_ACTIVE:
+                            currentAlarm = alarm;
                             startAlarm(alarm);
                             break;
                         case STATE_DEAD:
@@ -181,6 +185,10 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     private void snooze() {
         if (alarmIsActive) {
             TimerUtils.startSnoozeTimer(this, alarmActivityViewModel);
+
+            alarmIsActive = false;
+            alarmActivityViewModel.getAlarm().removeObservers(this);
+
             stopAlarm();
         }
         finish();
@@ -217,6 +225,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void stopAlarm() {
+        stopTimeoutClock();
         alarmIsActive = false;
         alarmActivityViewModel.getAlarm().removeObservers(this);
         Intent alarmIntent = new Intent(this, AlarmService.class);
@@ -237,6 +246,11 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         if (alarmManager != null) {
             alarmManager.setExact(RTC_WAKEUP, System.currentTimeMillis() + timeout, "tag", alarmCallback, null);
         }
+    }
+
+    private void stopTimeoutClock() {
+        AlarmManager alarmManager = getSystemService(AlarmManager.class);
+        alarmManager.cancel(alarmCallback);
     }
 
     @Override
