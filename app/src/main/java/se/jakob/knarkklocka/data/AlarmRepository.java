@@ -36,8 +36,8 @@ public class AlarmRepository {
         mAlarmDao.updateAlarm(alarm);
     }
 
-    public LiveData<Alarm> getWaitingAlarm() {
-        return mAlarmDao.loadSingleAlarmByState(Alarm.STATE_WAITING, Alarm.STATE_SNOOZING);
+    public LiveData<Alarm> getCurrentAlarm() {
+        return mAlarmDao.loadSingleAlarmByState(Alarm.STATE_WAITING, Alarm.STATE_SNOOZING, Alarm.STATE_ACTIVE);
     }
 
     LiveData<Alarm> getActiveAlarm() {
