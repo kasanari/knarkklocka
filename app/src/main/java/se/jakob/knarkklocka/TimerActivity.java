@@ -176,17 +176,14 @@ public class TimerActivity extends AppCompatActivity implements
         if (alarmIsRunning()) {
             Log.d(TAG, "Sleep mode engaged...");
             Snackbar.make(v, "Goodnight", Snackbar.LENGTH_LONG).show();
-            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
                     Alarm currentAlarm = mainActivityViewModel.getAlarm().getValue();
                     if (currentAlarm != null) {
                         mainActivityViewModel.delete();
                         TimerUtils.cancelAlarm(getApplicationContext(), currentAlarm.getId());
                     }
                 }
-            });
         }
+
     private void snooze() {
         AlarmBroadcasts.broadcastStopAlarm(this); /*Stop any vibration or notifications that are happening right now*/
         TimerUtils.startSnoozeTimer(this, mainActivityViewModel);
