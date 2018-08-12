@@ -45,7 +45,10 @@ public class TimerActivity extends AppCompatActivity implements
     private FloatingActionButton fab_start_timer;
 
     private Button button_sleep_mode;
+    private Button button_snooze;
     private MainActivityViewModel mainActivityViewModel;
+
+    private Alarm currentAlarm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +60,7 @@ public class TimerActivity extends AppCompatActivity implements
         chronometer = findViewById(R.id.time_display);
         tv_due_time = findViewById(R.id.tv_main_due);
         button_sleep_mode = findViewById(R.id.button_remove_timer);
+        button_snooze = findViewById(R.id.button_snooze_timer);
 
         button_sleep_mode.setVisibility(View.INVISIBLE);
         tv_due_time.setVisibility(View.INVISIBLE);
@@ -121,20 +125,9 @@ public class TimerActivity extends AppCompatActivity implements
         /*Floating action button to start a new timer*/
         fab_start_timer = findViewById(R.id.button_add_timer);
 
-        /*
-        fab_start_timer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //callVibrate();
-                setAlarm();
-                Snackbar.make(view, "Set new timer!", Snackbar.LENGTH_LONG).show();
-            }
-
-        });*/
 
         fab_start_timer.setOnLongClickListener(new View.OnLongClickListener() {
             public boolean onLongClick(View v) {
-                //showTimePickerDialog(v);
                 callVibrate();
                 restartAlarm();
                 Snackbar.make(v, "Started new timer!", Snackbar.LENGTH_LONG).show();
@@ -149,8 +142,13 @@ public class TimerActivity extends AppCompatActivity implements
             }
         });
 
-    }
+        button_snooze.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                snooze();
+            }
+        });
 
+    }
     private void callVibrate() {
         Klaxon.vibrateOnce(this);
     }
@@ -188,13 +186,13 @@ public class TimerActivity extends AppCompatActivity implements
             Log.d(TAG, "Sleep mode engaged...");
             AlarmBroadcasts.broadcastStopAlarm(this); /* Stop any vibration or notifications that are happening right now */
             Snackbar.make(v, "Goodnight", Snackbar.LENGTH_LONG).show();
-                    Alarm currentAlarm = mainActivityViewModel.getAlarm().getValue();
-                    if (currentAlarm != null) {
-                        mainActivityViewModel.delete();
-                        TimerUtils.cancelAlarm(getApplicationContext(), currentAlarm.getId());
-                    }
-                }
+            Alarm currentAlarm = mainActivityViewModel.getAlarm().getValue();
+            if (currentAlarm != null) {
+                mainActivityViewModel.delete();
+                TimerUtils.cancelAlarm(getApplicationContext(), currentAlarm.getId());
+            }
         }
+    }
 
     private void snooze() {
         AlarmBroadcasts.broadcastStopAlarm(this); /*Stop any vibration or notifications that are happening right now*/
