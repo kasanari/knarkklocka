@@ -102,4 +102,18 @@ public class AlarmRepository {
             return null;
         }
     }
+
+    private static class clearAsyncTask extends AsyncTask<Void, Void, Void> {
+        private AlarmDao mAsyncTaskDao;
+
+        clearAsyncTask(AlarmDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            mAsyncTaskDao.deleteAll();
+            return null;
+        }
+    }
 }
