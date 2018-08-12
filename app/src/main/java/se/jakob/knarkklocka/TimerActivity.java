@@ -164,7 +164,8 @@ public class TimerActivity extends AppCompatActivity implements
     public void setAlarm() {
         //TransitionManager.beginDelayedTransition(chronometer_container, new Slide(Gravity.TOP));
         if (alarmIsRunning()) {
-            mainActivityViewModel.kill();
+            mainActivityViewModel.kill(); /* If there is an alarm running, kill it. */
+            AlarmBroadcasts.broadcastStopAlarm(this); /* Stop any vibration or notifications that are happening right now */
         }
         TimerUtils.startMainTimer(this, mainActivityViewModel);
     }
