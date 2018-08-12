@@ -126,7 +126,7 @@ public class TimerActivity extends AppCompatActivity implements
             public boolean onLongClick(View v) {
                 //showTimePickerDialog(v);
                 callVibrate();
-                setAlarm();
+                restartAlarm();
                 Snackbar.make(v, "Started new timer!", Snackbar.LENGTH_LONG).show();
                 return true;
             }
@@ -161,7 +161,7 @@ public class TimerActivity extends AppCompatActivity implements
         chronometer.setBase(base.getTime());
     }
 
-    public void setAlarm() {
+    public void restartAlarm() {
         //TransitionManager.beginDelayedTransition(chronometer_container, new Slide(Gravity.TOP));
         if (alarmIsRunning()) {
             mainActivityViewModel.kill(); /* If there is an alarm running, kill it. */
