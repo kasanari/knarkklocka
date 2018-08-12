@@ -44,6 +44,10 @@ public class AlarmRepository {
         return mAlarmDao.loadSingleAlarmByState(Alarm.STATE_ACTIVE);
     }
 
+    public void deleteAll() {
+        new clearAsyncTask(mAlarmDao).execute();
+    }
+
     public long insert(Alarm alarm) {
         return mAlarmDao.insert(alarm);
         //new insertAsyncTask(mAlarmDao).execute(alarm);
