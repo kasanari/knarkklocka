@@ -21,12 +21,31 @@ public class AlarmService extends LifecycleService {
 
     private static final String TAG = "AlarmService";
     private AlarmRepository mRepository;
+    private boolean mIsRegistered;
+
+    private final BroadcastReceiver mActionsReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+
+            switch (action) {
+                case ACTION_STOP_ALARM:
+                    stopAlarm();
+                    break;
+            }
+        }
+    };
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "Service got created");
         mRepository = new AlarmRepository(getApplication());
+        // Register the broadcast receiver
+        final IntentFilter filter = new IntentFilter(ACTION_STOP_ALARM);
+        //filter.addAction(ACTION_SNOOZE_ALARM);
+        registerReceiver(mActionsReceiver, filter);
+        mIsRegistered = true;
     }
 
     @Override
@@ -90,6 +109,10 @@ public class AlarmService extends LifecycleService {
     public void onDestroy() {
         Log.d(TAG, "AlarmService.onDestroy() called");
         super.onDestroy();
+        if (mIsRegistered) {
+            unregisterReceiver(mActionsReceiver);
+            mIsRegistered = false;
+        }
         stopAlarm();
     }
 
