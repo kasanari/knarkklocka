@@ -45,6 +45,7 @@ public class AlarmService extends LifecycleService {
     }
 
     /*Intent handler meant to be run on separate thread*/
+    @MainThread
     private void handleIntent(String action, long id) {
         Alarm alarm = mRepository.getAlarmByID(id);
         switch (action) {
