@@ -85,11 +85,6 @@ public class TimerUtils {
         return PendingIntent.getActivity(context, TIMER_ACTIVITY_INTENT_ID, timerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    public static void setNewAlarm(Context context, long id) {
-        long timer_duration = PreferenceUtils.getMainTimerLength(context);
-        setNewAlarm(context, id, new Date(timer_duration));
-    }
-
     private static void setNewAlarm(Context context, long id, Date endTime) {
         AlarmManager alarmManager = context.getSystemService(AlarmManager.class);
 
@@ -109,11 +104,6 @@ public class TimerUtils {
                 Log.d(TAG, debugString);
             }
         }
-    }
-
-    public static void setSnooze(Context context, long id) {
-        long length = PreferenceUtils.getSnoozeTimerLength(context);
-        setNewAlarm(context, id, new Date(length));
     }
 
     public static void cancelAlarm(Context context, long id) {

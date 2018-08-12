@@ -39,6 +39,9 @@ import se.jakob.knarkklocka.data.Alarm;
 import se.jakob.knarkklocka.data.AlarmActivityViewModel;
 import se.jakob.knarkklocka.utils.TimerUtils;
 
+import static android.app.AlarmManager.RTC_WAKEUP;
+import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
+import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static se.jakob.knarkklocka.data.Alarm.STATE_ACTIVE;
 import static se.jakob.knarkklocka.data.Alarm.STATE_DEAD;
 import static se.jakob.knarkklocka.data.Alarm.STATE_SNOOZING;
@@ -54,11 +57,6 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     private TextView tv_alarm_text;
 
     private AlarmActivityViewModel alarmActivityViewModel;
-    
-    private static final int WINDOW_FLAGS = WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-            | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-            | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-            | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
  
     private Chronometer mAlarmChronometer;
 
@@ -99,7 +97,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         /*Hide navigation bar*/
         hideNavigationBar();
 
-        // Close dialogs and window shade, so this is fully visible
+        /* Close dialogs and window shade, so this is fully visible */
         sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
 
         mDismissButton = findViewById(R.id.dismiss);
@@ -110,18 +108,11 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         mDismissButton.setOnLongClickListener(this);
 
         mAlarmChronometer = findViewById(R.id.alarm_chronometer);
-        AlarmManager alarmManager = getSystemService(AlarmManager.class);
-        long timeout;
-//        if (BuildConfig.DEBUG) {
-//            timeout = 10 * SECOND_IN_MILLIS;
-//        } else {
-//            timeout = 2 * MINUTE_IN_MILLIS;
-//        }
-//
-//        if (alarmManager != null) {
-//            alarmManager.setExact(RTC_WAKEUP, System.currentTimeMillis() + timeout, "tag", alarmCallback, null);
-//        }
 
+        /*Start timeout timer, so that alarm is not going off forever */
+        startTimeoutClock();
+
+        /*Get the ID of the Alarm that is going off*/
         Intent intent = getIntent();
         long id = intent.getLongExtra(EXTRA_ALARM_ID, -1);
 
@@ -232,6 +223,20 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         //alarmIntent.putExtra(EXTRA_ALARM_ID, id);
         alarmIntent.setAction(ACTION_STOP_ALARM);
         startService(alarmIntent);
+    }
+
+    private void startTimeoutClock() {
+        AlarmManager alarmManager = getSystemService(AlarmManager.class);
+        long timeout;
+        if (BuildConfig.DEBUG) {
+            timeout = 10 * SECOND_IN_MILLIS;
+        } else {
+            timeout = 2 * MINUTE_IN_MILLIS;
+        }
+
+        if (alarmManager != null) {
+            alarmManager.setExact(RTC_WAKEUP, System.currentTimeMillis() + timeout, "tag", alarmCallback, null);
+        }
     }
 
     @Override
