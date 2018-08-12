@@ -186,6 +186,9 @@ public class TimerActivity extends AppCompatActivity implements
                 }
             });
         }
+    private void snooze() {
+        AlarmBroadcasts.broadcastStopAlarm(this); /*Stop any vibration or notifications that are happening right now*/
+        TimerUtils.startSnoozeTimer(this, mainActivityViewModel);
     }
 
     public boolean alarmIsRunning() {
