@@ -9,52 +9,100 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.os.SystemClock;
 import android.support.v4.content.ContextCompat;
+import android.widget.RemoteViews;
 
 import java.util.Date;
 
 import se.jakob.knarkklocka.data.Alarm;
+import se.jakob.knarkklocka.utils.TimerUtils;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID;
 
 public class AlarmNotificationsBuilder {
 
-    private static final String ALARM_NOTIFICATION_CHANNEL_ID = "reminder_notification_channel";
-    private static final int ALARM_FIRING_NOTIFICATION_ID = 8;
+    public static final int ALARM_ACTIVE_NOTIFICATION_ID = 1235;
+    private static final String ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID = "firing_notification_channel";
+    private static final String ALARM_SNOOZE_NOTIFICATION_CHANNEL_ID = "snooze_notification_channel";
+    private static final String ALARM_WAITING_NOTIFICATION_CHANNEL_ID = "waiting_notification_channel";
+    private static final int ALARM_WAITING_NOTIFICATION_ID = 5464;
+    private static final int ALARM_SNOOZING_NOTIFICATION_ID = 9845;
 
-    public static synchronized void showNotification(Service service, Alarm alarm) {
+    private static final int LIGHT_COLOR_RED = 0xff0000;
+    private static final int LIGHT_COLOR_BLUE = 0x0000ff;
 
+    private static void setupActiveNotificationChannel(Service service) {
         NotificationManager notificationManager = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 NotificationChannel mChannel = new NotificationChannel(
-                        ALARM_NOTIFICATION_CHANNEL_ID,
-                        service.getString(R.string.main_notification_channel_name),
+                        ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID,
+                        service.getString(R.string.active_notification_channel_name),
                         NotificationManager.IMPORTANCE_HIGH);
                 mChannel.enableVibration(true);
                 mChannel.enableLights(true);
                 mChannel.setBypassDnd(true);
                 mChannel.setShowBadge(false);
-                mChannel.setLightColor(0xff0000);
+                mChannel.setLightColor(LIGHT_COLOR_RED);
                 notificationManager.createNotificationChannel(mChannel);
             }
         }
+    }
 
+    private static void setupSnoozeNotificationChannel(Context context) {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel mChannel = new NotificationChannel(
+                        ALARM_SNOOZE_NOTIFICATION_CHANNEL_ID,
+                        context.getString(R.string.snoozing_notification_channel_name),
+                        NotificationManager.IMPORTANCE_LOW);
+                mChannel.setBypassDnd(true);
+                mChannel.setShowBadge(false);
+                mChannel.enableLights(true);
+                mChannel.setLightColor(LIGHT_COLOR_BLUE);
+                notificationManager.createNotificationChannel(mChannel);
+            }
+        }
+    }
 
-        Notification.Builder notification = new Notification.Builder(service, ALARM_NOTIFICATION_CHANNEL_ID)
-                .setContentTitle("THE DRUG ALARM IS GOING OFF!")
-                .setContentText("Time for drugs!")
+    private static void setupWaitingNotificationChannel(Context context) {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel mChannel = new NotificationChannel(
+                        ALARM_WAITING_NOTIFICATION_CHANNEL_ID,
+                        context.getString(R.string.waiting_notification_channel_name),
+                        NotificationManager.IMPORTANCE_LOW);
+                mChannel.setBypassDnd(true);
+                mChannel.setShowBadge(false);
+                notificationManager.createNotificationChannel(mChannel);
+            }
+        }
+    }
+
+    public static synchronized void showActiveAlarmNotification(Service service, Alarm alarm) {
+
+        setupActiveNotificationChannel(service);
+
+        Notification.Builder notification = new Notification.Builder(service, ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID)
                 .setColor(ContextCompat.getColor(service, R.color.colorAccent))
                 .setSmallIcon(R.drawable.ic_alarm_white_24dp)
                 .setLargeIcon(BitmapFactory.decodeResource(service.getResources(), R.mipmap.pill))
                 .setOngoing(true)
-                .setAutoCancel(false)
+                .setAutoCancel(true)
+                .setLocalOnly(true)
+                .setStyle(new Notification.DecoratedCustomViewStyle())
                 .setCategory(Notification.CATEGORY_ALARM)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setLocalOnly(true);
+                .setChannelId(ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID);
 
-        final Date base = alarm.getEndTime(); // For the Chronometer
+
+        final String pname = service.getPackageName();
+        String stateText = "Time for drugs!";
+        notification.setCustomContentView(buildChronometer(pname, alarm.getEndTime(), true, stateText));
 
         // Full screen intent has flags so it is different than the content intent.
         final Intent fullScreen = new Intent(service, AlarmActivity.class)
@@ -67,7 +115,80 @@ public class AlarmNotificationsBuilder {
         // Setup Content Intent
         notification.setContentIntent(pendingFullScreen);
 
-        service.startForeground(ALARM_FIRING_NOTIFICATION_ID, notification.build());
+        service.startForeground(ALARM_ACTIVE_NOTIFICATION_ID, notification.build());
+    }
+
+    public static synchronized void showSnoozingAlarmNotification(Context context, Alarm alarm) {
+
+        setupSnoozeNotificationChannel(context);
+
+        Notification.Builder notification = new Notification.Builder(context, ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID)
+                .setColor(ContextCompat.getColor(context, R.color.colorAccent))
+                .setSmallIcon(R.drawable.ic_alarm_white_24dp)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.pill))
+                .setOngoing(true)
+                .setAutoCancel(false)
+                .setStyle(new Notification.DecoratedCustomViewStyle())
+                .setLocalOnly(true)
+                .setCategory(Notification.CATEGORY_ALARM)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setChannelId(ALARM_SNOOZE_NOTIFICATION_CHANNEL_ID);
+
+        final PendingIntent pendingShowAlarm = TimerUtils.getShowAlarmIntent(context, alarm.getId());
+        notification.setContentIntent(pendingShowAlarm);
+
+        final String pname = context.getPackageName();
+        String stateText = "The drug timer is snoozing.";
+        notification.setCustomContentView(buildChronometer(pname, alarm.getEndTime(), true, stateText));
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(ALARM_SNOOZING_NOTIFICATION_ID, notification.build());
+    }
+
+    public static synchronized void showWaitingAlarmNotification(Context context, Alarm alarm) {
+
+        setupWaitingNotificationChannel(context);
+
+        Notification.Builder notification = new Notification.Builder(context, ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID)
+                .setColor(ContextCompat.getColor(context, R.color.colorAccent))
+                .setSmallIcon(R.drawable.ic_alarm_white_24dp)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.pill))
+                .setOngoing(true)
+                .setAutoCancel(false)
+                .setLocalOnly(true)
+                .setStyle(new Notification.DecoratedCustomViewStyle())
+                .setCategory(Notification.CATEGORY_SERVICE)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setChannelId(ALARM_WAITING_NOTIFICATION_CHANNEL_ID);
+
+        final PendingIntent pendingShowAlarm = TimerUtils.getShowAlarmIntent(context, alarm.getId());
+        notification.setContentIntent(pendingShowAlarm);
+
+        final String pname = context.getPackageName();
+
+        String stateText = "The drug timer is running.";
+        notification.setCustomContentView(buildChronometer(pname, alarm.getEndTime(), true, stateText));
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(ALARM_WAITING_NOTIFICATION_ID, notification.build());
+    }
+
+    public static void clearAllNotifications(Context context) {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancelAll();
+    }
+
+
+    private static RemoteViews buildChronometer(String pname, Date endtime, boolean running,
+                                                CharSequence stateText) {
+        final RemoteViews content = new RemoteViews(pname, R.layout.chronometer_notif_content);
+        content.setChronometerCountDown(R.id.notif_chronometer, true);
+
+        long timeDelta = endtime.getTime() - System.currentTimeMillis();
+        long base = SystemClock.elapsedRealtime() + timeDelta;
+        content.setChronometer(R.id.notif_chronometer, base, null, running);
+        content.setTextViewText(R.id.notif_state, stateText);
+        return content;
     }
 
 }
