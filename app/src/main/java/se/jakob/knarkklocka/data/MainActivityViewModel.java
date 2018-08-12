@@ -5,7 +5,7 @@ import android.app.Application;
 public class MainActivityViewModel extends AlarmViewModel {
     public MainActivityViewModel(Application application) {
         super(application);
-        super.mAlarm = mRepository.getWaitingAlarm();
+        super.mAlarm = mRepository.getCurrentAlarm();
     }
 }
 
