@@ -68,9 +68,15 @@ public class TimerActivity extends AppCompatActivity implements
             @Override
             public void onChanged(@Nullable final Alarm alarm) {
                 if (alarm != null) {
+                    currentAlarm = alarm;
                     int state = alarm.getState();
                     switch (state) {
                         case STATE_ACTIVE:
+                            setupChronometer(alarm);
+                            button_snooze.setVisibility(View.VISIBLE);
+                            button_sleep_mode.setVisibility(View.VISIBLE);
+                            fab_start_timer.setVisibility(View.VISIBLE);
+                            fab_start_timer.setImageResource(R.drawable.ic_restart_black_24dp);
                             break;
                         case STATE_DEAD:
                             fab_start_timer.setVisibility(View.VISIBLE);
@@ -78,20 +84,24 @@ public class TimerActivity extends AppCompatActivity implements
                             break;
                         case STATE_SNOOZING:
                             setupChronometer(alarm);
+                            button_snooze.setVisibility(View.INVISIBLE);
                             button_sleep_mode.setVisibility(View.VISIBLE);
                             fab_start_timer.setVisibility(View.VISIBLE);
                             fab_start_timer.setImageResource(R.drawable.ic_restart_black_24dp);
                             break;
                         case STATE_WAITING:
                             setupChronometer(alarm);
+                            button_snooze.setVisibility(View.INVISIBLE);
                             button_sleep_mode.setVisibility(View.VISIBLE);
                             fab_start_timer.setVisibility(View.INVISIBLE);
                             fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp);
                             break;
                     }
                 } else {
+                    fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp);
                     fab_start_timer.setVisibility(View.VISIBLE);
                     button_sleep_mode.setVisibility(View.INVISIBLE);
+                    button_snooze.setVisibility(View.INVISIBLE);
                     tv_due_time.setVisibility(View.INVISIBLE);
                     chronometer.setVisibility(View.INVISIBLE);
                 }
