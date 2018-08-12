@@ -39,8 +39,8 @@ public final class PreferenceUtils {
     private static long getTimerLength(Context context, String key) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         long length;
-        boolean shortMode = false; /*This can be set to true for testing purposes*/
-        if (shortMode) {
+        boolean quickTimerMode = true; /*This can be set to true for testing purposes, otherwise it should be set to false*/
+        if (quickTimerMode) {
             length = getShortDefault(key);
         } else {
             length = prefs.getLong(key, getDefaultLength(key));
