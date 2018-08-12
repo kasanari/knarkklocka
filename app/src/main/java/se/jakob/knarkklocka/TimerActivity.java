@@ -184,7 +184,9 @@ public class TimerActivity extends AppCompatActivity implements
         //TransitionManager.beginDelayedTransition(timer_content_group, new Slide(Gravity.TOP));
         fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp);
         if (alarmIsRunning()) {
+            AlarmNotificationsBuilder.clearAllNotifications(this);
             Log.d(TAG, "Sleep mode engaged...");
+            AlarmBroadcasts.broadcastStopAlarm(this); /* Stop any vibration or notifications that are happening right now */
             Snackbar.make(v, "Goodnight", Snackbar.LENGTH_LONG).show();
                     Alarm currentAlarm = mainActivityViewModel.getAlarm().getValue();
                     if (currentAlarm != null) {
