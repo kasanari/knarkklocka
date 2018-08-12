@@ -42,8 +42,7 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.Alar
             String string = current.getId() + " " + dateString;
             holder.dueTimeItemView.setText(string);
 
-            int state = current.getState();
-            String stateString = current.getStateString(state);
+            String stateString = current.getStateString();
             holder.stateItemView.setText(stateString);
 
 
