@@ -214,19 +214,7 @@ public class TimerActivity extends AppCompatActivity implements
     protected void onPause() {
         super.onPause();
         chronometer.stop();
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        chronometer.stop();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        chronometer.stop();
+        Log.d(TAG, "Application paused chronometer stopped");
     }
 
     @Override
