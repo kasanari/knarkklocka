@@ -55,7 +55,7 @@ public class TimerUtils {
         Intent alarmIntent = new Intent(context, AlarmService.class);
         alarmIntent.putExtra(EXTRA_ALARM_ID, id);
         alarmIntent.setAction(ACTION_ACTIVATE_ALARM);
-        return PendingIntent.getService(context, ALARM_INTENT_ID, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getForegroundService(context, ALARM_INTENT_ID, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     /**
