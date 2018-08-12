@@ -1,8 +1,16 @@
 package se.jakob.knarkklocka;
 
+import android.app.NotificationManager;
+import android.app.Service;
 import android.arch.lifecycle.LifecycleService;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
+import android.support.annotation.MainThread;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -12,15 +20,22 @@ import java.util.Locale;
 import se.jakob.knarkklocka.data.Alarm;
 import se.jakob.knarkklocka.data.AlarmRepository;
 
+import static android.provider.AlarmClock.ACTION_SNOOZE_ALARM;
+import static se.jakob.knarkklocka.AlarmNotificationsBuilder.ALARM_ACTIVE_NOTIFICATION_ID;
 import static se.jakob.knarkklocka.data.Alarm.STATE_ACTIVE;
+import static se.jakob.knarkklocka.data.Alarm.STATE_DEAD;
+import static se.jakob.knarkklocka.data.Alarm.STATE_SNOOZING;
+import static se.jakob.knarkklocka.data.Alarm.STATE_WAITING;
 import static se.jakob.knarkklocka.utils.TimerUtils.ACTION_ACTIVATE_ALARM;
 import static se.jakob.knarkklocka.utils.TimerUtils.ACTION_STOP_ALARM;
+import static se.jakob.knarkklocka.utils.TimerUtils.ACTION_WAITING_ALARM;
 import static se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID;
 
 public class AlarmService extends LifecycleService {
 
     private static final String TAG = "AlarmService";
     private AlarmRepository mRepository;
+    NotificationManager notificationManager;
     private boolean mIsRegistered;
 
     private final BroadcastReceiver mActionsReceiver = new BroadcastReceiver() {
@@ -46,6 +61,7 @@ public class AlarmService extends LifecycleService {
         //filter.addAction(ACTION_SNOOZE_ALARM);
         registerReceiver(mActionsReceiver, filter);
         mIsRegistered = true;
+        notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     @Override
@@ -94,9 +110,10 @@ public class AlarmService extends LifecycleService {
     }
 
     private void startAlarm(Alarm alarm) {
+        notificationManager.cancelAll();
         WakeLocker.acquire(this);
         Klaxon.vibrateAlarm(this);
-        AlarmNotificationsBuilder.showNotification(this, alarm);
+        AlarmNotificationsBuilder.showActiveAlarmNotification(this, alarm);
     }
 
     private void stopAlarm() {
