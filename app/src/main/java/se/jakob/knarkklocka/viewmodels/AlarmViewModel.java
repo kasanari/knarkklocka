@@ -1,10 +1,13 @@
-package se.jakob.knarkklocka.data;
+package se.jakob.knarkklocka.viewmodels;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 
 import java.util.Date;
+
+import se.jakob.knarkklocka.data.Alarm;
+import se.jakob.knarkklocka.data.AlarmRepository;
 
 public class AlarmViewModel extends AndroidViewModel {
     LiveData<Alarm> mAlarm;

@@ -1,4 +1,4 @@
-package se.jakob.knarkklocka.data;
+package se.jakob.knarkklocka.viewmodels;
 
 import android.app.Application;
 
