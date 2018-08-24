@@ -17,6 +17,7 @@ package se.jakob.knarkklocka;
 
 import android.app.AlarmManager;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Build;
@@ -37,8 +38,8 @@ import java.util.Date;
 
 import se.jakob.knarkklocka.data.Alarm;
 import se.jakob.knarkklocka.utils.InjectorUtils;
-import se.jakob.knarkklocka.utils.TimerUtils;
 import se.jakob.knarkklocka.viewmodels.AlarmActivityViewModel;
+import se.jakob.knarkklocka.utils.TimerUtils;
 import se.jakob.knarkklocka.viewmodels.AlarmActivityViewModelFactory;
 
 import static android.app.AlarmManager.RTC_WAKEUP;
@@ -121,12 +122,9 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         long id = intent.getLongExtra(EXTRA_ALARM_ID, -1);
 
         /*Setup ViewModel and Observer*/
-        //alarmActivityViewModel = ViewModelProviders.of(this).get(AlarmActivityViewModel.class);
-        //alarmActivityViewModel.setAlarm(id);
-
         AlarmActivityViewModelFactory factory = InjectorUtils.provideAlarmActivityViewModelFactory(this, id);
         alarmActivityViewModel = ViewModelProviders.of(this, factory).get(AlarmActivityViewModel.class);
-
+        
         alarmActivityViewModel.getAlarm().observe(this, new Observer<Alarm>() {
             @Override
             public void onChanged(@Nullable final Alarm alarm) {
