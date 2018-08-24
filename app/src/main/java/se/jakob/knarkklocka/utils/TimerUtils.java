@@ -15,12 +15,11 @@ import se.jakob.knarkklocka.AlarmActivity;
 import se.jakob.knarkklocka.AlarmBroadcastReceiver;
 import se.jakob.knarkklocka.AlarmNotificationsBuilder;
 import se.jakob.knarkklocka.AlarmService;
-import se.jakob.knarkklocka.AppExecutors;
 import se.jakob.knarkklocka.BuildConfig;
 import se.jakob.knarkklocka.PreferenceUtils;
 import se.jakob.knarkklocka.TimerActivity;
 import se.jakob.knarkklocka.data.Alarm;
-import se.jakob.knarkklocka.data.AlarmViewModel;
+import se.jakob.knarkklocka.viewmodels.AlarmViewModel;
 
 /**
  * Created by Jakob Nyberg on 2018-03-26.
