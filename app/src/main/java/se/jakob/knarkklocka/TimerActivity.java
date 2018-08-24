@@ -25,9 +25,11 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import se.jakob.knarkklocka.data.Alarm;
-import se.jakob.knarkklocka.data.MainActivityViewModel;
 import se.jakob.knarkklocka.settings.SettingsActivity;
+import se.jakob.knarkklocka.utils.InjectorUtils;
 import se.jakob.knarkklocka.utils.TimerUtils;
+import se.jakob.knarkklocka.viewmodels.MainActivityViewModel;
+import se.jakob.knarkklocka.viewmodels.MainActivityViewModelFactory;
 
 import static se.jakob.knarkklocka.data.Alarm.STATE_ACTIVE;
 import static se.jakob.knarkklocka.data.Alarm.STATE_DEAD;
@@ -66,7 +68,11 @@ public class TimerActivity extends AppCompatActivity implements
         tv_due_time.setVisibility(View.INVISIBLE);
         chronometer.setVisibility(View.INVISIBLE);
 
-        mainActivityViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
+        /*Floating action button to start a new timer*/
+        fab_start_timer = findViewById(R.id.button_add_timer);
+
+        MainActivityViewModelFactory factory = InjectorUtils.provideMainActivityViewModelFactory(this);
+        mainActivityViewModel = ViewModelProviders.of(this, factory).get(MainActivityViewModel.class);
 
         mainActivityViewModel.getAlarm().observe(this, new Observer<Alarm>() {
             @Override
@@ -121,9 +127,6 @@ public class TimerActivity extends AppCompatActivity implements
         toolbar.setTitle("Timer setup");
         setSupportActionBar(toolbar);
 
-
-        /*Floating action button to start a new timer*/
-        fab_start_timer = findViewById(R.id.button_add_timer);
 
 
         fab_start_timer.setOnLongClickListener(new View.OnLongClickListener() {

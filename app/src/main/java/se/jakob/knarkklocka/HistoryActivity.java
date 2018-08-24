@@ -2,7 +2,6 @@ package se.jakob.knarkklocka;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -14,10 +13,11 @@ import android.view.MenuItem;
 import java.util.List;
 
 import se.jakob.knarkklocka.data.Alarm;
-import se.jakob.knarkklocka.data.AlarmHistoryViewModel;
+import se.jakob.knarkklocka.utils.InjectorUtils;
+import se.jakob.knarkklocka.viewmodels.AlarmHistoryViewModel;
 import se.jakob.knarkklocka.data.AlarmListAdapter;
-import se.jakob.knarkklocka.settings.SettingsActivity;
 import se.jakob.knarkklocka.utils.TimerUtils;
+import se.jakob.knarkklocka.viewmodels.AlarmHistoryViewModelFactory;
 
 public class HistoryActivity extends AppCompatActivity {
 
@@ -35,7 +35,8 @@ public class HistoryActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // Get a new or existing ViewModel from the ViewModelProvider.
-        mAlarmHistoryViewModel = ViewModelProviders.of(this).get(AlarmHistoryViewModel.class);
+        AlarmHistoryViewModelFactory factory = InjectorUtils.provideAlarmHistoryViewModelFactory(this);
+        mAlarmHistoryViewModel = ViewModelProviders.of(this, factory).get(AlarmHistoryViewModel.class);
 
         // Add an observer on the LiveData returned by getAlphabetizedWords.
         // The onChanged() method fires when the observed data changes and the activity is

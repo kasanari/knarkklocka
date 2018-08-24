@@ -36,11 +36,12 @@ import android.widget.TextView;
 import java.util.Date;
 
 import se.jakob.knarkklocka.data.Alarm;
-import se.jakob.knarkklocka.data.AlarmActivityViewModel;
+import se.jakob.knarkklocka.utils.InjectorUtils;
 import se.jakob.knarkklocka.utils.TimerUtils;
+import se.jakob.knarkklocka.viewmodels.AlarmActivityViewModel;
+import se.jakob.knarkklocka.viewmodels.AlarmActivityViewModelFactory;
 
 import static android.app.AlarmManager.RTC_WAKEUP;
-import static android.provider.AlarmClock.ACTION_SNOOZE_ALARM;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static se.jakob.knarkklocka.data.Alarm.STATE_ACTIVE;
@@ -51,14 +52,14 @@ import static se.jakob.knarkklocka.utils.TimerUtils.ACTION_STOP_ALARM;
 import static se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID;
 
 public class AlarmActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener {
-    private static final String TAG = "AlarmActivity";   
+    private static final String TAG = "AlarmActivity";
 
     private Button mSnoozeButton;
     private Button mDismissButton;
     private TextView tv_alarm_text;
 
     private AlarmActivityViewModel alarmActivityViewModel;
- 
+
     private Chronometer mAlarmChronometer;
 
     private boolean alarmIsActive = false;
@@ -86,8 +87,8 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         /*Ensure that screen turns on*/
         final Window win = getWindow();
         if (Build.VERSION.SDK_INT >= 27) {
-            setTurnScreenOn(true); //Replaces FLAG_TURN_SCREEN_ON
-            setShowWhenLocked(true); //Replaces FLAG_SHOW_WHEN_LOCKED
+            setTurnScreenOn(true);      //Replaces FLAG_TURN_SCREEN_ON
+            setShowWhenLocked(true);    //Replaces FLAG_SHOW_WHEN_LOCKED
             win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                     | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
         } else {
@@ -120,8 +121,12 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         long id = intent.getLongExtra(EXTRA_ALARM_ID, -1);
 
         /*Setup ViewModel and Observer*/
-        alarmActivityViewModel = ViewModelProviders.of(this).get(AlarmActivityViewModel.class);
-        alarmActivityViewModel.setAlarm(id);
+        //alarmActivityViewModel = ViewModelProviders.of(this).get(AlarmActivityViewModel.class);
+        //alarmActivityViewModel.setAlarm(id);
+
+        AlarmActivityViewModelFactory factory = InjectorUtils.provideAlarmActivityViewModelFactory(this, id);
+        alarmActivityViewModel = ViewModelProviders.of(this, factory).get(AlarmActivityViewModel.class);
+
         alarmActivityViewModel.getAlarm().observe(this, new Observer<Alarm>() {
             @Override
             public void onChanged(@Nullable final Alarm alarm) {
@@ -229,7 +234,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         alarmIsActive = false;
         alarmActivityViewModel.getAlarm().removeObservers(this);
         Intent alarmIntent = new Intent(this, AlarmService.class);
-        //alarmIntent.putExtra(EXTRA_ALARM_ID, id);
+        alarmIntent.putExtra(EXTRA_ALARM_ID, currentAlarm.getId());
         alarmIntent.setAction(ACTION_STOP_ALARM);
         startService(alarmIntent);
     }
