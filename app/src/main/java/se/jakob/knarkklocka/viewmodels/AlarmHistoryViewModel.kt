@@ -2,21 +2,18 @@ package se.jakob.knarkklocka.viewmodels
 
 import android.app.Application
 import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.ViewModel
 
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmRepository
 
-class AlarmHistoryViewModel(application: Application) : ViewModel(application) {
-    val allAlarms: LiveData<List<Alarm>>
+class AlarmHistoryViewModel internal constructor(private val repository: AlarmRepository) : AlarmViewModel(repository) {
 
-    init {
-        mRepository = AlarmRepository(application)
-        super.mAlarm = mRepository.getCurrentAlarm()
-        allAlarms = mRepository.getAllAlarms()
-    }
+    val allAlarms = repository.getAllAlarms()
+    override var alarm = repository.currentAlarm
 
     fun clearHistory() {
-        mRepository.deleteAll()
+        repository.deleteAll()
     }
 
 }

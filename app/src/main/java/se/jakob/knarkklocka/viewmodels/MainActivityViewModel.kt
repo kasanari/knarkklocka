@@ -1,11 +1,12 @@
 package se.jakob.knarkklocka.viewmodels
 
-import android.app.Application
+import android.arch.lifecycle.ViewModel
+import se.jakob.knarkklocka.data.AlarmRepository
 
-class MainActivityViewModel(application: Application) : AlarmViewModel(application) {
-    init {
-        super.mAlarm = mRepository.currentAlarm
-    }
+class MainActivityViewModel(repository: AlarmRepository) : AlarmViewModel(repository) {
+
+        override var alarm = repository.currentAlarm
+
 }
 
 

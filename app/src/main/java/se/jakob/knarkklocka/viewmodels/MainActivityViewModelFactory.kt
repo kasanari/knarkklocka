@@ -6,16 +6,16 @@ import android.arch.lifecycle.ViewModelProvider
 import se.jakob.knarkklocka.data.AlarmRepository
 
 /**
- * Factory for creating a [AlarmViewModel] with a constructor that takes a
+ * Factory for creating a [MainActivityViewModel] with a constructor that takes a
  * [AlarmRepository].
  */
 
-class AlarmViewModelFactory(
+class MainActivityViewModelFactory(
         private val alarmRepository: AlarmRepository
 ) : ViewModelProvider.NewInstanceFactory() {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return AlarmViewModel(alarmRepository) as T
+        return MainActivityViewModel(alarmRepository) as T
     }
 }

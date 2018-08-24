@@ -1,7 +1,5 @@
 package se.jakob.knarkklocka.viewmodels
 
-import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.ViewModel
 
@@ -10,40 +8,47 @@ import java.util.Date
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmRepository
 
-class AlarmViewModel internal constructor(internal var mRepository: AlarmRepository)//this.mAlarm = mRepository.getActiveAlarm();
+abstract class AlarmViewModel internal constructor(private val repository: AlarmRepository)
     : ViewModel() {
-    var alarm: LiveData<Alarm>? = null
-        internal set
 
-    val currentAlarm: Alarm?
-        get() = alarm!!.value
+    abstract var alarm : LiveData<Alarm>
+
+    private var hasAlarm: Boolean = false
+        get() = alarm.value != null
+
+
+    fun getCurrentAlarm() : Alarm? {
+        return alarm.value
+    }
 
     fun add(alarm: Alarm): Long {
-        return mRepository.insert(alarm)
+        return repository.insert(alarm)
     }
 
     fun delete() {
-        if (alarm!!.value != null) {
-            mRepository.delete(alarm!!.value!!)
+        if (alarm.value != null) {
+            repository.delete(alarm.value!!)
         }
     }
 
     fun kill() {
-        if (alarm!!.value != null) {
-            val alarm = this.alarm!!.value
+        if (hasAlarm) {
+            val alarm = this.alarm.value
             alarm!!.state = Alarm.STATE_DEAD
-            mRepository.update(alarm)
+            repository.update(alarm)
         }
     }
 
     fun snooze(endTime: Date) {
-        if (alarm!!.value != null) {
-            val alarm = this.alarm!!.value
-            alarm!!.state = Alarm.STATE_SNOOZING
+        if (hasAlarm) {
+            val alarm : Alarm = this.alarm.value!!
+            alarm.state = Alarm.STATE_SNOOZING
             alarm.incrementSnoozes()
             alarm.endTime = endTime
-            mRepository.update(alarm)
+            repository.update(alarm)
         }
     }
+
+
 
 }

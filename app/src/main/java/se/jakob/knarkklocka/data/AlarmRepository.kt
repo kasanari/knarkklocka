@@ -1,61 +1,52 @@
 package se.jakob.knarkklocka.data
 
-import android.app.Application
 import android.arch.lifecycle.LiveData
 import android.os.AsyncTask
 
-class AlarmRepository(application: Application) {
-    private val mAlarmDao: AlarmDao
-    val allAlarms: LiveData<List<Alarm>>
+class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
 
     val currentAlarm: LiveData<Alarm>
-        get() = mAlarmDao.loadSingleAlarmByState(Alarm.STATE_WAITING, Alarm.STATE_SNOOZING, Alarm.STATE_ACTIVE)
-
-    internal val activeAlarm: LiveData<Alarm>
-        get() = mAlarmDao.loadSingleAlarmByState(Alarm.STATE_ACTIVE)
-
-    init {
-        val db = AlarmDatabase.getDatabase(application)
-        mAlarmDao = db.alarmDao()
-        allAlarms = mAlarmDao.loadAllAlarms()
-    }
+        get() = alarmDao.loadSingleAlarmByState(Alarm.STATE_WAITING, Alarm.STATE_SNOOZING, Alarm.STATE_ACTIVE)
 
     fun getLiveAlarmByID(id: Long): LiveData<Alarm> {
-        return mAlarmDao.loadLiveAlarmById(id)
+        return alarmDao.loadLiveAlarmById(id)
     }
 
     fun getAlarmByID(id: Long): Alarm {
-        return mAlarmDao.loadAlarmById(id)
+        return alarmDao.loadAlarmById(id)
     }
 
     internal fun getAlarmsByState(state: Int): LiveData<Alarm> {
-        return mAlarmDao.loadAlarmsByState(state)
+        return alarmDao.loadAlarmsByState(state)
     }
 
     fun changeAlarmState(id: Long, state: Int) {
         val alarm = getAlarmByID(id)
         alarm.state = state
-        mAlarmDao.updateAlarm(alarm)
+        alarmDao.updateAlarm(alarm)
+    }
+
+    fun getAllAlarms(): LiveData<MutableList<Alarm>>? {
+        return alarmDao.loadAllAlarms()
     }
 
     fun deleteAll() {
-        clearAsyncTask(mAlarmDao).execute()
+        ClearAsyncTask(alarmDao).execute()
     }
 
     fun insert(alarm: Alarm): Long {
-        return mAlarmDao.insert(alarm)
-        //new insertAsyncTask(mAlarmDao).execute(alarm);
+        return alarmDao.insert(alarm)
     }
 
     fun delete(alarm: Alarm) {
-        deleteAsyncTask(mAlarmDao).execute(alarm)
+        DeleteAsyncTask(alarmDao).execute(alarm)
     }
 
     fun update(alarm: Alarm) {
-        updateAsyncTask(mAlarmDao).execute(alarm)
+        UpdateAsyncTask(alarmDao).execute(alarm)
     }
 
-    private class updateAsyncTask internal constructor(private val mAsyncTaskDao: AlarmDao) : AsyncTask<Alarm, Void, Void>() {
+    private class UpdateAsyncTask internal constructor(private val mAsyncTaskDao: AlarmDao) : AsyncTask<Alarm, Void, Void>() {
 
         override fun doInBackground(vararg params: Alarm): Void? {
             mAsyncTaskDao.updateAlarm(params[0])
@@ -63,15 +54,7 @@ class AlarmRepository(application: Application) {
         }
     }
 
-    private class insertAsyncTask internal constructor(private val mAsyncTaskDao: AlarmDao) : AsyncTask<Alarm, Void, Void>() {
-
-        override fun doInBackground(vararg params: Alarm): Void? {
-            mAsyncTaskDao.insert(params[0])
-            return null
-        }
-    }
-
-    private class deleteAsyncTask internal constructor(private val mAsyncTaskDao: AlarmDao) : AsyncTask<Alarm, Void, Void>() {
+    private class DeleteAsyncTask internal constructor(private val mAsyncTaskDao: AlarmDao) : AsyncTask<Alarm, Void, Void>() {
 
         override fun doInBackground(vararg params: Alarm): Void? {
             mAsyncTaskDao.deleteAlarm(params[0])
@@ -79,11 +62,23 @@ class AlarmRepository(application: Application) {
         }
     }
 
-    private class clearAsyncTask internal constructor(private val mAsyncTaskDao: AlarmDao) : AsyncTask<Void, Void, Void>() {
+    private class ClearAsyncTask internal constructor(private val mAsyncTaskDao: AlarmDao) : AsyncTask<Void, Void, Void>() {
 
         override fun doInBackground(vararg voids: Void): Void? {
             mAsyncTaskDao.deleteAll()
             return null
         }
     }
+
+    companion object {
+
+        // For Singleton instantiation
+        @Volatile private var instance: AlarmRepository? = null
+
+        fun getInstance(alarmDao: AlarmDao) =
+                instance ?: synchronized(this) {
+                    instance ?: AlarmRepository(alarmDao).also { instance = it }
+                }
+    }
+    
 }
