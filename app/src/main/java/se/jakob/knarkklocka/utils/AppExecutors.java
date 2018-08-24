@@ -1,4 +1,4 @@
-package se.jakob.knarkklocka;
+package se.jakob.knarkklocka.utils;
 
 /*
  * Copyright (C) 2017 The Android Open Source Project
