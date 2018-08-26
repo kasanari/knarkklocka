@@ -9,11 +9,11 @@ import android.os.IBinder
 import android.support.annotation.MainThread
 import android.util.Log
 import se.jakob.knarkklocka.data.Alarm
-import se.jakob.knarkklocka.data.Alarm.STATE_ACTIVE
 import se.jakob.knarkklocka.data.AlarmRepository
+import se.jakob.knarkklocka.data.AlarmState
+import se.jakob.knarkklocka.utils.ACTION_ACTIVATE_ALARM
+import se.jakob.knarkklocka.utils.ACTION_STOP_ALARM
 import se.jakob.knarkklocka.utils.InjectorUtils
-import se.jakob.knarkklocka.utils.TimerUtils.ACTION_ACTIVATE_ALARM
-import se.jakob.knarkklocka.utils.TimerUtils.ACTION_STOP_ALARM
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID
 import se.jakob.knarkklocka.utils.runOnIoThread
 import java.text.DateFormat
@@ -70,10 +70,10 @@ class AlarmService : LifecycleService() {
                 }
 
                 if (alarm.snoozes < 10) {
-                    mRepository.changeAlarmState(id, STATE_ACTIVE)
+                    mRepository.changeAlarmState(id, AlarmState.STATE_ACTIVE)
                     startAlarm(alarm)
                 } else {
-                    alarm.state = Alarm.STATE_DEAD
+                    alarm.state = AlarmState.STATE_DEAD
                     mRepository.update(alarm)
                     stopAlarm()
                     stopSelf()
