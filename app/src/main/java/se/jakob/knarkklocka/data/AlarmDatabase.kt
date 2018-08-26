@@ -11,8 +11,8 @@ import androidx.work.WorkManager
 import se.jakob.knarkklocka.BuildConfig
 import se.jakob.knarkklocka.workers.PopulateDatabaseWorker
 
-@TypeConverters(DateConverter::class)
-@Database(entities = [Alarm::class], version = 1, exportSchema = false)
+@TypeConverters(Converters::class)
+@Database(entities = [Alarm::class], version = 3, exportSchema = false)
 abstract class AlarmDatabase : RoomDatabase() {
 
     abstract fun alarmDao(): AlarmDao  //Getter for Dao, use to access the database
@@ -41,10 +41,12 @@ abstract class AlarmDatabase : RoomDatabase() {
                 return Room.databaseBuilder(context, AlarmDatabase::class.java,
                         "alarm_database_debug")
                         .addCallback(databaseDebugCallback)
+                        .fallbackToDestructiveMigration()
                         .build()
             } else {
                 return Room.databaseBuilder(context,
                         AlarmDatabase::class.java, "alarm_database")
+                        .fallbackToDestructiveMigration()
                         .build()
             }
         }
