@@ -13,12 +13,13 @@ import java.util.Locale
 
 import se.jakob.knarkklocka.AlarmActivity
 import se.jakob.knarkklocka.AlarmBroadcastReceiver
-import se.jakob.knarkklocka.AlarmNotificationsBuilder
+import se.jakob.knarkklocka.AlarmNotificationsUtils
 import se.jakob.knarkklocka.AlarmService
 import se.jakob.knarkklocka.BuildConfig
 import se.jakob.knarkklocka.PreferenceUtils
 import se.jakob.knarkklocka.TimerActivity
 import se.jakob.knarkklocka.data.Alarm
+import se.jakob.knarkklocka.data.AlarmState
 import se.jakob.knarkklocka.viewmodels.AlarmViewModel
 
 /**
@@ -27,9 +28,7 @@ import se.jakob.knarkklocka.viewmodels.AlarmViewModel
 
 object TimerUtils {
 
-    const val ACTION_ACTIVATE_ALARM = "activate-alarm"
-    const val ACTION_STOP_ALARM = "stop-alarm"
-    const val ACTION_WAITING_ALARM = "wating-alarm"
+
 
     const val EXTRA_ALARM_ID = "alarm-id"
 
@@ -139,14 +138,14 @@ object TimerUtils {
                 val currentAlarm = vm.getCurrentAlarm()
                 if (currentAlarm != null) {
                     vm.snooze(endTime.time)
-                    AlarmNotificationsBuilder.showSnoozingAlarmNotification(context, currentAlarm)
+                    AlarmNotificationsUtils.showSnoozingAlarmNotification(context, currentAlarm)
                     setNewAlarmClock(context, currentAlarm.id, endTime.time)
                 }
             } else {
-                val alarm = Alarm(Alarm.STATE_WAITING, currentTime.time, endTime.time)
+                val alarm = Alarm(AlarmState.STATE_WAITING, currentTime.time, endTime.time)
                 val id = vm.add(alarm)
                 setNewAlarmClock(context, id, alarm.endTime)
-                AlarmNotificationsBuilder.showWaitingAlarmNotification(context, alarm)
+                AlarmNotificationsUtils.showWaitingAlarmNotification(context, alarm)
             }
         }
     }
