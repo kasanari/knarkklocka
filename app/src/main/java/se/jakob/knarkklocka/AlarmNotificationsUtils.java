@@ -21,7 +21,7 @@ import se.jakob.knarkklocka.utils.TimerUtils;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID;
 
-public class AlarmNotificationsBuilder {
+public class AlarmNotificationsUtils {
 
     public static final int ALARM_ACTIVE_NOTIFICATION_ID = 1235;
     private static final String ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID = "firing_notification_channel";
@@ -134,7 +134,7 @@ public class AlarmNotificationsBuilder {
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setChannelId(ALARM_SNOOZE_NOTIFICATION_CHANNEL_ID);
 
-        final PendingIntent pendingShowAlarm = TimerUtils.getShowAlarmIntent(context, alarm.getId());
+        final PendingIntent pendingShowAlarm = TimerUtils.INSTANCE.getTimerActivityIntent(context, alarm.getId());
         notification.setContentIntent(pendingShowAlarm);
 
         final String pname = context.getPackageName();
@@ -161,7 +161,7 @@ public class AlarmNotificationsBuilder {
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setChannelId(ALARM_WAITING_NOTIFICATION_CHANNEL_ID);
 
-        final PendingIntent pendingShowAlarm = TimerUtils.getShowAlarmIntent(context, alarm.getId());
+        final PendingIntent pendingShowAlarm = TimerUtils.INSTANCE.getTimerActivityIntent(context, alarm.getId());
         notification.setContentIntent(pendingShowAlarm);
 
         final String pname = context.getPackageName();
