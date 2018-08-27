@@ -11,11 +11,8 @@ import android.util.Log
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmRepository
 import se.jakob.knarkklocka.data.AlarmState
-import se.jakob.knarkklocka.utils.ACTION_ACTIVATE_ALARM
-import se.jakob.knarkklocka.utils.ACTION_STOP_ALARM
-import se.jakob.knarkklocka.utils.InjectorUtils
+import se.jakob.knarkklocka.utils.*
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID
-import se.jakob.knarkklocka.utils.runOnIoThread
 import java.text.DateFormat
 import java.util.*
 
