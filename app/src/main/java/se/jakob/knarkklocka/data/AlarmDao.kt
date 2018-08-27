@@ -28,6 +28,9 @@ interface AlarmDao {
     @Query("SELECT * FROM alarm_table ORDER BY end_time")
     fun loadAllAlarms(): LiveData<List<Alarm>>
 
+    @Query("SELECT * FROM alarm_table ORDER BY start_time DESC LIMIT 1")
+    fun loadMostRecentAlarm(): LiveData<Alarm>
+
     @Query("SELECT * FROM alarm_table WHERE id = :id")
     fun loadLiveAlarmById(id: Long): LiveData<Alarm>
 

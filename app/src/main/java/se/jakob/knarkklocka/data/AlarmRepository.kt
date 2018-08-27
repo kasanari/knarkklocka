@@ -1,16 +1,12 @@
 package se.jakob.knarkklocka.data
 
 import android.arch.lifecycle.LiveData
-import android.os.AsyncTask
-import se.jakob.knarkklocka.data.AlarmState.STATE_WAITING
-import se.jakob.knarkklocka.data.AlarmState.STATE_SNOOZING
-import se.jakob.knarkklocka.data.AlarmState.STATE_ACTIVE
 import se.jakob.knarkklocka.utils.runOnIoThread
 
 class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
 
     val currentAlarm: LiveData<Alarm>
-        get() = alarmDao.loadSingleAlarmByState(Converters().fromAlarmState(STATE_WAITING), Converters().fromAlarmState(STATE_SNOOZING), Converters().fromAlarmState(STATE_ACTIVE))
+        get() = alarmDao.loadMostRecentAlarm()
 
     fun getLiveAlarmByID(id: Long): LiveData<Alarm> {
         return alarmDao.loadLiveAlarmById(id)
