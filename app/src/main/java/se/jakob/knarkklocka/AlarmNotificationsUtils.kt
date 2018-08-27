@@ -1,10 +1,7 @@
 package se.jakob.knarkklocka
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
+import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
@@ -12,74 +9,65 @@ import android.os.Build
 import android.os.SystemClock
 import android.support.v4.content.ContextCompat
 import android.widget.RemoteViews
-
-import java.util.Date
-
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.utils.TimerUtils
-
-import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID
+import java.util.*
 
 object AlarmNotificationsUtils {
 
-    val ALARM_ACTIVE_NOTIFICATION_ID = 1235
-    private val ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID = "firing_notification_channel"
-    private val ALARM_SNOOZE_NOTIFICATION_CHANNEL_ID = "snooze_notification_channel"
-    private val ALARM_WAITING_NOTIFICATION_CHANNEL_ID = "waiting_notification_channel"
-    private val ALARM_WAITING_NOTIFICATION_ID = 5464
-    private val ALARM_SNOOZING_NOTIFICATION_ID = 9845
+    private const val ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID = "firing_notification_channel"
+    private const val ALARM_SNOOZE_NOTIFICATION_CHANNEL_ID = "snooze_notification_channel"
+    private const val ALARM_WAITING_NOTIFICATION_CHANNEL_ID = "waiting_notification_channel"
 
-    private val LIGHT_COLOR_RED = 0xff0000
-    private val LIGHT_COLOR_BLUE = 0x0000ff
+    private const val ALARM_WAITING_NOTIFICATION_ID = 5464
+    private const val ALARM_SNOOZING_NOTIFICATION_ID = 9845
+    private const val ALARM_ACTIVE_NOTIFICATION_ID = 1235
+
+    private const val LIGHT_COLOR_RED = 0xff0000
+    private const val LIGHT_COLOR_BLUE = 0x0000ff
 
     private fun setupActiveNotificationChannel(service: Service) {
         val notificationManager = service.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (notificationManager != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val mChannel = NotificationChannel(
-                        ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID,
-                        service.getString(R.string.active_notification_channel_name),
-                        NotificationManager.IMPORTANCE_HIGH)
-                mChannel.enableVibration(true)
-                mChannel.enableLights(true)
-                mChannel.setBypassDnd(true)
-                mChannel.setShowBadge(false)
-                mChannel.lightColor = LIGHT_COLOR_RED
-                notificationManager.createNotificationChannel(mChannel)
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val mChannel = NotificationChannel(
+                    ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID,
+                    service.getString(R.string.active_notification_channel_name),
+                    NotificationManager.IMPORTANCE_HIGH)
+            mChannel.enableVibration(true)
+            mChannel.enableLights(true)
+            mChannel.setBypassDnd(true)
+            mChannel.setShowBadge(false)
+            mChannel.lightColor = LIGHT_COLOR_RED
+            notificationManager.createNotificationChannel(mChannel)
         }
     }
 
     private fun setupSnoozeNotificationChannel(context: Context) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (notificationManager != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val mChannel = NotificationChannel(
-                        ALARM_SNOOZE_NOTIFICATION_CHANNEL_ID,
-                        context.getString(R.string.snoozing_notification_channel_name),
-                        NotificationManager.IMPORTANCE_LOW)
-                mChannel.setBypassDnd(true)
-                mChannel.setShowBadge(false)
-                mChannel.enableLights(true)
-                mChannel.lightColor = LIGHT_COLOR_BLUE
-                notificationManager.createNotificationChannel(mChannel)
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val mChannel = NotificationChannel(
+                    ALARM_SNOOZE_NOTIFICATION_CHANNEL_ID,
+                    context.getString(R.string.snoozing_notification_channel_name),
+                    NotificationManager.IMPORTANCE_LOW)
+            mChannel.setBypassDnd(true)
+            mChannel.setShowBadge(false)
+            mChannel.enableLights(true)
+            mChannel.lightColor = LIGHT_COLOR_BLUE
+            notificationManager.createNotificationChannel(mChannel)
         }
     }
 
     private fun setupWaitingNotificationChannel(context: Context) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (notificationManager != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val mChannel = NotificationChannel(
-                        ALARM_WAITING_NOTIFICATION_CHANNEL_ID,
-                        context.getString(R.string.waiting_notification_channel_name),
-                        NotificationManager.IMPORTANCE_LOW)
-                mChannel.setBypassDnd(true)
-                mChannel.setShowBadge(false)
-                notificationManager.createNotificationChannel(mChannel)
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val mChannel = NotificationChannel(
+                    ALARM_WAITING_NOTIFICATION_CHANNEL_ID,
+                    context.getString(R.string.waiting_notification_channel_name),
+                    NotificationManager.IMPORTANCE_LOW)
+            mChannel.setBypassDnd(true)
+            mChannel.setShowBadge(false)
+            notificationManager.createNotificationChannel(mChannel)
         }
     }
 
@@ -100,10 +88,9 @@ object AlarmNotificationsUtils {
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setChannelId(ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID)
 
-
-        val pname = service.packageName
-        val stateText = "Time for drugs!"
-        notification.setCustomContentView(buildChronometer(pname, alarm.endTime, true, stateText))
+        val packageName = service.packageName
+        val stateText = service.resources.getString(R.string.active_notification_text)
+        notification.setCustomContentView(buildChronometer(packageName, alarm.endTime, true, stateText))
 
         // Full screen intent has flags so it is different than the content intent.
         val fullScreen = Intent(service, AlarmActivity::class.java)
@@ -139,9 +126,9 @@ object AlarmNotificationsUtils {
         val pendingShowAlarm = TimerUtils.getTimerActivityIntent(context, alarm.id)
         notification.setContentIntent(pendingShowAlarm)
 
-        val pname = context.packageName
-        val stateText = "The drug timer is snoozing."
-        notification.setCustomContentView(buildChronometer(pname, alarm.endTime, true, stateText))
+        val packageName = context.packageName
+        val stateText = context.resources.getString(R.string.snoozing_notification_text)
+        notification.setCustomContentView(buildChronometer(packageName, alarm.endTime, true, stateText))
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(ALARM_SNOOZING_NOTIFICATION_ID, notification.build())
@@ -167,10 +154,10 @@ object AlarmNotificationsUtils {
         val pendingShowAlarm = TimerUtils.getTimerActivityIntent(context, alarm.id)
         notification.setContentIntent(pendingShowAlarm)
 
-        val pname = context.packageName
+        val packageName = context.packageName
+        val stateText = context.resources.getString(R.string.waiting_notification_text)
 
-        val stateText = "The drug timer is running."
-        notification.setCustomContentView(buildChronometer(pname, alarm.endTime, true, stateText))
+        notification.setCustomContentView(buildChronometer(packageName, alarm.endTime, true, stateText))
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(ALARM_WAITING_NOTIFICATION_ID, notification.build())
@@ -181,13 +168,13 @@ object AlarmNotificationsUtils {
         notificationManager.cancelAll()
     }
 
-
-    private fun buildChronometer(pname: String, endtime: Date, running: Boolean,
+    private fun buildChronometer(packageName: String, endTime: Date, running: Boolean,
                                  stateText: CharSequence): RemoteViews {
-        val content = RemoteViews(pname, R.layout.chronometer_notif_content)
+
+        val content = RemoteViews(packageName, R.layout.chronometer_notif_content)
         content.setChronometerCountDown(R.id.notif_chronometer, true)
 
-        val timeDelta = endtime.time - System.currentTimeMillis()
+        val timeDelta = endTime.time - System.currentTimeMillis()
         val base = SystemClock.elapsedRealtime() + timeDelta
         content.setChronometer(R.id.notif_chronometer, base, null, running)
         content.setTextViewText(R.id.notif_state, stateText)
