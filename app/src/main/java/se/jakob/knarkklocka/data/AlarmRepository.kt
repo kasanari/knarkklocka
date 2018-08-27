@@ -2,11 +2,14 @@ package se.jakob.knarkklocka.data
 
 import android.arch.lifecycle.LiveData
 import android.os.AsyncTask
+import se.jakob.knarkklocka.data.AlarmState.STATE_WAITING
+import se.jakob.knarkklocka.data.AlarmState.STATE_SNOOZING
+import se.jakob.knarkklocka.data.AlarmState.STATE_ACTIVE
 
 class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
 
     val currentAlarm: LiveData<Alarm>
-        get() = alarmDao.loadSingleAlarmByState(Alarm.STATE_WAITING, Alarm.STATE_SNOOZING, Alarm.STATE_ACTIVE)
+        get() = alarmDao.loadSingleAlarmByState(Converters().fromAlarmState(STATE_WAITING), Converters().fromAlarmState(STATE_SNOOZING), Converters().fromAlarmState(STATE_ACTIVE))
 
     fun getLiveAlarmByID(id: Long): LiveData<Alarm> {
         return alarmDao.loadLiveAlarmById(id)
@@ -16,17 +19,17 @@ class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
         return alarmDao.loadAlarmById(id)
     }
 
-    internal fun getAlarmsByState(state: Int): LiveData<Alarm> {
-        return alarmDao.loadAlarmsByState(state)
+    internal fun getAlarmsByState(state: AlarmState): LiveData<Alarm> {
+        return alarmDao.loadAlarmsByState(Converters().fromAlarmState(state))
     }
 
-    fun changeAlarmState(id: Long, state: Int) {
+    fun changeAlarmState(id: Long, state: AlarmState) {
         val alarm = getAlarmByID(id)
         alarm.state = state
         alarmDao.updateAlarm(alarm)
     }
 
-    fun getAllAlarms(): LiveData<MutableList<Alarm>>? {
+    fun getAllAlarms(): LiveData<List<Alarm>>? {
         return alarmDao.loadAllAlarms()
     }
 
