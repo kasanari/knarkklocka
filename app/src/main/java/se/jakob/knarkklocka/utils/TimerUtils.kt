@@ -16,7 +16,6 @@ import se.jakob.knarkklocka.AlarmBroadcastReceiver
 import se.jakob.knarkklocka.AlarmNotificationsUtils
 import se.jakob.knarkklocka.AlarmService
 import se.jakob.knarkklocka.BuildConfig
-import se.jakob.knarkklocka.PreferenceUtils
 import se.jakob.knarkklocka.TimerActivity
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmState
@@ -89,7 +88,7 @@ object TimerUtils {
         val pendingAlarmIntent = getPI(context, id)
 
         /*Setup alarm clock info*/
-        //long wakeup_time = System.currentTimeMillis() + length;
+        //long wakeup_time = System.currentTimeMillis() + time;
         val showAlarmPI = getTimerActivityIntent(context, id)
         val alarmInfo = AlarmManager.AlarmClockInfo(endTime.time, showAlarmPI)
 
