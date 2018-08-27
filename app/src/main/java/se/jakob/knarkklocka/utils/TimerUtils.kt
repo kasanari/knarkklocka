@@ -13,7 +13,6 @@ import java.util.Locale
 
 import se.jakob.knarkklocka.AlarmActivity
 import se.jakob.knarkklocka.AlarmBroadcastReceiver
-import se.jakob.knarkklocka.AlarmNotificationsUtils
 import se.jakob.knarkklocka.AlarmService
 import se.jakob.knarkklocka.BuildConfig
 import se.jakob.knarkklocka.TimerActivity
@@ -40,7 +39,6 @@ object TimerUtils {
      * Returns whatever pending intent i am using at the moment
      */
     private fun getPI(context: Context, id: Long): PendingIntent {
-        //return getAlarmReceiverIntent(context, id);
         return getAlarmServiceIntent(context, id)
     }
 
@@ -52,24 +50,6 @@ object TimerUtils {
         alarmIntent.putExtra(EXTRA_ALARM_ID, id)
         alarmIntent.action = ACTION_ACTIVATE_ALARM
         return PendingIntent.getForegroundService(context, ALARM_INTENT_ID, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-    }
-
-    /**
-     * Returns the pending intent that starts the Alarm Activity
-     */
-    fun getAlarmActivityIntent(context: Context, id: Long): PendingIntent {
-        val alarmIntent = Intent(context, AlarmActivity::class.java)
-        alarmIntent.putExtra(EXTRA_ALARM_ID, id)
-        return PendingIntent.getActivity(context, ALARM_INTENT_ID, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-    }
-
-    /**
-     * Returns the pending intent that starts the Alarm Activity
-     */
-    private fun getAlarmReceiverIntent(context: Context, id: Long): PendingIntent {
-        val alarmIntent = Intent(context, AlarmBroadcastReceiver::class.java)
-        alarmIntent.putExtra(EXTRA_ALARM_ID, id)
-        return PendingIntent.getBroadcast(context, ALARM_INTENT_ID, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     /**
@@ -88,7 +68,6 @@ object TimerUtils {
         val pendingAlarmIntent = getPI(context, id)
 
         /*Setup alarm clock info*/
-        //long wakeup_time = System.currentTimeMillis() + time;
         val showAlarmPI = getTimerActivityIntent(context, id)
         val alarmInfo = AlarmManager.AlarmClockInfo(endTime.time, showAlarmPI)
 
