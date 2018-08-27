@@ -5,6 +5,7 @@ import android.os.AsyncTask
 import se.jakob.knarkklocka.data.AlarmState.STATE_WAITING
 import se.jakob.knarkklocka.data.AlarmState.STATE_SNOOZING
 import se.jakob.knarkklocka.data.AlarmState.STATE_ACTIVE
+import se.jakob.knarkklocka.utils.runOnIoThread
 
 class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
 
@@ -34,7 +35,9 @@ class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
     }
 
     fun deleteAll() {
-        ClearAsyncTask(alarmDao).execute()
+        runOnIoThread {
+            alarmDao.deleteAll()
+        }
     }
 
     fun insert(alarm: Alarm): Long {
@@ -42,34 +45,14 @@ class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
     }
 
     fun delete(alarm: Alarm) {
-        DeleteAsyncTask(alarmDao).execute(alarm)
+        runOnIoThread {
+            alarmDao.deleteAlarm(alarm)
+        }
     }
 
     fun update(alarm: Alarm) {
-        UpdateAsyncTask(alarmDao).execute(alarm)
-    }
-
-    private class UpdateAsyncTask internal constructor(private val mAsyncTaskDao: AlarmDao) : AsyncTask<Alarm, Void, Void>() {
-
-        override fun doInBackground(vararg params: Alarm): Void? {
-            mAsyncTaskDao.updateAlarm(params[0])
-            return null
-        }
-    }
-
-    private class DeleteAsyncTask internal constructor(private val mAsyncTaskDao: AlarmDao) : AsyncTask<Alarm, Void, Void>() {
-
-        override fun doInBackground(vararg params: Alarm): Void? {
-            mAsyncTaskDao.deleteAlarm(params[0])
-            return null
-        }
-    }
-
-    private class ClearAsyncTask internal constructor(private val mAsyncTaskDao: AlarmDao) : AsyncTask<Void, Void, Void>() {
-
-        override fun doInBackground(vararg voids: Void): Void? {
-            mAsyncTaskDao.deleteAll()
-            return null
+        runOnIoThread {
+            alarmDao.updateAlarm(alarm)
         }
     }
 
