@@ -1,21 +1,25 @@
 package se.jakob.knarkklocka.settings
 
-
-import android.app.ActionBar
 import android.os.Bundle
+import android.support.v4.app.DialogFragment
+import android.support.v4.app.FragmentActivity
 import android.support.v4.app.NavUtils
-import android.support.v7.app.AppCompatActivity
+import android.support.v7.preference.Preference
+import android.support.v7.preference.PreferenceFragmentCompat
 import android.view.MenuItem
+import se.jakob.knarkklocka.R
+import se.jakob.knarkklocka.utils.Utils
 
 
-class SettingsActivity : AppCompatActivity() {
+class SettingsActivity : FragmentActivity() {
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         val actionBar = actionBar
         actionBar?.setDisplayHomeAsUpEnabled(true)
 
         super.onCreate(savedInstanceState)
-        fragmentManager.beginTransaction()
+        // Display the fragment as the main content.
+        supportFragmentManager.beginTransaction()
                 .replace(android.R.id.content, SettingsFragment())
                 .commit()
     }
@@ -28,4 +32,34 @@ class SettingsActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
+
+
+    class SettingsFragment : PreferenceFragmentCompat() {
+        override fun onCreatePreferences(p0: Bundle?, p1: String?) {
+            // Load the preferences from an XML resource
+            addPreferencesFromResource(R.xml.preference_screen)
+            val credits = findPreference(getString(R.string.pref_credits_key))
+            credits.title = Utils.creditsString
+        }
+
+        override fun onDisplayPreferenceDialog(preference: Preference?) {
+            // Try if the preference is one of our custom Preferences
+            var dialogFragment: DialogFragment? = null
+
+            if (preference is TimerLengthPreference) {
+                // Create a new instance of TimePreferenceDialogFragment with the key of the related Preference
+                dialogFragment = TimePreferenceDialogFragmentCompat.getInstance(preference.getKey())
+            }
+
+            // If it was one of our custom Preferences, show its dialog
+            if (dialogFragment != null) {
+                dialogFragment.setTargetFragment(this, 0)
+                dialogFragment.show(this.fragmentManager,
+                        "android.support.v7.preference" + ".PreferenceFragment.DIALOG")
+            } else {
+                super.onDisplayPreferenceDialog(preference) // Could not be handled here. Try with the super method.
+            }
+        }
+    }
+
 }
