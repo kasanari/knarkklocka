@@ -1,4 +1,4 @@
-package se.jakob.knarkklocka
+package se.jakob.knarkklocka.utils
 
 import android.app.*
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
@@ -9,8 +9,9 @@ import android.os.Build
 import android.os.SystemClock
 import android.support.v4.content.ContextCompat
 import android.widget.RemoteViews
+import se.jakob.knarkklocka.AlarmActivity
+import se.jakob.knarkklocka.R
 import se.jakob.knarkklocka.data.Alarm
-import se.jakob.knarkklocka.utils.TimerUtils
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID
 import java.util.*
 
