@@ -2,12 +2,10 @@ package se.jakob.knarkklocka.viewmodels
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.ViewModel
-
-import java.util.Date
-
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmRepository
 import se.jakob.knarkklocka.data.AlarmState
+import java.util.*
 
 abstract class AlarmViewModel internal constructor(private val repository: AlarmRepository)
     : ViewModel() {

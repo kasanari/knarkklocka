@@ -12,7 +12,7 @@ import se.jakob.knarkklocka.data.AlarmRepository
 
 class AlarmActivityViewModelFactory(
         private val alarmRepository: AlarmRepository,
-        private val alarmID : Long
+        private val alarmID: Long
 ) : ViewModelProvider.NewInstanceFactory() {
 
     @Suppress("UNCHECKED_CAST")
