@@ -7,22 +7,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-
-import java.text.SimpleDateFormat
-import java.util.Locale
-
 import se.jakob.knarkklocka.R
+import java.text.SimpleDateFormat
+import java.util.*
 
 class AlarmListAdapter(context: Context) : RecyclerView.Adapter<AlarmListAdapter.AlarmViewHolder>() {
 
-    private val mInflater: LayoutInflater
-    private var mAlarms: List<Alarm>? = null // Cached copy of alarms
-    private val res: Resources
-
-    init {
-        mInflater = LayoutInflater.from(context)
-        res = context.resources
+    private val mInflater: LayoutInflater = LayoutInflater.from(context)
+    var mAlarms: List<Alarm>? = null // Cached copy of alarms
+    set(alarms) {
+        field = alarms
+        notifyDataSetChanged()
     }
+    private val res: Resources = context.resources
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlarmViewHolder {
         val itemView = mInflater.inflate(R.layout.recyclerview_item, parent, false)
@@ -30,50 +27,35 @@ class AlarmListAdapter(context: Context) : RecyclerView.Adapter<AlarmListAdapter
     }
 
     override fun onBindViewHolder(holder: AlarmViewHolder, position: Int) {
-        if (mAlarms != null) {
-            val current = mAlarms!![position]
-            val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-            val dateString = dateFormat.format(current.endTime)
-            val string = current.id.toString() + " " + dateString
-            holder.dueTimeItemView.text = string
+        mAlarms?.run {
+            val currentAlarm = this[position]
+            val dateString = SimpleDateFormat("HH:mm", Locale.getDefault()).format(currentAlarm.endTime)
+            //val dateString = dateFormat.format(currentAlarm.endTime)
+            //val string = currentAlarm.id.toString() + " " + dateString
+            holder.dueTimeItemView.text = String.format(Locale.getDefault(), "%d: \t %s", currentAlarm.id, dateString)
 
-            val stateString = current.stateToString
+            val stateString = currentAlarm.stateToString
             holder.stateItemView.text = stateString
 
-
-            val snoozes = current.snoozes
+            val snoozes = currentAlarm.snoozes
             val snoozeString = res.getQuantityString(R.plurals.snoozes, snoozes, snoozes)
             //String snoozeString = "Snoozes: " + snoozes;
             holder.snoozeItemView.text = snoozeString
-        } else {
+        } ?: run {
             // Covers the case of data not being ready yet.
-            holder.dueTimeItemView.text = "No Alarms"
+            holder.dueTimeItemView.text = res.getString(R.string.viewholder_no_alarms)
         }
-    }
-
-    fun setAlarms(words: List<Alarm>) {
-        mAlarms = words
-        notifyDataSetChanged()
     }
 
     // getItemCount() is called many times, and when it is first called,
     // mAlarms has not been updated (means initially, it's null, and we can't return null).
     override fun getItemCount(): Int {
-        return if (mAlarms != null)
-            mAlarms!!.size
-        else
-            0
+        return mAlarms?.size ?: 0
     }
 
-    internal inner class AlarmViewHolder private constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val dueTimeItemView: TextView
-        private val stateItemView: TextView
-        private val snoozeItemView: TextView
-
-        init {
-            dueTimeItemView = itemView.findViewById(R.id.tv_alarm_due)
-            stateItemView = itemView.findViewById(R.id.tv_alarm_state)
-            snoozeItemView = itemView.findViewById(R.id.tv_alarm_snoozes)
-        }
+    inner class AlarmViewHolder constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val dueTimeItemView: TextView = itemView.findViewById(R.id.tv_alarm_due)
+        val stateItemView: TextView = itemView.findViewById(R.id.tv_alarm_state)
+        val snoozeItemView: TextView = itemView.findViewById(R.id.tv_alarm_snoozes)
     }
 }
