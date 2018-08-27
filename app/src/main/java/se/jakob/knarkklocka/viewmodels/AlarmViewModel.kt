@@ -7,6 +7,7 @@ import java.util.Date
 
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmRepository
+import se.jakob.knarkklocka.data.AlarmState
 
 abstract class AlarmViewModel internal constructor(private val repository: AlarmRepository)
     : ViewModel() {
@@ -34,7 +35,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
     fun kill() {
         if (hasAlarm) {
             val alarm = this.alarm.value
-            alarm!!.state = Alarm.STATE_DEAD
+            alarm!!.state = AlarmState.STATE_DEAD
             repository.update(alarm)
         }
     }
@@ -42,7 +43,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
     fun snooze(endTime: Date) {
         if (hasAlarm) {
             val alarm : Alarm = this.alarm.value!!
-            alarm.state = Alarm.STATE_SNOOZING
+            alarm.state = AlarmState.STATE_SNOOZING
             alarm.incrementSnoozes()
             alarm.endTime = endTime
             repository.update(alarm)
