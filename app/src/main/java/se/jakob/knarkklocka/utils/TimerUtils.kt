@@ -6,19 +6,14 @@ import android.content.Context
 import android.content.Intent
 import android.icu.util.Calendar
 import android.util.Log
-
-import java.text.DateFormat
-import java.util.Date
-import java.util.Locale
-
-import se.jakob.knarkklocka.AlarmActivity
-import se.jakob.knarkklocka.AlarmBroadcastReceiver
 import se.jakob.knarkklocka.AlarmService
 import se.jakob.knarkklocka.BuildConfig
 import se.jakob.knarkklocka.TimerActivity
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmState
 import se.jakob.knarkklocka.viewmodels.AlarmViewModel
+import java.text.DateFormat
+import java.util.*
 
 /**
  * Created by Jakob Nyberg on 2018-03-26.
@@ -27,13 +22,11 @@ import se.jakob.knarkklocka.viewmodels.AlarmViewModel
 object TimerUtils {
 
 
-
     const val EXTRA_ALARM_ID = "alarm-id"
 
     private const val TAG = "TimerUtils"
     private const val ALARM_INTENT_ID = 76          //Arbitrary unique ID for the alarm intent
     private const val TIMER_ACTIVITY_INTENT_ID = 34 //Arbitrary unique ID for the TimerActivity intent
-
 
     /**
      * Returns whatever pending intent i am using at the moment
@@ -43,7 +36,7 @@ object TimerUtils {
     }
 
     /**
-     * Returns the pending intent that starts the Alarm Service
+     * Returns the pending intent that starts [AlarmService]
      */
     private fun getAlarmServiceIntent(context: Context, id: Long): PendingIntent {
         val alarmIntent = Intent(context, AlarmService::class.java)
@@ -53,7 +46,7 @@ object TimerUtils {
     }
 
     /**
-     * Returns the pending intent that starts the main timer activity
+     * Returns the pending intent that starts [TimerActivity]
      */
     fun getTimerActivityIntent(context: Context, id: Long): PendingIntent {
         val timerIntent = Intent(context, TimerActivity::class.java)
@@ -61,70 +54,61 @@ object TimerUtils {
         return PendingIntent.getActivity(context, TIMER_ACTIVITY_INTENT_ID, timerIntent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
+    /**
+     * Creates a new AlarmClock with the system [AlarmManager]
+     */
     private fun setNewAlarmClock(context: Context, id: Long, endTime: Date) {
+        cancelAlarm(context, -1) /* Remove existing alarm */
+
         val alarmManager = context.getSystemService(AlarmManager::class.java)
 
-        /*Set AlarmService to start when alarm goes off*/
-        val pendingAlarmIntent = getPI(context, id)
+        val pendingAlarmIntent = getPI(context, id) /* Set AlarmService as the intent to start when alarm goes off */
 
-        /*Setup alarm clock info*/
         val showAlarmPI = getTimerActivityIntent(context, id)
-        val alarmInfo = AlarmManager.AlarmClockInfo(endTime.time, showAlarmPI)
+        val alarmClockInfo = AlarmManager.AlarmClockInfo(endTime.time, showAlarmPI) /* Setup alarm clock info */
 
-        if (alarmManager != null) {
-            alarmManager.setAlarmClock(alarmInfo, pendingAlarmIntent)
-            if (BuildConfig.DEBUG) {
-                val df = DateFormat.getTimeInstance(DateFormat.SHORT)
-                val debugString = String.format(Locale.getDefault(), "Set alarm with id %d due %s", id, df.format(endTime))
-                Log.d(TAG, debugString)
-            }
+        alarmManager.setAlarmClock(alarmClockInfo, pendingAlarmIntent) /* Register the alarm with the AlarmManager */
+
+        if (BuildConfig.DEBUG) {
+            val df = DateFormat.getTimeInstance(DateFormat.SHORT)
+            val debugString = String.format(Locale.getDefault(), "Set alarm with id %d due %s", id, df.format(endTime))
+            Log.d(TAG, debugString)
         }
+
     }
 
     fun cancelAlarm(context: Context, id: Long) {
         val alarmManager = context.getSystemService(AlarmManager::class.java)
-        val pendingAlarmIntent = getPI(context, id)
-        if (alarmManager != null) {
-            alarmManager.cancel(pendingAlarmIntent)
-            if (BuildConfig.DEBUG) {
-                val debugString = String.format(Locale.getDefault(), "Cancelled alarm with id %d", id)
-                Log.d(TAG, debugString)
-            }
+
+        val pendingAlarmIntent = getPI(context, id) /*Create the same intent as the registered alarm in order to cancel it*/
+        alarmManager.cancel(pendingAlarmIntent)
+
+        if (BuildConfig.DEBUG) {
+            val debugString = String.format(Locale.getDefault(), "Cancelled alarm with id %d", id)
+            Log.d(TAG, debugString)
         }
+
     }
 
     fun startMainTimer(context: Context, vm: AlarmViewModel) {
-        restartTimer(context, vm, false)
+        val timerDuration = PreferenceUtils.getSnoozeTimerLength(context)
+        val startTime = Calendar.getInstance()
+        val endTime = Calendar.getInstance().apply { add(Calendar.MILLISECOND, timerDuration.toInt()) }
+        val alarm = Alarm(AlarmState.STATE_WAITING, startTime.time, endTime.time)
+        runOnIoThread {
+            val id = vm.add(alarm)
+            setNewAlarmClock(context, id, alarm.endTime)
+        }
+        AlarmNotificationsUtils.showWaitingAlarmNotification(context, alarm)
     }
 
     fun startSnoozeTimer(context: Context, vm: AlarmViewModel) {
-        restartTimer(context, vm, true)
-    }
-
-    private fun restartTimer(context: Context, vm: AlarmViewModel, isSnooze: Boolean) {
-
-        val timerDuration = if (isSnooze) {
-            PreferenceUtils.getSnoozeTimerLength(context)
-        } else {
-            PreferenceUtils.getMainTimerLength(context)
-        }
-
-        runOnIoThread {
-            val currentTime = Calendar.getInstance()
-            val endTime = Calendar.getInstance().also { it.add(Calendar.MILLISECOND, timerDuration.toInt()) }
-            if (isSnooze) {
-                val currentAlarm = vm.getCurrentAlarm()
-                if (currentAlarm != null) {
-                    vm.snooze(endTime.time)
-                    AlarmNotificationsUtils.showSnoozingAlarmNotification(context, currentAlarm)
-                    setNewAlarmClock(context, currentAlarm.id, endTime.time)
-                }
-            } else {
-                val alarm = Alarm(AlarmState.STATE_WAITING, currentTime.time, endTime.time)
-                val id = vm.add(alarm)
-                setNewAlarmClock(context, id, alarm.endTime)
-                AlarmNotificationsUtils.showWaitingAlarmNotification(context, alarm)
-            }
+        val timerDuration = PreferenceUtils.getSnoozeTimerLength(context)
+        val endTime = Calendar.getInstance().apply { add(Calendar.MILLISECOND, timerDuration.toInt()) }
+        vm.getCurrentAlarm()?.run {
+            vm.snooze(endTime.time)
+            AlarmNotificationsUtils.showSnoozingAlarmNotification(context, this)
+            setNewAlarmClock(context, this.id, endTime.time)
         }
     }
 }
