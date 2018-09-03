@@ -1,6 +1,7 @@
 package se.jakob.knarkklocka.data
 
 import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.arch.persistence.room.Dao
 import android.arch.persistence.room.Delete
 import android.arch.persistence.room.Insert
@@ -37,8 +38,8 @@ interface AlarmDao {
     @Query("SELECT * FROM alarm_table WHERE id = :id")
     fun loadAlarmById(id: Long): Alarm
 
-    @Query("SELECT * FROM alarm_table WHERE alarm_state = :state")
-    fun loadAlarmsByState(state: Int): LiveData<Alarm>
+    @Query("SELECT * FROM alarm_table  WHERE alarm_state IN (:states) ORDER BY start_time DESC")
+    fun loadAlarmsByStates(vararg states: Int): LiveData<List<Alarm>>
 
     @Query("SELECT * FROM alarm_table WHERE alarm_state IN (:states) LIMIT 1")
     fun loadSingleAlarmByState(vararg states: Int): LiveData<Alarm>
