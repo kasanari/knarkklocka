@@ -38,7 +38,7 @@ class HistoryActivity : AppCompatActivity() {
             adapter.mAlarms = alarms
         })
 
-        mAlarmHistoryViewModel.alarm.observe(this, Observer { alarm -> currentAlarm = alarm })
+        mAlarmHistoryViewModel.liveAlarm.observe(this, Observer { alarm -> currentAlarm = alarm })
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -68,6 +68,6 @@ class HistoryActivity : AppCompatActivity() {
     }
 
     private fun alarmIsRunning(): Boolean {
-        return mAlarmHistoryViewModel.alarm.value != null
+        return mAlarmHistoryViewModel.liveAlarm.value != null
     }
 }
