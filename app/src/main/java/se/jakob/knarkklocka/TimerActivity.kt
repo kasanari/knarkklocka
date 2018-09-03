@@ -45,7 +45,7 @@ class TimerActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceC
         val factory = InjectorUtils.provideMainActivityViewModelFactory(this)
         mainActivityViewModel = ViewModelProviders.of(this, factory).get(MainActivityViewModel::class.java)
 
-        mainActivityViewModel.alarm.observe(this, Observer { alarm ->
+        mainActivityViewModel.liveAlarm.observe(this, Observer { alarm ->
             if (alarm != null) {
                 currentAlarm = alarm
                 val state = alarm.state
@@ -146,7 +146,7 @@ class TimerActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceC
             Log.d(TAG, "Sleep mode engaged...")
             AlarmBroadcasts.broadcastStopAlarm(this) /* Stop any vibration or notifications that are happening right now */
             Snackbar.make(v, "Goodnight", Snackbar.LENGTH_LONG).show()
-            val currentAlarm = mainActivityViewModel.alarm.value
+            val currentAlarm = mainActivityViewModel.liveAlarm.value
             if (currentAlarm != null) {
                 mainActivityViewModel.delete()
                 TimerUtils.cancelAlarm(applicationContext, currentAlarm.id)
@@ -160,7 +160,7 @@ class TimerActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceC
     }
 
     private fun alarmIsRunning(): Boolean {
-        return mainActivityViewModel.alarm.value != null
+        return mainActivityViewModel.liveAlarm.value != null
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
