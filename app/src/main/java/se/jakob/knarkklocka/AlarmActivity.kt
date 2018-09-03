@@ -97,7 +97,7 @@ class AlarmActivity : AppCompatActivity(), View.OnClickListener, View.OnLongClic
         val factory = InjectorUtils.provideAlarmActivityViewModelFactory(this, id)
         alarmActivityViewModel = ViewModelProviders.of(this, factory).get(AlarmActivityViewModel::class.java)
 
-        alarmActivityViewModel.alarm.observe(this, Observer { alarm ->
+        alarmActivityViewModel.liveAlarm.observe(this, Observer { alarm ->
             if (alarm != null) {
                 val state = alarm.state
                 when (state) {
@@ -148,7 +148,7 @@ class AlarmActivity : AppCompatActivity(), View.OnClickListener, View.OnLongClic
             TimerUtils.startSnoozeTimer(this, alarmActivityViewModel)
 
             alarmIsActive = false
-            alarmActivityViewModel.alarm.removeObservers(this)
+            alarmActivityViewModel.liveAlarm.removeObservers(this)
 
             stopAlarm()
         }
@@ -187,7 +187,7 @@ class AlarmActivity : AppCompatActivity(), View.OnClickListener, View.OnLongClic
     private fun stopAlarm() {
         stopTimeoutClock()
         alarmIsActive = false
-        alarmActivityViewModel.alarm.removeObservers(this)
+        alarmActivityViewModel.liveAlarm.removeObservers(this)
         val alarmIntent = Intent(this, AlarmService::class.java)
         alarmIntent.putExtra(EXTRA_ALARM_ID, currentAlarm!!.id)
         alarmIntent.action = ACTION_STOP_ALARM
