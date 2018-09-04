@@ -12,8 +12,8 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
 
     abstract var alarm : LiveData<Alarm>
 
-    private var hasAlarm: Boolean = false
-        get() = alarm.value != null
+    var hasAlarm: Boolean = false
+        get() = liveAlarm.value != null
 
 
     fun getCurrentAlarm() : Alarm? {

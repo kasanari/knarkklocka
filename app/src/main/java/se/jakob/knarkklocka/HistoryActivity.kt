@@ -55,7 +55,7 @@ class HistoryActivity : AppCompatActivity() {
 
         return when (id) {
             R.id.action_clear_history -> {
-                if (alarmIsRunning()) {
+                if (mAlarmHistoryViewModel.alarmIsRunning) {
                     TimerUtils.cancelAlarm(applicationContext, currentAlarm!!.id)
                     AlarmNotificationsUtils.clearAllNotifications(this)
                 }
@@ -65,9 +65,5 @@ class HistoryActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    private fun alarmIsRunning(): Boolean {
-        return mAlarmHistoryViewModel.liveAlarm.value != null
     }
 }

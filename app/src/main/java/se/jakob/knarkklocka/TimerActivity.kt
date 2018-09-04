@@ -132,7 +132,7 @@ class TimerActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceC
     }
 
     private fun restartAlarm() {
-        if (alarmIsRunning()) {
+        if (mainActivityViewModel.hasAlarm) {
             mainActivityViewModel.kill() /* If there is an alarm running, kill it. */
             AlarmBroadcasts.broadcastStopAlarm(this) /* Stop any vibration or notifications that are happening right now */
         }
@@ -140,8 +140,7 @@ class TimerActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceC
     }
 
     private fun sleep(v: View) {
-        fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp)
-        if (alarmIsRunning()) {
+        if (mainActivityViewModel.hasAlarm) {
             AlarmNotificationsUtils.clearAllNotifications(this)
             Log.d(TAG, "Sleep mode engaged...")
             AlarmBroadcasts.broadcastStopAlarm(this) /* Stop any vibration or notifications that are happening right now */
@@ -171,7 +170,7 @@ class TimerActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceC
 
     override fun onResume() {
         super.onResume()
-        if (alarmIsRunning()) {
+        if (mainActivityViewModel.hasAlarm) {
             chronometer_main.start()
         }
     }
