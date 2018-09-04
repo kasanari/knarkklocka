@@ -26,7 +26,7 @@ import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
 import java.text.DateFormat
 import java.util.*
 
-class TimerActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
+class TimerActivity : AppCompatActivity() {
 
     private lateinit var mainActivityViewModel: MainActivityViewModel
 
@@ -90,11 +90,7 @@ class TimerActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceC
             }
         })
 
-        /*Setup the shared preference listener*/
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        prefs.registerOnSharedPreferenceChangeListener(this)
-
-        /*Use toolbar instead of ActionBar*/
+        /* Setting up Toolbar instead of ActionBar */
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         toolbar.title = "Timer setup"
         setSupportActionBar(toolbar)
@@ -200,10 +196,6 @@ class TimerActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceC
             }
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-
     }
 
     companion object {
