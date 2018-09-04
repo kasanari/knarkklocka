@@ -67,11 +67,10 @@ class AlarmService : LifecycleService() {
                 }
 
                 if (alarm.snoozes < 10) {
-                    mRepository.changeAlarmState(id, AlarmState.STATE_ACTIVE)
+                    mRepository.changeAlarmState(alarm, AlarmState.STATE_ACTIVE)
                     startAlarm(alarm)
                 } else {
-                    alarm.state = AlarmState.STATE_DEAD
-                    mRepository.update(alarm)
+                    mRepository.changeAlarmState(alarm, AlarmState.STATE_DEAD)
                     stopAlarm()
                     stopSelf()
                 }
