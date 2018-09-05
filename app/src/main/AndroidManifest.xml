@@ -71,7 +71,6 @@
             android:exported="false" />
 
         <!-- *********Broadcast Receivers******** -->
-        <receiver android:name=".AlarmBroadcastReceiver" />
     </application>
 
 </manifest>
