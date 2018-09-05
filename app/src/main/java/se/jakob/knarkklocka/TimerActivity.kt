@@ -37,7 +37,6 @@ class TimerActivity : AppCompatActivity() {
         setContentView(R.layout.activity_timer)
 
         button_remove_timer.visibility = View.INVISIBLE
-        tv_main_due.visibility = View.INVISIBLE
         chronometer_main.visibility = View.INVISIBLE
 
         /*Floating action button to start a new timer*/
@@ -62,7 +61,6 @@ class TimerActivity : AppCompatActivity() {
                         fab_start_timer.visibility = View.VISIBLE
                         button_remove_timer.visibility = View.INVISIBLE
                         button_snooze_timer.visibility = View.INVISIBLE
-                        tv_main_due.visibility = View.INVISIBLE
                         chronometer_main.visibility = View.INVISIBLE
                     }
                     AlarmState.STATE_SNOOZING -> {
@@ -85,7 +83,6 @@ class TimerActivity : AppCompatActivity() {
                 fab_start_timer.visibility = View.VISIBLE
                 button_remove_timer.visibility = View.INVISIBLE
                 button_snooze_timer.visibility = View.INVISIBLE
-                tv_main_due.visibility = View.INVISIBLE
                 chronometer_main.visibility = View.INVISIBLE
             }
         })
@@ -114,13 +111,11 @@ class TimerActivity : AppCompatActivity() {
 
     private fun setupChronometer(alarm: Alarm) {
         val endTime = alarm.endTime
-        val dateString = dateFormat.format(endTime)
-        tv_main_due.text = dateString
-        tv_main_due.visibility = View.VISIBLE
-        chronometer_main.visibility = View.VISIBLE
         val timeDelta = endTime.time - System.currentTimeMillis()
         chronometer_main.base = SystemClock.elapsedRealtime() + timeDelta
         chronometer_main.start()
+
+        chronometer_main.visibility = View.VISIBLE
     }
 
     private fun restartAlarm() {
