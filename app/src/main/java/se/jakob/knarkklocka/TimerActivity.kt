@@ -138,13 +138,12 @@ class TimerActivity : AppCompatActivity() {
     private fun sleep(v: View) {
         if (mainActivityViewModel.hasAlarm) {
             AlarmNotificationsUtils.clearAllNotifications(this)
-            Log.d(TAG, "Sleep mode engaged...")
             AlarmBroadcasts.broadcastStopAlarm(this) /* Stop any vibration or notifications that are happening right now */
+            mainActivityViewModel.delete()
+            currentAlarm?.let {
+                TimerUtils.cancelAlarm(applicationContext, it.id)
+            Log.d(TAG, "Sleep mode engaged...")
             Snackbar.make(v, "Goodnight", Snackbar.LENGTH_LONG).show()
-            val currentAlarm = mainActivityViewModel.liveAlarm.value
-            if (currentAlarm != null) {
-                mainActivityViewModel.delete()
-                TimerUtils.cancelAlarm(applicationContext, currentAlarm.id)
             }
         }
     }
