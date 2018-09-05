@@ -96,13 +96,14 @@ class TimerActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         fab_start_timer.setOnLongClickListener { v ->
-            callVibrate()
+            Klaxon.vibrateOnce(this)
             restartAlarm()
             Snackbar.make(v, "Started new timer!", Snackbar.LENGTH_LONG).show()
             true
         }
 
         button_remove_timer.setOnLongClickListener { v ->
+            Klaxon.vibrateOnce(this)
             sleep(v)
             true
         }
@@ -111,12 +112,7 @@ class TimerActivity : AppCompatActivity() {
 
     }
 
-    private fun callVibrate() {
-        Klaxon.vibrateOnce(this)
-    }
-
     private fun setupChronometer(alarm: Alarm) {
-        val dateFormat = DateFormat.getTimeInstance()
         val endTime = alarm.endTime
         val dateString = dateFormat.format(endTime)
         tv_main_due.text = dateString
