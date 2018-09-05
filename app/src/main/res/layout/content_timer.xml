@@ -17,7 +17,7 @@
         android:elevation="4dp">
 
         <Chronometer
-            android:id="@+id/time_display"
+            android:id="@+id/chronometer_main"
             android:theme="@style/chronometer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -33,7 +33,7 @@
     </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout
-        android:id="@+id/constraintLayout"
+        android:id="@+id/timer_controls"
         android:layout_width="match_parent"
         android:layout_height="113dp"
         android:layout_marginBottom="40dp"
@@ -48,10 +48,10 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="16dp"
-            android:fontFamily="@font/varela_round"
+            android:theme="@style/button_style"
             android:text="@string/remove"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/button_add_timer"
+            app:layout_constraintEnd_toStartOf="@+id/fab_start_timer"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -75,11 +75,11 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="16dp"
-            android:fontFamily="@font/varela_round"
+            android:theme="@style/button_style"
             android:text="@string/snooze"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/button_add_timer"
+            app:layout_constraintStart_toEndOf="@+id/fab_start_timer"
             app:layout_constraintTop_toTopOf="parent" />
 
     </android.support.constraint.ConstraintLayout>
