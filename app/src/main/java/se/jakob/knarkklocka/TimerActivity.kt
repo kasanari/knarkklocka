@@ -3,10 +3,8 @@ package se.jakob.knarkklocka
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.SystemClock
-import android.preference.PreferenceManager
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
@@ -24,7 +22,6 @@ import se.jakob.knarkklocka.utils.Klaxon
 import se.jakob.knarkklocka.utils.TimerUtils
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
 import java.text.DateFormat
-import java.util.*
 
 class TimerActivity : AppCompatActivity() {
 
@@ -38,8 +35,6 @@ class TimerActivity : AppCompatActivity() {
 
         button_remove_timer.visibility = View.INVISIBLE
         chronometer_main.visibility = View.INVISIBLE
-
-        /*Floating action button to start a new timer*/
 
         val factory = InjectorUtils.provideMainActivityViewModelFactory(this)
         mainActivityViewModel = ViewModelProviders.of(this, factory).get(MainActivityViewModel::class.java)
@@ -92,6 +87,8 @@ class TimerActivity : AppCompatActivity() {
         toolbar.title = "Timer setup"
         setSupportActionBar(toolbar)
 
+
+        /* Setting up OnClick listeners */
         fab_start_timer.setOnLongClickListener { v ->
             Klaxon.vibrateOnce(this)
             restartAlarm()
@@ -105,7 +102,7 @@ class TimerActivity : AppCompatActivity() {
             true
         }
 
-        button_snooze_timer.setOnClickListener { snooze() }
+        button_snooze_timer.setOnClickListener { v -> snooze(v) }
 
     }
 
@@ -133,19 +130,16 @@ class TimerActivity : AppCompatActivity() {
             mainActivityViewModel.delete()
             currentAlarm?.let {
                 TimerUtils.cancelAlarm(applicationContext, it.id)
-            Log.d(TAG, "Sleep mode engaged...")
-            Snackbar.make(v, "Goodnight", Snackbar.LENGTH_LONG).show()
+                Log.d(TAG, "Sleep mode engaged...")
+                Snackbar.make(v, "Goodnight", Snackbar.LENGTH_LONG).show()
             }
         }
     }
 
-    private fun snooze() {
-        AlarmBroadcasts.broadcastStopAlarm(this) /*Stop any vibration or notifications that are happening right now*/
+    private fun snooze(v : View) {
+        AlarmBroadcasts.broadcastStopAlarm(this) // Stop any vibration or notifications that are happening right now
         TimerUtils.startSnoozeTimer(this, mainActivityViewModel)
-    }
-
-    private fun alarmIsRunning(): Boolean {
-        return mainActivityViewModel.liveAlarm.value != null
+        Snackbar.make(v, "You are only postponing the inevitable...", Snackbar.LENGTH_LONG).show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
