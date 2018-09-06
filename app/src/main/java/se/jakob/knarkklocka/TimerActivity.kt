@@ -16,16 +16,14 @@ import kotlinx.android.synthetic.main.content_timer.*
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmState
 import se.jakob.knarkklocka.settings.SettingsActivity
-import se.jakob.knarkklocka.utils.AlarmNotificationsUtils
 import se.jakob.knarkklocka.utils.InjectorUtils
 import se.jakob.knarkklocka.utils.Klaxon
 import se.jakob.knarkklocka.utils.TimerUtils
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
-import java.text.DateFormat
 
 class TimerActivity : AppCompatActivity() {
 
-    private lateinit var mainActivityViewModel: MainActivityViewModel
+    private lateinit var viewModel: MainActivityViewModel
 
     private var currentAlarm: Alarm? = null
 
@@ -37,9 +35,9 @@ class TimerActivity : AppCompatActivity() {
         chronometer_main.visibility = View.INVISIBLE
 
         val factory = InjectorUtils.provideMainActivityViewModelFactory(this)
-        mainActivityViewModel = ViewModelProviders.of(this, factory).get(MainActivityViewModel::class.java)
+        viewModel = ViewModelProviders.of(this, factory).get(MainActivityViewModel::class.java)
 
-        mainActivityViewModel.liveAlarm.observe(this, Observer { alarm ->
+        viewModel.liveAlarm.observe(this, Observer { alarm ->
             if (alarm != null) {
                 currentAlarm = alarm
                 val state = alarm.state
@@ -87,7 +85,6 @@ class TimerActivity : AppCompatActivity() {
         toolbar.title = "Timer setup"
         setSupportActionBar(toolbar)
 
-
         /* Setting up OnClick listeners */
         fab_start_timer.setOnLongClickListener { v ->
             Klaxon.vibrateOnce(this)
@@ -116,29 +113,21 @@ class TimerActivity : AppCompatActivity() {
     }
 
     private fun restartAlarm() {
-        if (mainActivityViewModel.hasAlarm) {
-            mainActivityViewModel.kill() /* If there is an alarm running, kill it. */
-            AlarmBroadcasts.broadcastStopAlarm(this) /* Stop any vibration or notifications that are happening right now */
-        }
-        TimerUtils.startMainTimer(this, mainActivityViewModel)
+        viewModel.kill() /* Kill any running alarms. */
+        TimerUtils.startMainTimer(this)
     }
 
     private fun sleep(v: View) {
-        if (mainActivityViewModel.hasAlarm) {
-            AlarmNotificationsUtils.clearAllNotifications(this)
-            AlarmBroadcasts.broadcastStopAlarm(this) /* Stop any vibration or notifications that are happening right now */
-            mainActivityViewModel.delete()
-            currentAlarm?.let {
-                TimerUtils.cancelAlarm(applicationContext, it.id)
-                Log.d(TAG, "Sleep mode engaged...")
-                Snackbar.make(v, "Goodnight", Snackbar.LENGTH_LONG).show()
-            }
+        viewModel.delete() /* Delete any running alarm */
+        currentAlarm?.let {
+            TimerUtils.cancelAlarm(this, it.id)
+            Log.d(TAG, "Sleep mode engaged...")
+            Snackbar.make(v, "Goodnight", Snackbar.LENGTH_LONG).show()
         }
     }
 
-    private fun snooze(v : View) {
-        AlarmBroadcasts.broadcastStopAlarm(this) // Stop any vibration or notifications that are happening right now
-        TimerUtils.startSnoozeTimer(this, mainActivityViewModel)
+    private fun snooze(v: View) {
+        TimerUtils.startSnoozeTimer(this, viewModel.getCurrentAlarm()!!)
         Snackbar.make(v, "You are only postponing the inevitable...", Snackbar.LENGTH_LONG).show()
     }
 
@@ -149,7 +138,7 @@ class TimerActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (mainActivityViewModel.hasAlarm) {
+        if (viewModel.hasAlarm) {
             chronometer_main.start()
         }
     }
@@ -157,7 +146,7 @@ class TimerActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         chronometer_main.stop()
-        Log.d(TAG, "Application paused chronometer stopped")
+        Log.d(TAG, "Application paused, chronometer stopped")
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
