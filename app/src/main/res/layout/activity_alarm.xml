@@ -43,7 +43,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/snooze"
+        android:id="@+id/button_snooze_alarm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="128dp"
@@ -52,10 +52,10 @@
         android:text="@string/snooze"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/dismiss" />
+        app:layout_constraintStart_toEndOf="@+id/button_dismiss_alarm" />
 
     <Button
-        android:id="@+id/dismiss"
+        android:id="@+id/button_dismiss_alarm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="128dp"
@@ -63,6 +63,6 @@
         android:layout_marginStart="8dp"
         android:text="@string/dismiss"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/snooze"
+        app:layout_constraintEnd_toStartOf="@+id/button_snooze_alarm"
         app:layout_constraintStart_toStartOf="parent" />
 </android.support.constraint.ConstraintLayout>
