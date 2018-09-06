@@ -187,8 +187,8 @@ class AlarmActivity : AppCompatActivity(), View.OnClickListener, View.OnLongClic
 
     }
 
-    private fun startAlarm(alarm: Alarm?) {
-        setupChronometer(alarm!!)
+    private fun startAlarm(alarm: Alarm) {
+        setupChronometer(alarm)
         alarmIsActive = true
     }
 
