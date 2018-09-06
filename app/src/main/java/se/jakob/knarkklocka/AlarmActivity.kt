@@ -38,31 +38,25 @@ import se.jakob.knarkklocka.utils.ACTION_STOP_ALARM
 import se.jakob.knarkklocka.utils.InjectorUtils
 import se.jakob.knarkklocka.utils.TimerUtils
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID
-import se.jakob.knarkklocka.utils.WakeLocker
 import se.jakob.knarkklocka.viewmodels.AlarmActivityViewModel
 
-class AlarmActivity : AppCompatActivity(), View.OnClickListener, View.OnLongClickListener {
+class AlarmActivity : AppCompatActivity() {
 
-    private val TAG = "AlarmActivity"
-    private lateinit var alarmActivityViewModel: AlarmActivityViewModel
+    private lateinit var viewModel: AlarmActivityViewModel
 
     private var alarmIsActive = false
-
-    private var currentAlarm: Alarm? = null
 
     private val alarmCallback = AlarmManager.OnAlarmListener {
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "Timeout reached. Snoozing...")
         }
-        snooze()
+        finish()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "AlarmActivity started")
         setContentView(R.layout.activity_alarm)
-
-        WakeLocker.acquire(this)
 
         /*Ensure that screen turns on*/
         val win = window
@@ -98,24 +92,18 @@ class AlarmActivity : AppCompatActivity(), View.OnClickListener, View.OnLongClic
         startTimeoutClock()
 
         /*Get the ID of the Alarm that is going off*/
-        val intent = intent
         val id = intent.getLongExtra(EXTRA_ALARM_ID, -1)
 
         /*Setup ViewModel and Observer*/
         val factory = InjectorUtils.provideAlarmActivityViewModelFactory(this, id)
-        alarmActivityViewModel = ViewModelProviders.of(this, factory).get(AlarmActivityViewModel::class.java)
+        viewModel = ViewModelProviders.of(this, factory).get(AlarmActivityViewModel::class.java)
 
-        alarmActivityViewModel.liveAlarm.observe(this, Observer { alarm ->
+        viewModel.liveAlarm.observe(this, Observer { alarm ->
             if (alarm != null) {
-                val state = alarm.state
-                when (state) {
-                    AlarmState.STATE_ACTIVE -> {
-                        currentAlarm = alarm
-                        startAlarm(alarm)
-                    }
-                    AlarmState.STATE_DEAD -> finish()
-                    AlarmState.STATE_SNOOZING -> finish()
-                    AlarmState.STATE_WAITING -> finish()
+                if (alarm.state == AlarmState.STATE_ACTIVE) {
+                    startAlarm(alarm)
+                } else {
+                    finish()
                 }
             } else {
                 alarm_chronometer.visibility = View.INVISIBLE
@@ -152,23 +140,16 @@ class AlarmActivity : AppCompatActivity(), View.OnClickListener, View.OnLongClic
     }
 
     private fun snooze() {
-        if (alarmIsActive) {
-            TimerUtils.startSnoozeTimer(this, alarmActivityViewModel)
-
-            alarmIsActive = false
-            alarmActivityViewModel.liveAlarm.removeObservers(this)
-
-            stopAlarm()
+        viewModel.getCurrentAlarm()?.let {
+            TimerUtils.startSnoozeTimer(this, it)
         }
-        finish()
+        stopAlarm()
     }
 
     private fun dismiss() {
-        if (alarmIsActive) {
-            alarmActivityViewModel.kill()
-            TimerUtils.startMainTimer(this, alarmActivityViewModel)
-            stopAlarm()
-        }
+        viewModel.kill()
+        TimerUtils.startMainTimer(this)
+        stopAlarm()
         finish()
     }
 
@@ -178,14 +159,6 @@ class AlarmActivity : AppCompatActivity(), View.OnClickListener, View.OnLongClic
                 or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
     }
 
-    override fun onClick(view: View) {
-        if (view === button_snooze_alarm) {
-            snooze()
-        } else if (view === button_dismiss_alarm) {
-            dismiss()
-        }
-
-    }
 
     private fun startAlarm(alarm: Alarm) {
         setupChronometer(alarm)
@@ -195,11 +168,13 @@ class AlarmActivity : AppCompatActivity(), View.OnClickListener, View.OnLongClic
     private fun stopAlarm() {
         stopTimeoutClock()
         alarmIsActive = false
-        alarmActivityViewModel.liveAlarm.removeObservers(this)
-        val alarmIntent = Intent(this, AlarmService::class.java)
-        alarmIntent.putExtra(EXTRA_ALARM_ID, currentAlarm!!.id)
-        alarmIntent.action = ACTION_STOP_ALARM
-        startService(alarmIntent)
+        viewModel.liveAlarm.removeObservers(this)
+        viewModel.getCurrentAlarm()?.let {
+            val alarmIntent = Intent(this, AlarmService::class.java)
+            alarmIntent.putExtra(EXTRA_ALARM_ID, it.id)
+            alarmIntent.action = ACTION_STOP_ALARM
+            startService(alarmIntent)
+        }
     }
 
     private fun startTimeoutClock() {
