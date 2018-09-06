@@ -82,9 +82,17 @@ class AlarmActivity : AppCompatActivity(), View.OnClickListener, View.OnLongClic
         /* Close dialogs and window shade, so this is fully visible */
         sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
 
-
-        button_snooze_alarm.setOnClickListener(this)
-        button_dismiss_alarm.setOnLongClickListener(this)
+        button_snooze_alarm.setOnClickListener {
+            finish()
+        }
+        button_dismiss_alarm.setOnLongClickListener {
+            if (alarmIsActive) {
+                dismiss()
+            } else {
+                finish()
+            }
+            true
+        }
 
         /*Start timeout timer, so that alarm is not going off forever */
         startTimeoutClock()
@@ -210,10 +218,7 @@ class AlarmActivity : AppCompatActivity(), View.OnClickListener, View.OnLongClic
         alarmManager.cancel(alarmCallback)
     }
 
-    override fun onLongClick(v: View): Boolean {
-        if (v === button_dismiss_alarm) {
-            dismiss()
-        }
-        return true
+    companion object {
+        private const val TAG = "AlarmActivity"
     }
 }
