@@ -17,7 +17,7 @@ import se.jakob.knarkklocka.viewmodels.AlarmHistoryViewModel
 
 class HistoryActivity : AppCompatActivity() {
 
-    private lateinit var mAlarmHistoryViewModel: AlarmHistoryViewModel
+    private lateinit var viewModel: AlarmHistoryViewModel
 
     private var currentAlarm: Alarm? = null
 
@@ -31,14 +31,14 @@ class HistoryActivity : AppCompatActivity() {
 
         // Get a new or existing ViewModel from the ViewModelProvider.
         val factory = InjectorUtils.provideAlarmHistoryViewModelFactory(this)
-        mAlarmHistoryViewModel = ViewModelProviders.of(this, factory).get(AlarmHistoryViewModel::class.java)
+        viewModel = ViewModelProviders.of(this, factory).get(AlarmHistoryViewModel::class.java)
 
-        mAlarmHistoryViewModel.allAlarms?.observe(this, Observer { alarms ->
+        viewModel.allAlarms.observe(this, Observer { alarms ->
             // Update the cached copy of the words in the adapter.
             adapter.mAlarms = alarms
         })
 
-        mAlarmHistoryViewModel.liveAlarm.observe(this, Observer { alarm -> currentAlarm = alarm })
+        viewModel.liveAlarm.observe(this, Observer { alarm -> currentAlarm = alarm })
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -55,12 +55,12 @@ class HistoryActivity : AppCompatActivity() {
 
         return when (id) {
             R.id.action_clear_history -> {
-                if (mAlarmHistoryViewModel.alarmIsRunning) {
+                if (viewModel.hasAlarm) {
                     TimerUtils.cancelAlarm(applicationContext, currentAlarm!!.id)
                     AlarmNotificationsUtils.clearAllNotifications(this)
                 }
 
-                mAlarmHistoryViewModel.clearHistory()
+                viewModel.clearHistory()
                 true
             }
             else -> super.onOptionsItemSelected(item)
