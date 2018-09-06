@@ -8,11 +8,13 @@ import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.SystemClock
 import android.support.v4.content.ContextCompat
+import android.view.View
 import android.widget.RemoteViews
 import se.jakob.knarkklocka.AlarmActivity
 import se.jakob.knarkklocka.R
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID
+import java.text.SimpleDateFormat
 import java.util.*
 
 object AlarmNotificationsUtils {
@@ -91,7 +93,7 @@ object AlarmNotificationsUtils {
 
         val packageName = service.packageName
         val stateText = service.resources.getString(R.string.active_notification_text)
-        notification.setCustomContentView(buildChronometer(packageName, alarm.endTime, true, stateText))
+        notification.setCustomContentView(buildActiveNotificationView(packageName, alarm, true, stateText))
 
         // Full screen intent has flags so it is different than the content intent.
         val fullScreen = Intent(service, AlarmActivity::class.java)
@@ -124,12 +126,12 @@ object AlarmNotificationsUtils {
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setChannelId(ALARM_SNOOZE_NOTIFICATION_CHANNEL_ID)
 
-        val pendingShowAlarm = TimerUtils.getTimerActivityIntent(context, alarm.id)
+        val pendingShowAlarm = TimerUtils.getTimerActivityIntent(context)
         notification.setContentIntent(pendingShowAlarm)
 
         val packageName = context.packageName
         val stateText = context.resources.getString(R.string.snoozing_notification_text)
-        notification.setCustomContentView(buildChronometer(packageName, alarm.endTime, true, stateText))
+        notification.setCustomContentView(buildSnoozingNotificationView(context, packageName, alarm, true, stateText))
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(ALARM_SNOOZING_NOTIFICATION_ID, notification.build())
@@ -152,13 +154,13 @@ object AlarmNotificationsUtils {
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setChannelId(ALARM_WAITING_NOTIFICATION_CHANNEL_ID)
 
-        val pendingShowAlarm = TimerUtils.getTimerActivityIntent(context, alarm.id)
+        val pendingShowAlarm = TimerUtils.getTimerActivityIntent(context)
         notification.setContentIntent(pendingShowAlarm)
 
         val packageName = context.packageName
         val stateText = context.resources.getString(R.string.waiting_notification_text)
 
-        notification.setCustomContentView(buildChronometer(packageName, alarm.endTime, true, stateText))
+        notification.setCustomContentView(buildWaitingNotificationView(packageName, alarm.endTime, true, stateText))
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(ALARM_WAITING_NOTIFICATION_ID, notification.build())
@@ -169,17 +171,43 @@ object AlarmNotificationsUtils {
         notificationManager.cancelAll()
     }
 
-    private fun buildChronometer(packageName: String, endTime: Date, running: Boolean,
-                                 stateText: CharSequence): RemoteViews {
 
+    private fun buildChronometer(packageName: String, endTime: Date, running: Boolean): RemoteViews {
         val content = RemoteViews(packageName, R.layout.chronometer_notif_content)
         content.setChronometerCountDown(R.id.notif_chronometer, true)
-
         val timeDelta = endTime.time - System.currentTimeMillis()
         val base = SystemClock.elapsedRealtime() + timeDelta
         content.setChronometer(R.id.notif_chronometer, base, null, running)
-        content.setTextViewText(R.id.notif_state, stateText)
+
         return content
     }
 
+    private fun buildWaitingNotificationView(packageName: String, endTime: Date, running: Boolean,
+                                             stateText: CharSequence): RemoteViews {
+        val content = buildChronometer(packageName, endTime, running)
+        content.setTextViewText(R.id.notif_state, stateText)
+        val dateString = SimpleDateFormat("HH:mm", Locale.getDefault()).format(endTime)
+        val detailString = String.format(Locale.getDefault(), "This timer is due %s", dateString)
+        content.setTextViewText(R.id.notif_details, detailString)
+        return content
+    }
+
+    private fun buildSnoozingNotificationView(context: Context, packageName: String, alarm: Alarm,
+                                              running: Boolean, stateText: CharSequence): RemoteViews {
+
+        val content = buildChronometer(packageName, alarm.endTime, running)
+        content.setTextViewText(R.id.notif_state, stateText)
+        val snoozesString = context.resources.getQuantityString(R.plurals.times, alarm.snoozes, alarm.snoozes)
+        val snoozeText = String.format(Locale.getDefault(), "This timer has been snoozed %s.", snoozesString)
+        content.setTextViewText(R.id.notif_details, snoozeText)
+        return content
+    }
+
+    private fun buildActiveNotificationView(packageName: String, alarm: Alarm,
+                                            running: Boolean, stateText: CharSequence): RemoteViews {
+        val content = buildChronometer(packageName, alarm.endTime, running)
+        content.setTextViewText(R.id.notif_state, stateText)
+        content.setViewVisibility(R.id.notif_details, View.GONE)
+        return content
+    }
 }
