@@ -9,7 +9,7 @@ import java.util.*
 @Entity(tableName = "alarm_table")
 data class Alarm constructor(
         @PrimaryKey(autoGenerate = true) val id: Long,
-        @ColumnInfo(name = "alarm_state") var state: AlarmState,
+        @ColumnInfo(name = "alarm_state") var state: AlarmState = AlarmState.STATE_DEAD,
         @ColumnInfo(name = "start_time") var startTime: Date,
         @ColumnInfo(name = "end_time") var endTime: Date,
         @ColumnInfo(name = "number_of_snoozes") var snoozes: Int = 0
@@ -28,7 +28,25 @@ data class Alarm constructor(
             }
         }
 
-    fun incrementSnoozes() {
+    fun activate() {
+        this.state = AlarmState.STATE_ACTIVE
+    }
+
+    fun snooze(newEndTime: Date) {
+        state = AlarmState.STATE_SNOOZING
+        incrementSnoozeCount()
+        endTime = newEndTime
+    }
+
+    fun kill() {
+        this.state = AlarmState.STATE_DEAD
+    }
+
+    fun isDead() : Boolean {
+        return (this.state == AlarmState.STATE_DEAD)
+    }
+
+    private fun incrementSnoozeCount() {
         this.snoozes += 1
     }
 
