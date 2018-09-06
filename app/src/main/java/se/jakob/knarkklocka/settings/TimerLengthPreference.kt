@@ -7,7 +7,9 @@ import android.support.v7.preference.PreferenceManager
 import android.text.format.DateUtils.HOUR_IN_MILLIS
 import android.text.format.DateUtils.MINUTE_IN_MILLIS
 import android.util.AttributeSet
+import android.util.TimeUtils
 import se.jakob.knarkklocka.R
+import se.jakob.knarkklocka.utils.PreferenceUtils
 
 /**
  * A [android.preference.Preference] that displays a number picker as a dialog.
@@ -21,8 +23,8 @@ class TimerLengthPreference @JvmOverloads constructor(
     var time: Long = 0
         set(value) {
             field = value
+            persistLong(value)
             notifyChanged()
-            persistLong(this.time)
         }
 
     val wholeMinutes: Int
@@ -39,6 +41,18 @@ class TimerLengthPreference @JvmOverloads constructor(
         dialogLayoutResource = R.layout.dialog_numberpicker
         setPositiveButtonText(R.string.positive)
         setNegativeButtonText(R.string.negative)
+    }
+
+    override fun onGetDefaultValue(a: TypedArray, index: Int): Any? {
+        return a.getString(index)
+    }
+
+    override fun onSetInitialValue(defaultValue: Any?) {
+        time = if (defaultValue == null) {
+            getPersistedLong(5 * MINUTE_IN_MILLIS)
+        } else {
+            getPersistedLong(defaultValue.toString().toLong())
+        }
     }
 
     override fun getSummary(): CharSequence {
