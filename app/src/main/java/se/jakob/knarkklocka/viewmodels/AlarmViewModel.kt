@@ -10,14 +10,14 @@ import java.util.*
 abstract class AlarmViewModel internal constructor(private val repository: AlarmRepository)
     : ViewModel() {
 
-    abstract var alarm : LiveData<Alarm>
+    abstract var liveAlarm: LiveData<Alarm>
 
     var hasAlarm: Boolean = false
         get() = liveAlarm.value != null
 
 
-    fun getCurrentAlarm() : Alarm? {
-        return alarm.value
+    fun getCurrentAlarm(): Alarm? {
+        return liveAlarm.value
     }
 
     fun add(alarm: Alarm): Long {
@@ -25,29 +25,21 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
     }
 
     fun delete() {
-        if (alarm.value != null) {
-            repository.delete(alarm.value!!)
+        liveAlarm.value?.let {
+            repository.delete(it)
         }
     }
 
     fun kill() {
-        if (hasAlarm) {
-            val alarm = this.alarm.value
-            alarm!!.state = AlarmState.STATE_DEAD
-            repository.update(alarm)
+        liveAlarm.value?.let {
+            repository.changeAlarmState(it, AlarmState.STATE_DEAD)
         }
     }
 
     fun snooze(endTime: Date) {
-        if (hasAlarm) {
-            val alarm : Alarm = this.alarm.value!!
-            alarm.state = AlarmState.STATE_SNOOZING
-            alarm.incrementSnoozes()
-            alarm.endTime = endTime
-            repository.update(alarm)
+        liveAlarm.value?.let {
+            it.snooze(endTime)
+            repository.update(it)
         }
     }
-
-
-
 }
