@@ -85,7 +85,6 @@ class AlarmService : LifecycleService() {
 
     private fun startAlarm(alarm: Alarm) {
         AlarmNotificationsUtils.clearAllNotifications(this)
-        //WakeLocker.acquire(this)
         Klaxon.vibrateAlarm(this)
         AlarmNotificationsUtils.showActiveAlarmNotification(this, alarm)
     }
@@ -93,7 +92,6 @@ class AlarmService : LifecycleService() {
     private fun stopAlarm() {
         Klaxon.stopVibrate(this)
         stopForeground(true)
-        //WakeLocker.release()
     }
 
     override fun onDestroy() {
