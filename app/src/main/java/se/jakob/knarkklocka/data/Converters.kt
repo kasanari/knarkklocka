@@ -26,6 +26,14 @@ class Converters {
         }
     }
 
+    fun fromAlarmState(vararg states : AlarmState) : IntArray {
+        val result = intArrayOf(states.size)
+        for ((index, state) in states.withIndex()) {
+            result[index] = fromAlarmState(state)
+        }
+        return result
+    }
+
     @TypeConverter
     fun toAlarmState(state : Int) : AlarmState {
         return when (state) {
