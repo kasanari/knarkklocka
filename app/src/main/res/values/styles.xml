@@ -15,6 +15,7 @@
         <item name="colorButtonNormal">@color/colorDecorative</item>
         <item name="alertDialogTheme">@style/AppAlertDialog</item>
         <item name="coordinatorLayoutStyle">@style/Widget.Support.CoordinatorLayout</item>
+        <item name="floatingActionButtonStyle">@style/Widget.Design.FloatingActionButton</item>
     </style>
 
 
@@ -38,9 +39,7 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <!-- The default font for RecyclerView items is too small.
-    The margin is a simple delimiter between the words. -->
-    <style name="alarm_title">
+    <style name="alarm_list_entry">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">26dp</item>
         <item name="android:textSize">18sp</item>
