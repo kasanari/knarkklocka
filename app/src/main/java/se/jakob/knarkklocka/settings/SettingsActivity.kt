@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentActivity
 import android.support.v4.app.NavUtils
 import android.support.v7.preference.Preference
 import android.support.v7.preference.PreferenceFragmentCompat
+import kotlinx.android.synthetic.main.activity_settings.*
 import android.view.MenuItem
 import se.jakob.knarkklocka.R
 import se.jakob.knarkklocka.utils.Utils
@@ -16,12 +17,15 @@ class SettingsActivity : FragmentActivity() {
     public override fun onCreate(savedInstanceState: Bundle?) {
         val actionBar = actionBar
         actionBar?.setDisplayHomeAsUpEnabled(true)
+        setContentView(R.layout.activity_settings)
 
         super.onCreate(savedInstanceState)
         // Display the fragment as the main content.
         supportFragmentManager.beginTransaction()
-                .replace(android.R.id.content, SettingsFragment())
+                .replace(R.id.preference_content, SettingsFragment())
                 .commit()
+
+        tv_credits.text = Utils.creditsString
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -37,9 +41,7 @@ class SettingsActivity : FragmentActivity() {
     class SettingsFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(p0: Bundle?, p1: String?) {
             // Load the preferences from an XML resource
-            addPreferencesFromResource(R.xml.preference_screen)
-            val credits = findPreference(getString(R.string.pref_credits_key))
-            credits.title = Utils.creditsString
+            addPreferencesFromResource(R.xml.preferences)
         }
 
         override fun onDisplayPreferenceDialog(preference: Preference?) {
