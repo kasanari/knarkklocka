@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.preference.PreferenceManager
 import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.Menu
@@ -30,6 +31,8 @@ class TimerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_timer)
+
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, true)
 
         button_remove_timer.visibility = View.INVISIBLE
         chronometer_main.visibility = View.INVISIBLE
