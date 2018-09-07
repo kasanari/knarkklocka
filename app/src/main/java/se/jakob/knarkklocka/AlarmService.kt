@@ -83,7 +83,7 @@ class AlarmService : LifecycleService() {
         }
 
     }
-
+    
     private fun startAlarm(alarm: Alarm) {
         AlarmNotificationsUtils.clearAllNotifications(this)
         Klaxon.vibrateAlarm(this)
