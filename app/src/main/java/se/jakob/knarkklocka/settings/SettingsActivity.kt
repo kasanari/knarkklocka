@@ -24,7 +24,7 @@ class SettingsActivity : FragmentActivity() {
         supportFragmentManager.beginTransaction()
                 .replace(R.id.preference_content, SettingsFragment())
                 .commit()
-
+                
         tv_credits.text = Utils.creditsString
     }
 
