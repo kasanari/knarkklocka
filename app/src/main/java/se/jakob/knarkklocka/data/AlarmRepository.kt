@@ -6,18 +6,18 @@ import se.jakob.knarkklocka.utils.runOnIoThread
 class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
 
     val currentAlarm
-        get() = alarmDao.loadMostRecentAlarm()
+        get() = alarmDao.getMostRecentAlarm()
 
     fun getLiveAlarmByID(id: Long): LiveData<Alarm> {
-        return alarmDao.loadLiveAlarmById(id)
+        return alarmDao.getLiveAlarm(id)
     }
 
-    fun getAlarmByID(id: Long): Alarm {
-        return alarmDao.loadAlarmById(id)
+    fun getAlarmByID(id: Long): Alarm? {
+        return alarmDao.getAlarm(id)
     }
 
     internal fun getAlarmsByStates(vararg states: AlarmState): LiveData<List<Alarm>> {
-        return alarmDao.loadAlarmsByStates(*Converters().fromAlarmState(*states))
+        return alarmDao.getAlarmsByStates(*Converters().fromAlarmState(*states))
     }
 
     fun changeAlarmState(alarm: Alarm, state: AlarmState) {
@@ -28,7 +28,7 @@ class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
     }
 
     fun getAllAlarms(): LiveData<List<Alarm>> {
-        return alarmDao.loadAllAlarms()
+        return alarmDao.getAllAlarms()
     }
 
     fun deleteAll() {
