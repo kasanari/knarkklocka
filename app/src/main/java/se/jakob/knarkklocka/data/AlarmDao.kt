@@ -17,6 +17,9 @@ interface AlarmDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(alarm: Alarm): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(plants: List<Alarm>)
+
     @Update(onConflict = OnConflictStrategy.REPLACE)
     fun updateAlarm(alarm: Alarm)
 
@@ -26,21 +29,21 @@ interface AlarmDao {
     @Query("DELETE FROM alarm_table")
     fun deleteAll()
 
-    @Query("SELECT * FROM alarm_table ORDER BY end_time")
-    fun loadAllAlarms(): LiveData<List<Alarm>>
+    @Query("SELECT * FROM alarm_table ORDER BY start_time DESC, end_time DESC")
+    fun getAllAlarms(): LiveData<List<Alarm>>
 
-    @Query("SELECT * FROM alarm_table ORDER BY start_time DESC LIMIT 1")
-    fun loadMostRecentAlarm(): LiveData<Alarm>
-
-    @Query("SELECT * FROM alarm_table WHERE id = :id")
-    fun loadLiveAlarmById(id: Long): LiveData<Alarm>
+    @Query("SELECT * FROM alarm_table ORDER BY start_time DESC, end_time DESC LIMIT 1")
+    fun getMostRecentAlarm(): LiveData<Alarm>
 
     @Query("SELECT * FROM alarm_table WHERE id = :id")
-    fun loadAlarmById(id: Long): Alarm
+    fun getLiveAlarm(id: Long): LiveData<Alarm>
 
-    @Query("SELECT * FROM alarm_table  WHERE alarm_state IN (:states) ORDER BY start_time DESC")
-    fun loadAlarmsByStates(vararg states: Int): LiveData<List<Alarm>>
+    @Query("SELECT * FROM alarm_table WHERE id = :id")
+    fun getAlarm(id: Long): Alarm
+
+    @Query("SELECT * FROM alarm_table  WHERE alarm_state IN (:states) ORDER BY start_time DESC, end_time DESC")
+    fun getAlarmsByStates(vararg states: Int): LiveData<List<Alarm>>
 
     @Query("SELECT * FROM alarm_table WHERE alarm_state IN (:states) LIMIT 1")
-    fun loadSingleAlarmByState(vararg states: Int): LiveData<Alarm>
+    fun getAlarmByState(vararg states: Int): LiveData<Alarm>
 }
