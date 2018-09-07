@@ -58,29 +58,30 @@ class AlarmService : LifecycleService() {
     @MainThread
     private fun handleIntent(action: String, id: Long) {
         val alarm = mRepository.getAlarmByID(id)
-        when (action) {
-            ACTION_ACTIVATE_ALARM -> {
-                if (BuildConfig.DEBUG) {
-                    val df = DateFormat.getTimeInstance(DateFormat.SHORT)
-                    val debugString = String.format(Locale.getDefault(), "Activating alarm with id %d due %s", id, df.format(alarm.endTime))
-                    Log.d(tag, debugString)
+        alarm?.let {
+            when (action) {
+                ACTION_ACTIVATE_ALARM -> {
+                    if (BuildConfig.DEBUG) {
+                        val df = DateFormat.getTimeInstance(DateFormat.SHORT)
+                        val debugString = String.format(Locale.getDefault(), "Activating alarm with id %d due %s", id, df.format(it.endTime))
+                        Log.d(tag, debugString)
+                    }
+                    if (it.snoozes < 10) {
+                        mRepository.changeAlarmState(it, AlarmState.STATE_ACTIVE)
+                        startAlarm(it)
+                    } else {
+                        mRepository.changeAlarmState(it, AlarmState.STATE_DEAD)
+                        stopAlarm()
+                        stopSelf()
+                    }
                 }
-
-                if (alarm.snoozes < 10) {
-                    mRepository.changeAlarmState(alarm, AlarmState.STATE_ACTIVE)
-                    startAlarm(alarm)
-                } else {
-                    mRepository.changeAlarmState(alarm, AlarmState.STATE_DEAD)
+                ACTION_STOP_ALARM -> {
                     stopAlarm()
                     stopSelf()
                 }
             }
-
-            ACTION_STOP_ALARM -> {
-                stopAlarm()
-                stopSelf()
-            }
         }
+
     }
 
     private fun startAlarm(alarm: Alarm) {
