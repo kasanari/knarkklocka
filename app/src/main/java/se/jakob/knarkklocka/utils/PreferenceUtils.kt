@@ -3,6 +3,7 @@ package se.jakob.knarkklocka.utils
 import android.content.Context
 import android.support.v7.preference.PreferenceManager
 import android.text.format.DateUtils.*
+import se.jakob.knarkklocka.BuildConfig
 
 object PreferenceUtils {
 
@@ -34,7 +35,14 @@ object PreferenceUtils {
 
     private fun getTimerLength(context: Context, key: String): Long {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-        val quickTimerMode = true /*This can be set to true for testing purposes, otherwise it should be set to false*/
+
+        val quickTimerMode =
+                if (BuildConfig.DEBUG) {
+                    false /*This can be set to true for testing purposes, otherwise it should be set to false*/
+                } else {
+                    false /*Should not be changed*/
+                }
+
         return if (quickTimerMode) {
             getShortDefault(key)
         } else {
