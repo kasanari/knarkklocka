@@ -175,6 +175,7 @@ public class TimerActivity extends AppCompatActivity implements
             mainActivityViewModel.kill(); /* If there is an alarm running, kill it. */
             AlarmBroadcasts.broadcastStopAlarm(this); /* Stop any vibration or notifications that are happening right now */
         }
+        AlarmNotificationsBuilder.clearAllNotifications(this);
         TimerUtils.startMainTimer(this, mainActivityViewModel);
     }
 
