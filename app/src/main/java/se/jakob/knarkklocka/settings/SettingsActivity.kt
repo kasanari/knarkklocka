@@ -1,20 +1,20 @@
 package se.jakob.knarkklocka.settings
 
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v4.app.FragmentActivity
-import android.support.v4.app.NavUtils
-import android.support.v7.preference.Preference
-import android.support.v7.preference.PreferenceFragmentCompat
+import androidx.core.app.NavUtils
 import kotlinx.android.synthetic.main.activity_settings.*
 import android.view.MenuItem
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentActivity
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
 import se.jakob.knarkklocka.R
 import se.jakob.knarkklocka.utils.Utils
 
 
 class SettingsActivity : FragmentActivity() {
 
-    public override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         val actionBar = actionBar
         actionBar?.setDisplayHomeAsUpEnabled(true)
         setContentView(R.layout.activity_settings)
@@ -57,7 +57,7 @@ class SettingsActivity : FragmentActivity() {
             if (dialogFragment != null) {
                 dialogFragment.setTargetFragment(this, 0)
                 dialogFragment.show(this.fragmentManager,
-                        "android.support.v7.preference" + ".PreferenceFragment.DIALOG")
+                        "androidx.preference" + ".PreferenceFragment.DIALOG")
             } else {
                 super.onDisplayPreferenceDialog(preference) // Could not be handled here. Try with the super method.
             }

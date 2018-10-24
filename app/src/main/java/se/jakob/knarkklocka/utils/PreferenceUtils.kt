@@ -1,8 +1,8 @@
 package se.jakob.knarkklocka.utils
 
 import android.content.Context
-import android.support.v7.preference.PreferenceManager
 import android.text.format.DateUtils.*
+import androidx.preference.PreferenceManager
 import se.jakob.knarkklocka.BuildConfig
 
 object PreferenceUtils {

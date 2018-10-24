@@ -1,10 +1,9 @@
 package se.jakob.knarkklocka.settings
-
 import android.os.Bundle
-import android.support.v7.preference.PreferenceDialogFragmentCompat
 import android.text.format.DateUtils
 import android.view.View
 import android.widget.NumberPicker
+import androidx.preference.PreferenceDialogFragmentCompat
 import se.jakob.knarkklocka.R
 
 

@@ -7,7 +7,7 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.SystemClock
-import android.support.v4.content.ContextCompat
+import androidx.core.content.ContextCompat
 import android.view.View
 import android.widget.RemoteViews
 import se.jakob.knarkklocka.AlarmActivity

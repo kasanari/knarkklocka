@@ -1,36 +1,20 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package se.jakob.knarkklocka
-
 import android.app.AlarmManager
 import android.app.AlarmManager.RTC_WAKEUP
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import android.text.format.DateUtils.MINUTE_IN_MILLIS
 import android.text.format.DateUtils.SECOND_IN_MILLIS
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.Chronometer
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_alarm.*
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmState
@@ -98,7 +82,7 @@ class AlarmActivity : AppCompatActivity() {
         val factory = InjectorUtils.provideAlarmActivityViewModelFactory(this, id)
         viewModel = ViewModelProviders.of(this, factory).get(AlarmActivityViewModel::class.java)
 
-        viewModel.liveAlarm.observe(this, Observer { alarm ->
+        viewModel.liveAlarm.observe(this, Observer {alarm : Alarm? ->
             if (alarm != null) {
                 if (alarm.state == AlarmState.STATE_ACTIVE) {
                     startAlarm(alarm)

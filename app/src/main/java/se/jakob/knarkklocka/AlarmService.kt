@@ -1,13 +1,13 @@
 package se.jakob.knarkklocka
 
-import android.arch.lifecycle.LifecycleService
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.IBinder
-import android.support.annotation.MainThread
 import android.util.Log
+import androidx.annotation.MainThread
+import androidx.lifecycle.LifecycleService
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmRepository
 import se.jakob.knarkklocka.data.AlarmState

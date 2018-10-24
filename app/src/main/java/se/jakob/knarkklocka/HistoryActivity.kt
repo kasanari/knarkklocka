@@ -1,12 +1,13 @@
 package se.jakob.knarkklocka
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
+
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_history.*
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmListAdapter
@@ -33,7 +34,7 @@ class HistoryActivity : AppCompatActivity() {
         val factory = InjectorUtils.provideAlarmHistoryViewModelFactory(this)
         viewModel = ViewModelProviders.of(this, factory).get(AlarmHistoryViewModel::class.java)
 
-        viewModel.allAlarms.observe(this, Observer { alarms ->
+        viewModel.allAlarms.observe(this, Observer { alarms: List<Alarm> ->
             // Update the cached copy of the words in the adapter.
             adapter.mAlarms = alarms
         })

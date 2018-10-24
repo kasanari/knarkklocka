@@ -2,14 +2,11 @@ package se.jakob.knarkklocka.settings
 
 import android.content.Context
 import android.content.res.TypedArray
-import android.support.v7.preference.DialogPreference
-import android.support.v7.preference.PreferenceManager
 import android.text.format.DateUtils.HOUR_IN_MILLIS
 import android.text.format.DateUtils.MINUTE_IN_MILLIS
 import android.util.AttributeSet
-import android.util.TimeUtils
+import androidx.preference.DialogPreference
 import se.jakob.knarkklocka.R
-import se.jakob.knarkklocka.utils.PreferenceUtils
 
 /**
  * A [android.preference.Preference] that displays a number picker as a dialog.

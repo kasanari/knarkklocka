@@ -1,13 +1,19 @@
 package se.jakob.knarkklocka.workers
 
+
+
+
+import android.content.Context
 import androidx.work.Worker
+import androidx.work.WorkerParameters
 import se.jakob.knarkklocka.data.AlarmDatabase
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmState
 import java.util.*
 
 
-class PopulateDatabaseWorker : Worker() {
+class PopulateDatabaseWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams)
+{
 
     override fun doWork(): Result {
         val database = AlarmDatabase.getInstance(applicationContext)
@@ -16,6 +22,6 @@ class PopulateDatabaseWorker : Worker() {
         database.alarmDao().insert(alarm)
         alarm = Alarm(AlarmState.STATE_DEAD, Date(600), Date(600))
         database.alarmDao().insert(alarm)
-        return Worker.Result.SUCCESS
+        return Result.SUCCESS
     }
 }

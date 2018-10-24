@@ -1,0 +1,14 @@
+<androidx.preference.PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/preferences">
+
+    <se.jakob.knarkklocka.settings.TimerLengthPreference
+        android:key="@string/pref_timer_length_key"
+        android:title="@string/pref_timer_length"
+        android:defaultValue="6000" />
+    <se.jakob.knarkklocka.settings.TimerLengthPreference
+        android:key="@string/pref_snooze_length_key"
+        android:title="@string/pref_snooze_length"
+        android:defaultValue="6000" />
+
+</androidx.preference.PreferenceScreen>

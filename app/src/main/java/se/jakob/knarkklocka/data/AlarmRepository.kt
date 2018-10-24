@@ -1,6 +1,5 @@
 package se.jakob.knarkklocka.data
-
-import android.arch.lifecycle.LiveData
+import androidx.lifecycle.LiveData
 import se.jakob.knarkklocka.utils.runOnIoThread
 
 class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
