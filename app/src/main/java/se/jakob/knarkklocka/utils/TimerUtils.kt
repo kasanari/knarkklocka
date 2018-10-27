@@ -113,7 +113,7 @@ object TimerUtils {
         val alarm = Alarm(AlarmState.STATE_WAITING, startTime, endTime)
         val repository = InjectorUtils.getAlarmRepository(context)
         runOnIoThread {
-            val id = repository.insert(alarm)
+            val id = repository.safeInsert(alarm)
             setNewAlarmClock(context, id, alarm.endTime)
         }
         AlarmNotificationsUtils.showWaitingAlarmNotification(context, alarm)
@@ -126,7 +126,7 @@ object TimerUtils {
         alarm.snooze(newEndTime)
         AlarmNotificationsUtils.showSnoozingAlarmNotification(context, alarm)
         val repository = InjectorUtils.getAlarmRepository(context)
-        repository.update(alarm)
+        repository.safeUpdate(alarm)
         return newEndTime
     }
 }
