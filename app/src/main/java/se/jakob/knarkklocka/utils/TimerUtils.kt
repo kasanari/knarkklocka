@@ -32,17 +32,25 @@ object TimerUtils {
      * Returns whatever pending intent i am using at the moment
      */
     private fun getPI(context: Context, id: Long): PendingIntent {
-        return getAlarmServiceIntent(context, id)
+        return getAlarmServicePendingIntent(context, id)
+    }
+     fun getAlarmServiceIntent(context: Context, id: Long) : Intent {
+        val alarmIntent = Intent(context, AlarmService::class.java)
+        alarmIntent.putExtra(EXTRA_ALARM_ID, id)
+        alarmIntent.action = ACTION_ACTIVATE_ALARM
+        return alarmIntent
     }
 
     /**
      * Returns the pending intent that starts [AlarmService]
      */
-    private fun getAlarmServiceIntent(context: Context, id: Long): PendingIntent {
-        val alarmIntent = Intent(context, AlarmService::class.java)
-        alarmIntent.putExtra(EXTRA_ALARM_ID, id)
-        alarmIntent.action = ACTION_ACTIVATE_ALARM
-        return PendingIntent.getForegroundService(context, ALARM_INTENT_ID, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+    private fun getAlarmServicePendingIntent(context: Context, id: Long): PendingIntent {
+        val alarmIntent = getAlarmServiceIntent(context, id)
+        return PendingIntent.getForegroundService(
+                context,
+                ALARM_INTENT_ID,
+                alarmIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     /**
