@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmRepository
-import se.jakob.knarkklocka.data.AlarmState
 import java.util.*
 
 abstract class AlarmViewModel internal constructor(private val repository: AlarmRepository)
@@ -22,25 +21,31 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
     }
 
     fun add(alarm: Alarm): Long {
-        return repository.insert(alarm)
+        return repository.safeInsert(alarm)
     }
 
-    fun delete() {
-        liveAlarm.value?.let {
-            repository.delete(it)
+    fun sleep() {
+        liveAlarm.value?.let { alarm ->
+            if (alarm.active or alarm.snoozing) {
+                alarm.kill()
+                repository.safeUpdate(alarm)
+            } else if (alarm.waiting) {
+                repository.safeDelete(alarm)
+            }
         }
     }
 
     fun kill() {
-        liveAlarm.value?.let {
-            repository.changeAlarmState(it, AlarmState.STATE_DEAD)
+        liveAlarm.value?.let { alarm ->
+            alarm.kill()
+            repository.safeUpdate(alarm)
         }
     }
 
     fun snooze(endTime: Date) {
-        liveAlarm.value?.let {
-            it.snooze(endTime)
-            repository.update(it)
+        liveAlarm.value?.let { alarm ->
+            alarm.snooze(endTime)
+            repository.safeUpdate(alarm)
         }
     }
 }
