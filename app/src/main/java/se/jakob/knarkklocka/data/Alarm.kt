@@ -16,6 +16,23 @@ data class Alarm constructor(
         @ColumnInfo(name = "number_of_snoozes") var snoozes: Int = 0
 ) {
 
+    var waiting : Boolean = true
+    get () {
+        return state == AlarmState.STATE_WAITING
+    }
+    var active : Boolean = false
+        get () {
+            return state == AlarmState.STATE_ACTIVE
+        }
+    var snoozing : Boolean = false
+        get () {
+            return state == AlarmState.STATE_SNOOZING
+        }
+    var dead : Boolean = false
+        get () {
+            return state == AlarmState.STATE_DEAD
+        }
+
     @Ignore
     constructor(state: AlarmState, startTime: Date, endTime: Date) : this(0, state, startTime, endTime)
 
