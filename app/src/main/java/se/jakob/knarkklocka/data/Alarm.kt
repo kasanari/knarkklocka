@@ -5,12 +5,14 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import se.jakob.knarkklocka.BuildConfig
+import java.lang.Exception
 import java.util.*
 
 @Entity(tableName = "alarm_table")
 data class Alarm constructor(
-        @PrimaryKey(autoGenerate = true) val id: Long,
-        @ColumnInfo(name = "alarm_state") var state: AlarmState = AlarmState.STATE_DEAD,
+        @PrimaryKey(autoGenerate = true) var id: Long,
+        @ColumnInfo(name = "alarm_state") var state: AlarmState = AlarmState.STATE_WAITING,
         @ColumnInfo(name = "start_time") var startTime: Date,
         @ColumnInfo(name = "end_time") var endTime: Date,
         @ColumnInfo(name = "number_of_snoozes") var snoozes: Int = 0
@@ -34,7 +36,10 @@ data class Alarm constructor(
         }
 
     @Ignore
-    constructor(state: AlarmState, startTime: Date, endTime: Date) : this(0, state, startTime, endTime)
+    constructor(state: AlarmState, startTime: Date, endTime: Date) : this(id = 0, state = state, startTime = startTime, endTime = endTime)
+
+    @Ignore
+    constructor(startTime: Date, endTime: Date) : this(id = 0, startTime=startTime, endTime=endTime)
 
     val stateToString: String
         get() {
@@ -47,21 +52,30 @@ data class Alarm constructor(
         }
 
     fun activate() {
-        this.state = AlarmState.STATE_ACTIVE
+        if (dead) {
+            if (BuildConfig.DEBUG) {
+                throw InvalidStateChangeException("Activating a dead Alarm is not allowed.")
+            }
+        } else {
+            this.state = AlarmState.STATE_ACTIVE
+        }
     }
 
     fun snooze(newEndTime: Date) {
-        state = AlarmState.STATE_SNOOZING
-        incrementSnoozeCount()
-        endTime = newEndTime
+        if (!active) {
+            if (BuildConfig.DEBUG) {
+                throw InvalidStateChangeException("Only an active Alarm can be snoozed.")
+            }
+        } else {
+            state = AlarmState.STATE_SNOOZING
+            incrementSnoozeCount()
+            endTime = newEndTime
+        }
     }
 
     fun kill() {
+        this.endTime = Calendar.getInstance().time
         this.state = AlarmState.STATE_DEAD
-    }
-
-    fun isDead() : Boolean {
-        return (this.state == AlarmState.STATE_DEAD)
     }
 
     private fun incrementSnoozeCount() {
@@ -73,6 +87,6 @@ data class Alarm constructor(
                 id, startTime.toString(), endTime.toString(), stateToString)
     }
 
-
+    class InvalidStateChangeException(message:String) : Exception(message)
 }
 
