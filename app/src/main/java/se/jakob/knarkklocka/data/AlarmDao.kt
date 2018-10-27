@@ -13,7 +13,7 @@ interface AlarmDao {
     fun insert(alarm: Alarm): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(plants: List<Alarm>)
+    fun insertAll(alarms: List<Alarm>)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     fun updateAlarm(alarm: Alarm)
@@ -37,8 +37,11 @@ interface AlarmDao {
     fun getAlarm(id: Long): Alarm
 
     @Query("SELECT * FROM alarm_table  WHERE alarm_state IN (:states) ORDER BY start_time DESC, end_time DESC")
-    fun getAlarmsByStates(vararg states: Int): LiveData<List<Alarm>>
+    fun getLiveAlarmsByStates(vararg states: Int): LiveData<List<Alarm>>
 
-    @Query("SELECT * FROM alarm_table WHERE alarm_state IN (:states) LIMIT 1")
-    fun getAlarmByState(vararg states: Int): LiveData<Alarm>
+    @Query("SELECT * FROM alarm_table WHERE alarm_state IN (:states)")
+    fun getAlarmsByStates(vararg states: Int): List<Alarm>
+
+    @Query("DELETE FROM alarm_table WHERE alarm_state in (:states)")
+    fun deleteAlarmsByStates(vararg states: Int)
 }
