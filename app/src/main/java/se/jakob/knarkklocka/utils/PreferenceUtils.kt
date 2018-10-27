@@ -57,4 +57,20 @@ object PreferenceUtils {
     fun getSnoozeTimerLength(context: Context): Long {
         return getTimerLength(context, KEY_SNOOZE_TIMER_LENGTH)
     }
+
+    private fun setTimerLength(context: Context, key: String, length: Long) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val editor = prefs!!.edit()
+        editor.putLong(key, length)
+        editor.apply()
+    }
+
+    fun setMainTimerLength(context: Context, length: Long) {
+        setTimerLength(context, KEY_MAIN_TIMER_LENGTH, length)
+    }
+
+    fun setSnoozeTimerLength(context: Context, length: Long) {
+        setTimerLength(context, KEY_SNOOZE_TIMER_LENGTH, length)
+    }
+
 }
