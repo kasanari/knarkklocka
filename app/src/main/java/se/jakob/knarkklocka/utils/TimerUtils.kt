@@ -34,6 +34,17 @@ object TimerUtils {
     private fun getPI(context: Context, id: Long): PendingIntent {
         return getAlarmServicePendingIntent(context, id)
     }
+
+    fun isAlarmSet(context: Context, id: Long) : Boolean {
+        val alarmIntent = getAlarmServiceIntent(context, id)
+        val service = PendingIntent.getForegroundService(
+                context,
+                ALARM_INTENT_ID,
+                alarmIntent,
+                PendingIntent.FLAG_NO_CREATE)
+        return service != null
+    }
+
      fun getAlarmServiceIntent(context: Context, id: Long) : Intent {
         val alarmIntent = Intent(context, AlarmService::class.java)
         alarmIntent.putExtra(EXTRA_ALARM_ID, id)
