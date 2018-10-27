@@ -80,6 +80,7 @@ object TimerUtils {
         AlarmBroadcasts.broadcastStopAlarm(context) /* Stop any vibration */
         val pendingAlarmIntent = getPI(context, id) /*Create the same intent as the registered alarm in order to cancel it*/
         alarmManager.cancel(pendingAlarmIntent)
+        pendingAlarmIntent.cancel()
         if (BuildConfig.DEBUG) {
             val debugString = String.format(Locale.getDefault(), "Cancelled alarm with id %d", id)
             Log.d(TAG, debugString)
