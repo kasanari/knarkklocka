@@ -46,7 +46,7 @@ class TimerUtilsTest {
         TimerUtils.startMainTimer(context)
         Thread.sleep(2000) //Wait a bit for db operation to finish
         val alarm : Alarm = getValue(repository.currentAlarm)
-        val isSet = TimerUtils.isAlarmSet(context, alarm.id)
+        val isSet = TimerUtils.alarmIsSet(context, alarm.id)
         assertTrue(isSet)
         assertEquals(alarm.endTime.time/1000, endTime.time/1000)
     }
@@ -57,12 +57,12 @@ class TimerUtilsTest {
         TimerUtils.startMainTimer(context)
         Thread.sleep(2000) //Wait a bit for db operation to finish
         val alarm : Alarm = getValue(repository.currentAlarm)
-        var isSet = TimerUtils.isAlarmSet(context, alarm.id)
+        var isSet = TimerUtils.alarmIsSet(context, alarm.id)
         assertTrue(isSet)
 
         // Cancel the alarm
         TimerUtils.cancelAlarm(context, alarm.id)
-        isSet = TimerUtils.isAlarmSet(context, alarm.id)
+        isSet = TimerUtils.alarmIsSet(context, alarm.id)
         assertFalse(isSet)
     }
 
