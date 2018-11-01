@@ -52,9 +52,9 @@ data class Alarm constructor(
         }
 
     fun activate() {
-        if (dead) {
+        if (dead or active) {
             if (BuildConfig.DEBUG) {
-                throw InvalidStateChangeException("Activating a dead Alarm is not allowed.")
+                throw InvalidStateChangeException("Activating a dead or active Alarm is not allowed.")
             }
         } else {
             this.state = AlarmState.STATE_ACTIVE
