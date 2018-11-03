@@ -42,6 +42,7 @@ class AlarmActivity : AppCompatActivity() {
         Log.d(TAG, "AlarmActivity started")
         setContentView(R.layout.activity_alarm)
 
+        WakeLocker.acquire(this)
         /*Ensure that screen turns on*/
         val win = window
         if (Build.VERSION.SDK_INT >= 27) {
@@ -125,6 +126,7 @@ class AlarmActivity : AppCompatActivity() {
         if (alarmIsActive) {
             snooze()
         }
+        WakeLocker.release()
     }
 
     private fun snooze() {
