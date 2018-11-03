@@ -28,7 +28,10 @@ interface AlarmDao {
     fun getAllAlarms(): LiveData<List<Alarm>>
 
     @Query("SELECT * FROM alarm_table ORDER BY start_time DESC, end_time DESC LIMIT 1")
-    fun getMostRecentAlarm(): LiveData<Alarm>
+    fun getMostRecentLiveAlarm(): LiveData<Alarm>
+
+    @Query("SELECT * FROM alarm_table ORDER BY start_time DESC, end_time DESC LIMIT 1")
+    fun getMostRecentAlarm(): Alarm
 
     @Query("SELECT * FROM alarm_table WHERE id = :id")
     fun getLiveAlarm(id: Long): LiveData<Alarm>
@@ -39,7 +42,7 @@ interface AlarmDao {
     @Query("SELECT * FROM alarm_table  WHERE alarm_state IN (:states) ORDER BY start_time DESC, end_time DESC")
     fun getLiveAlarmsByStates(vararg states: Int): LiveData<List<Alarm>>
 
-    @Query("SELECT * FROM alarm_table WHERE alarm_state IN (:states)")
+    @Query("SELECT * FROM alarm_table WHERE alarm_state IN (:states) ORDER BY start_time DESC, end_time DESC")
     fun getAlarmsByStates(vararg states: Int): List<Alarm>
 
     @Query("DELETE FROM alarm_table WHERE alarm_state in (:states)")
