@@ -29,8 +29,8 @@ class AlarmListAdapter(context: Context) : RecyclerView.Adapter<AlarmListAdapter
         mAlarms?.run {
             val currentAlarm = this[position]
             val dateString = SimpleDateFormat("HH:mm", Locale.getDefault()).format(currentAlarm.endTime)
-            //val dateString = dateFormat.format(currentAlarm.endTime)
-            //val string = currentAlarm.id.toString() + " " + dateString
+            //val dateString = dateFormat.format(currentLiveAlarm.endTime)
+            //val string = currentLiveAlarm.id.toString() + " " + dateString
             holder.dueTimeItemView.text = String.format(Locale.getDefault(), "%d: \t %s", currentAlarm.id, dateString)
 
             val stateString = currentAlarm.stateToString
