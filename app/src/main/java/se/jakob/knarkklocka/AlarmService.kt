@@ -48,6 +48,7 @@ class AlarmService : LifecycleService() {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        WakeLocker.acquire(this)
         val id = intent.getLongExtra(EXTRA_ALARM_ID, -1)
         val action = intent.action
         if (action != null) {
@@ -116,6 +117,7 @@ class AlarmService : LifecycleService() {
             mIsRegistered = false
         }
         stopAlarm()
+        WakeLocker.release()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
