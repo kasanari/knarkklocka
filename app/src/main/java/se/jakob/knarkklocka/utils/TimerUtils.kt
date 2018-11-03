@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.icu.util.Calendar
 import android.util.Log
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import se.jakob.knarkklocka.AlarmBroadcasts
 import se.jakob.knarkklocka.AlarmService
 import se.jakob.knarkklocka.BuildConfig
@@ -45,7 +47,7 @@ object TimerUtils {
         return service != null
     }
 
-     fun getAlarmServiceIntent(context: Context, id: Long) : Intent {
+    fun getAlarmServiceIntent(context: Context, id: Long): Intent {
         val alarmIntent = Intent(context, AlarmService::class.java)
         alarmIntent.putExtra(EXTRA_ALARM_ID, id)
         alarmIntent.action = ACTION_ACTIVATE_ALARM
@@ -76,8 +78,8 @@ object TimerUtils {
     /**
      * Creates a new AlarmClock with the system [AlarmManager]
      */
-    private fun setNewAlarmClock(context: Context, id: Long, endTime: Date) {
-        cancelAlarm(context, -1) /* Remove existing alarm */
+     fun setNewAlarmClock(context: Context, id: Long, endTime: Date) = GlobalScope.launch {
+        //cancelAlarm(context, -1) /* Remove existing alarm */
         val alarmManager = context.getSystemService(AlarmManager::class.java)
 
         val pendingAlarmIntent = getPI(context, id) /* Set AlarmService as the intent to start when alarm goes off */
@@ -94,40 +96,43 @@ object TimerUtils {
         }
     }
 
-    fun cancelAlarm(context: Context, id: Long) {
-        val alarmManager = context.getSystemService(AlarmManager::class.java)
-        AlarmNotificationsUtils.clearAllNotifications(context)
-        AlarmBroadcasts.broadcastStopAlarm(context) /* Stop any vibration */
-        val pendingAlarmIntent = getPI(context, id) /*Create the same intent as the registered alarm in order to cancel it*/
-        alarmManager.cancel(pendingAlarmIntent)
-        pendingAlarmIntent.cancel()
-        if (BuildConfig.DEBUG) {
-            val debugString = String.format(Locale.getDefault(), "Cancelled alarm with id %d", id)
-            Log.d(TAG, debugString)
+    fun cancelAlarm(context: Context, id: Long) = GlobalScope.launch {
+        if (alarmIsSet(context, id)) {
+            val alarmManager = context.getSystemService(AlarmManager::class.java)
+            AlarmNotificationsUtils.clearAllNotifications(context)
+            AlarmBroadcasts.broadcastStopAlarm(context) /* Stop any vibration */
+            val pendingAlarmIntent = getPI(context, id) /*Create the same intent as the registered alarm in order to cancel it*/
+            alarmManager.cancel(pendingAlarmIntent)
+            pendingAlarmIntent.cancel()
+            if (BuildConfig.DEBUG) {
+                val debugString = String.format(Locale.getDefault(), "Cancelled alarm with id %d", id)
+                Log.d(TAG, debugString)
+            }
         }
     }
 
-    fun startMainTimer(context: Context) {
+    fun startMainTimer(context: Context) = GlobalScope.launch {
         val timerDuration = PreferenceUtils.getMainTimerLength(context)
         val startTime = Calendar.getInstance().time
         val endTime = Calendar.getInstance().apply { add(Calendar.MILLISECOND, timerDuration.toInt()) }.time
         val alarm = Alarm(AlarmState.STATE_WAITING, startTime, endTime)
         val repository = InjectorUtils.getAlarmRepository(context)
-        runOnIoThread {
-            val id = repository.safeInsert(alarm)
+        repository.safeInsert(alarm)?.let { id ->
             setNewAlarmClock(context, id, alarm.endTime)
         }
         AlarmNotificationsUtils.showWaitingAlarmNotification(context, alarm)
     }
 
-    fun startSnoozeTimer(context: Context, alarm: Alarm) : Date {
+    fun startSnoozeTimer(context: Context, alarm: Alarm): Date {
         val snoozeDuration = PreferenceUtils.getSnoozeTimerLength(context)
         val newEndTime = Calendar.getInstance().apply { add(Calendar.MILLISECOND, snoozeDuration.toInt()) }.time
-        setNewAlarmClock(context, alarm.id, newEndTime)
-        alarm.snooze(newEndTime)
-        AlarmNotificationsUtils.showSnoozingAlarmNotification(context, alarm)
-        val repository = InjectorUtils.getAlarmRepository(context)
-        repository.safeUpdate(alarm)
+        GlobalScope.launch {
+            setNewAlarmClock(context, alarm.id, newEndTime)
+            alarm.snooze(newEndTime)
+            AlarmNotificationsUtils.showSnoozingAlarmNotification(context, alarm)
+            val repository = InjectorUtils.getAlarmRepository(context)
+            repository.safeUpdate(alarm)
+        }
         return newEndTime
     }
 }
