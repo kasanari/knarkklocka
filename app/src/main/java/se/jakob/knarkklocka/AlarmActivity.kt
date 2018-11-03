@@ -147,6 +147,9 @@ class AlarmActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
     }
 
+    override fun onBackPressed() {
+        snooze()
+    }
 
     private fun startAlarm(alarm: Alarm) {
         setupChronometer(alarm)
