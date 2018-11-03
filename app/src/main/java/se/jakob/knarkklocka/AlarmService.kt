@@ -56,28 +56,38 @@ class AlarmService : LifecycleService() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    /*Intent handler meant to be run on separate thread*/
-    @MainThread
-    private fun handleIntent(action: String, id: Long) {
-        val alarm = mRepository.getAlarmByID(id)
-        alarm?.let {
-            when (action) {
-                ACTION_ACTIVATE_ALARM -> {
+    private fun activateAlarm(alarm: Alarm) {
                     if (BuildConfig.DEBUG) {
                         val df = DateFormat.getTimeInstance(DateFormat.SHORT)
-                        val debugString = String.format(Locale.getDefault(), "Activating alarm with id %d due %s", id, df.format(it.endTime))
-                        Log.d(tag, debugString)
+            val debugString = String.format(
+                    Locale.getDefault(),
+                    "Activating alarm with id %d due %s",
+                    alarm.id,
+                    df.format(alarm.endTime))
+            Log.d(TAG, debugString)
                     }
-                    if (it.snoozes < 10) {
+        if (alarm.snoozes < 10) { //Check if alarm has already been snoozed a bunch of times
+            if (alarm.active) {
+                Log.e(TAG, "Service attempted to activate an already activated alarm!")
+            } else {
                         alarm.activate()
-                        mRepository.safeUpdate(alarm)
+                repository.safeUpdate(alarm)
                         startAlarm(alarm)
-                    } else {
+            }
+        } else { // if it has, then kill it
                         alarm.kill()
-                        mRepository.safeUpdate(alarm)
+            repository.safeUpdate(alarm)
                         stopAlarm()
                         stopSelf()
                     }
+                }
+
+    /*Intent handler meant to be run on separate thread*/
+    private fun handleIntent(action: String, id: Long) = GlobalScope.launch {
+        repository.getAlarmByID(id)?.let { alarm ->
+            when (action) {
+                ACTION_ACTIVATE_ALARM -> {
+                   activateAlarm(alarm)
                 }
                 ACTION_STOP_ALARM -> {
                     stopAlarm()
@@ -85,7 +95,6 @@ class AlarmService : LifecycleService() {
                 }
             }
         }
-
     }
     
     private fun startAlarm(alarm: Alarm) {
