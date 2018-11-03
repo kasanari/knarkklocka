@@ -35,7 +35,7 @@ object TimerUtils {
         return getAlarmServicePendingIntent(context, id)
     }
 
-    fun isAlarmSet(context: Context, id: Long) : Boolean {
+    fun alarmIsSet(context: Context, id: Long): Boolean {
         val alarmIntent = getAlarmServiceIntent(context, id)
         val service = PendingIntent.getForegroundService(
                 context,
