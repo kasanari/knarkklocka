@@ -1,16 +1,19 @@
 package se.jakob.knarkklocka
 import android.app.AlarmManager
 import android.app.AlarmManager.RTC_WAKEUP
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.os.SystemClock
 import androidx.core.content.ContextCompat
 import android.text.format.DateUtils.MINUTE_IN_MILLIS
 import android.text.format.DateUtils.SECOND_IN_MILLIS
 import android.util.Log
 import android.view.View
-import android.view.WindowManager
 import android.widget.Chronometer
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -22,13 +25,17 @@ import se.jakob.knarkklocka.utils.ACTION_STOP_ALARM
 import se.jakob.knarkklocka.utils.InjectorUtils
 import se.jakob.knarkklocka.utils.TimerUtils
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID
+import se.jakob.knarkklocka.utils.WakeLocker
 import se.jakob.knarkklocka.viewmodels.AlarmActivityViewModel
+import android.view.WindowManager.LayoutParams.*
+
 
 class AlarmActivity : AppCompatActivity() {
 
     private lateinit var viewModel: AlarmActivityViewModel
 
     private var alarmIsActive = false
+    private var mServiceBound: Boolean = false
 
     private val alarmCallback = AlarmManager.OnAlarmListener {
         if (BuildConfig.DEBUG) {
@@ -37,12 +44,25 @@ class AlarmActivity : AppCompatActivity() {
         finish()
     }
 
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            Log.d(TAG, "Finished binding to AlarmService")
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            Log.d(TAG, "Disconnected from AlarmService")
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "AlarmActivity started")
         setContentView(R.layout.activity_alarm)
 
+        bindAlarmService()
+
         WakeLocker.acquire(this)
+
         /*Ensure that screen turns on*/
         val win = window
         if (Build.VERSION.SDK_INT >= 27) {
@@ -168,6 +188,7 @@ class AlarmActivity : AppCompatActivity() {
             alarmIntent.action = ACTION_STOP_ALARM
             startService(alarmIntent)
         }
+        unbindAlarmService()
     }
 
     private fun startTimeoutClock() {
@@ -184,6 +205,27 @@ class AlarmActivity : AppCompatActivity() {
     private fun stopTimeoutClock() {
         val alarmManager = getSystemService(AlarmManager::class.java)
         alarmManager.cancel(alarmCallback)
+    }
+
+    /**
+     * Bind AlarmService if not yet bound.
+     */
+    private fun bindAlarmService() {
+        if (!mServiceBound) {
+            val intent = Intent(this, AlarmService::class.java)
+            bindService(intent, connection, Context.BIND_AUTO_CREATE)
+            mServiceBound = true
+        }
+    }
+
+    /**
+     * Unbind AlarmService if bound.
+     */
+    private fun unbindAlarmService() {
+        if (mServiceBound) {
+            unbindService(connection)
+            mServiceBound = false
+        }
     }
 
     companion object {
