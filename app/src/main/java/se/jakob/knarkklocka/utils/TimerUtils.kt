@@ -57,6 +57,7 @@ object TimerUtils {
      */
     private fun getAlarmServicePendingIntent(context: Context, id: Long): PendingIntent {
         val alarmIntent = getAlarmServiceIntent(context, id)
+        alarmIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         return PendingIntent.getForegroundService(
                 context,
                 ALARM_INTENT_ID,
