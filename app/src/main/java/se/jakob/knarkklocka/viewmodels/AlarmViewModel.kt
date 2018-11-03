@@ -3,6 +3,9 @@ package se.jakob.knarkklocka.viewmodels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import se.jakob.knarkklocka.BuildConfig
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmRepository
 import java.util.*
@@ -20,29 +23,37 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
         return liveAlarm.value
     }
 
-    fun add(alarm: Alarm): Long {
+    fun add(alarm: Alarm): Long? {
         return repository.safeInsert(alarm)
     }
 
-    fun sleep() {
+    fun sleep() = GlobalScope.launch {
+        var success: Boolean
         liveAlarm.value?.let { alarm ->
-            if (alarm.active or alarm.snoozing) {
-                alarm.kill()
-                repository.safeUpdate(alarm)
-            } else if (alarm.waiting) {
-                repository.safeDelete(alarm)
+            success = when {
+                alarm.active or alarm.snoozing -> {
+                    alarm.kill()
+                    repository.safeUpdate(alarm)
+                }
+                alarm.waiting -> repository.safeDelete(alarm)
+                else -> false
+            }
+            if (!success) {
+                if (BuildConfig.DEBUG) {
+                    throw Exception("Failed to put alarm to sleep")
+                }
             }
         }
     }
 
-    fun kill() {
+    fun kill() = GlobalScope.launch {
         liveAlarm.value?.let { alarm ->
             alarm.kill()
             repository.safeUpdate(alarm)
         }
     }
 
-    fun snooze(endTime: Date) {
+    fun snooze(endTime: Date) = GlobalScope.launch {
         liveAlarm.value?.let { alarm ->
             alarm.snooze(endTime)
             repository.safeUpdate(alarm)
