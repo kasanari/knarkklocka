@@ -1,8 +1,10 @@
 package se.jakob.knarkklocka
 
+import android.content.Context
 import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
+import android.os.PowerManager
 import android.os.SystemClock
 import android.util.Log
 import android.view.Menu
@@ -20,6 +22,7 @@ import se.jakob.knarkklocka.settings.SettingsActivity
 import se.jakob.knarkklocka.utils.InjectorUtils
 import se.jakob.knarkklocka.utils.Klaxon
 import se.jakob.knarkklocka.utils.TimerUtils
+import se.jakob.knarkklocka.utils.Utils
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
 
 class TimerActivity : AppCompatActivity() {
@@ -31,6 +34,8 @@ class TimerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_timer)
+
+        Utils.checkIfWhiteListed(this)
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true)
 
@@ -111,7 +116,6 @@ class TimerActivity : AppCompatActivity() {
         val timeDelta = endTime.time - System.currentTimeMillis()
         chronometer_main.base = SystemClock.elapsedRealtime() + timeDelta
         chronometer_main.start()
-
         chronometer_main.visibility = View.VISIBLE
     }
 
@@ -121,7 +125,7 @@ class TimerActivity : AppCompatActivity() {
     }
 
     private fun sleep(v: View) {
-        viewModel.delete() /* Delete any running alarm */
+        viewModel.sleep() /* Delete or kill any running alarm */
         currentAlarm?.let {
             TimerUtils.cancelAlarm(this, it.id)
             Log.d(TAG, "Sleep mode engaged...")
@@ -130,8 +134,10 @@ class TimerActivity : AppCompatActivity() {
     }
 
     private fun snooze(v: View) {
-        TimerUtils.startSnoozeTimer(this, viewModel.getCurrentAlarm()!!)
-        Snackbar.make(v, "You are only postponing the inevitable...", Snackbar.LENGTH_LONG).show()
+        currentAlarm?.let {alarm ->
+            TimerUtils.startSnoozeTimer(this, alarm)
+            Snackbar.make(v, "You are only postponing the inevitable...", Snackbar.LENGTH_LONG).show()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
