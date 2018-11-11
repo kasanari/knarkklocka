@@ -30,8 +30,7 @@ class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
         return alarmDao.getAllAlarms()
     }
 
-    fun deleteAll() {
-        runOnIoThread {
+    fun deleteAll() = GlobalScope.launch {
             alarmDao.deleteAll()
         }
     
