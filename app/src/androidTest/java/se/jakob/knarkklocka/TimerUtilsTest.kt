@@ -45,7 +45,7 @@ class TimerUtilsTest {
         val endTime = Calendar.getInstance().apply {add(Calendar.MILLISECOND, testTimerLength.toInt())}.time
         TimerUtils.startMainTimer(context)
         Thread.sleep(2000) //Wait a bit for db operation to finish
-        val alarm : Alarm = getValue(repository.currentAlarm)
+        val alarm : Alarm = getValue(repository.currentLiveAlarm)
         val isSet = TimerUtils.alarmIsSet(context, alarm.id)
         assertTrue(isSet)
         assertEquals(alarm.endTime.time/1000, endTime.time/1000)
@@ -56,7 +56,7 @@ class TimerUtilsTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         TimerUtils.startMainTimer(context)
         Thread.sleep(2000) //Wait a bit for db operation to finish
-        val alarm : Alarm = getValue(repository.currentAlarm)
+        val alarm : Alarm = getValue(repository.currentLiveAlarm)
         var isSet = TimerUtils.alarmIsSet(context, alarm.id)
         assertTrue(isSet)
 

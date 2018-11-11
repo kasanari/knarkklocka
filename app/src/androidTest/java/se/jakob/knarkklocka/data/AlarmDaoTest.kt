@@ -52,7 +52,7 @@ class AlarmDaoTest {
 
     @Test
     fun testGetMostRecentAlarm() {
-        val alarm = getValue(alarmDao.getMostRecentAlarm())
+        val alarm = getValue(alarmDao.getMostRecentLiveAlarm())
 
         assertThat(alarm, equalTo(alarmC))
     }
