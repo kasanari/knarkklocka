@@ -102,7 +102,9 @@ object TimerUtils {
             AlarmNotificationsUtils.clearAllNotifications(context)
             AlarmBroadcasts.broadcastStopAlarm(context) /* Stop any vibration */
             val pendingAlarmIntent = getPI(context, id) /*Create the same intent as the registered alarm in order to cancel it*/
-            alarmManager.cancel(pendingAlarmIntent)
+            context.getSystemService(AlarmManager::class.java).run {
+                cancel(pendingAlarmIntent)
+            }
             pendingAlarmIntent.cancel()
             if (BuildConfig.DEBUG) {
                 val debugString = String.format(Locale.getDefault(), "Cancelled alarm with id %d", id)
@@ -115,10 +117,12 @@ object TimerUtils {
         val timerDuration = PreferenceUtils.getMainTimerLength(context)
         val startTime = Calendar.getInstance().time
         val endTime = Calendar.getInstance().apply { add(Calendar.MILLISECOND, timerDuration.toInt()) }.time
+        GlobalScope.launch {
         val alarm = Alarm(AlarmState.STATE_WAITING, startTime, endTime)
-        val repository = InjectorUtils.getAlarmRepository(context)
-        repository.safeInsert(alarm)?.let { id ->
-            setNewAlarmClock(context, id, alarm.endTime)
+            InjectorUtils.getAlarmRepository(context).run {
+                safeInsert(alarm)?.let { id ->
+                    setNewAlarm(context, id, alarm.endTime)
+                }
         }
         AlarmNotificationsUtils.showWaitingAlarmNotification(context, alarm)
     }
@@ -130,8 +134,9 @@ object TimerUtils {
             setNewAlarmClock(context, alarm.id, newEndTime)
             alarm.snooze(newEndTime)
             AlarmNotificationsUtils.showSnoozingAlarmNotification(context, alarm)
-            val repository = InjectorUtils.getAlarmRepository(context)
-            repository.safeUpdate(alarm)
+            InjectorUtils.getAlarmRepository(context).run {
+                safeUpdate(alarm)
+            }
         }
         return newEndTime
     }
