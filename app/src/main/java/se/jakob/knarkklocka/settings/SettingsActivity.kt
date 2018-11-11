@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.core.app.NavUtils
 import kotlinx.android.synthetic.main.activity_settings.*
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
 import androidx.preference.Preference
@@ -12,7 +13,7 @@ import se.jakob.knarkklocka.R
 import se.jakob.knarkklocka.utils.Utils
 
 
-class SettingsActivity : FragmentActivity() {
+class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val actionBar = actionBar
