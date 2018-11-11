@@ -1,10 +1,8 @@
 package se.jakob.knarkklocka
 
-import android.content.Context
 import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
-import android.os.PowerManager
 import android.os.SystemClock
 import android.util.Log
 import android.view.Menu
@@ -17,13 +15,15 @@ import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.content_timer.*
 import se.jakob.knarkklocka.data.Alarm
-import se.jakob.knarkklocka.data.AlarmState
+import se.jakob.knarkklocka.data.AlarmState.*
 import se.jakob.knarkklocka.settings.SettingsActivity
 import se.jakob.knarkklocka.utils.InjectorUtils
 import se.jakob.knarkklocka.utils.Klaxon
 import se.jakob.knarkklocka.utils.TimerUtils
 import se.jakob.knarkklocka.utils.Utils
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
+
+import java.util.*
 
 class TimerActivity : AppCompatActivity() {
 
@@ -50,29 +50,29 @@ class TimerActivity : AppCompatActivity() {
                 currentAlarm = alarm
                 val state = alarm.state
                 when (state) {
-                    AlarmState.STATE_ACTIVE -> {
-                        setupChronometer(alarm)
+                    STATE_ACTIVE -> {
+                        setupChronometer(alarm.endTime)
                         button_snooze_timer.visibility = View.VISIBLE
                         button_remove_timer.visibility = View.VISIBLE
                         fab_start_timer.visibility = View.VISIBLE
                         fab_start_timer.setImageResource(R.drawable.ic_restart_black_24dp)
                     }
-                    AlarmState.STATE_DEAD -> {
+                    STATE_DEAD -> {
                         fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp)
                         fab_start_timer.visibility = View.VISIBLE
                         button_remove_timer.visibility = View.INVISIBLE
                         button_snooze_timer.visibility = View.INVISIBLE
                         chronometer_main.visibility = View.INVISIBLE
                     }
-                    AlarmState.STATE_SNOOZING -> {
-                        setupChronometer(alarm)
+                    STATE_SNOOZING -> {
+                        setupChronometer(alarm.endTime)
                         button_snooze_timer.visibility = View.INVISIBLE
                         button_remove_timer.visibility = View.VISIBLE
                         fab_start_timer.visibility = View.VISIBLE
                         fab_start_timer.setImageResource(R.drawable.ic_restart_black_24dp)
                     }
-                    AlarmState.STATE_WAITING -> {
-                        setupChronometer(alarm)
+                    STATE_WAITING -> {
+                        setupChronometer(alarm.endTime)
                         button_snooze_timer.visibility = View.INVISIBLE
                         button_remove_timer.visibility = View.VISIBLE
                         fab_start_timer.visibility = View.INVISIBLE
@@ -97,7 +97,7 @@ class TimerActivity : AppCompatActivity() {
 
         /* Setting up Toolbar instead of ActionBar */
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        toolbar.title = "Timer setup"
+        toolbar.title = "Timer control"
         setSupportActionBar(toolbar)
 
         /* Setting up OnClick listeners */
@@ -118,8 +118,7 @@ class TimerActivity : AppCompatActivity() {
 
     }
 
-    private fun setupChronometer(alarm: Alarm) {
-        val endTime = alarm.endTime
+    private fun setupChronometer(endTime: Date) {
         val timeDelta = endTime.time - System.currentTimeMillis()
         chronometer_main.base = SystemClock.elapsedRealtime() + timeDelta
         chronometer_main.start()
@@ -128,7 +127,7 @@ class TimerActivity : AppCompatActivity() {
 
     private fun restartAlarm() {
         viewModel.kill() /* Kill any running alarms. */
-        TimerUtils.startMainTimer(this)
+        setupChronometer(TimerUtils.startMainTimer(this))
     }
 
     private fun sleep(v: View) {
@@ -142,7 +141,7 @@ class TimerActivity : AppCompatActivity() {
 
     private fun snooze(v: View) {
         currentAlarm?.let {alarm ->
-            TimerUtils.startSnoozeTimer(this, alarm)
+            setupChronometer(TimerUtils.startSnoozeTimer(this, alarm))
             Snackbar.make(v, "You are only postponing the inevitable...", Snackbar.LENGTH_LONG).show()
         }
     }
