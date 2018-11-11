@@ -24,6 +24,7 @@ class Converters {
             AlarmState.STATE_DEAD -> 1
             AlarmState.STATE_ACTIVE -> 2
             AlarmState.STATE_SNOOZING -> 3
+            AlarmState.STATE_MISSED -> 4
         }
     }
 
@@ -42,6 +43,7 @@ class Converters {
             1 -> AlarmState.STATE_DEAD
             2 -> AlarmState.STATE_ACTIVE
             3 -> AlarmState.STATE_SNOOZING
+            4 -> AlarmState.STATE_MISSED
             else -> {
                 throw Exception("Invalid AlarmState")
             }
