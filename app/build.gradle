@@ -36,7 +36,7 @@ android {
             dimension "version"
             applicationIdSuffix ".experimental"
             versionNameSuffix "-experimental"
-}
+        }
         stable {
             dimension "version"
             applicationIdSuffix ".stable"
@@ -46,8 +46,11 @@ android {
 }
 
 dependencies {
+
     //Linting
     ktlint "com.github.shyiko:ktlint:0.29.0"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.coroutinesVersion"
 
     implementation "androidx.core:core-ktx:$rootProject.ktxVersion"
     implementation "com.google.android.material:material:$rootProject.supportLibraryVersion"
@@ -57,6 +60,7 @@ dependencies {
 
     // Testing dependencies
     androidTestImplementation "androidx.arch.core:core-testing:$rootProject.coreTestingVersion"
+    androidTestImplementation 'androidx.test:core:1.0.0-beta02'
     androidTestImplementation "androidx.test.espresso:espresso-contrib:$rootProject.espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-intents:$rootProject.espressoVersion"
@@ -68,28 +72,36 @@ dependencies {
     kapt "androidx.room:room-compiler:$rootProject.roomVersion" // use kapt for Kotlin
     // optional - RxJava support for Room
     implementation "androidx.room:room-rxjava2:$rootProject.roomVersion"
+
     // optional - Guava support for Room, including Optional and ListenableFuture
     implementation "androidx.room:room-guava:$rootProject.roomVersion"
+
     // Test helpers
     testImplementation "androidx.room:room-testing:$rootProject.roomVersion"
 
     // Lifecycle
+
     // ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-livedata:$rootProject.lifecycleVersion"
+
     // alternatively - Lifecycles only (no ViewModel or LiveData). Some UI
+
     // AndroidX libraries use this lightweight import for Lifecycle
     implementation "androidx.lifecycle:lifecycle-runtime:$rootProject.lifecycleVersion"
+    kapt "androidx.lifecycle:lifecycle-compiler:$rootProject.lifecycleVersion"
 
-    kapt "androidx.lifecycle:lifecycle-compiler:$rootProject.lifecycleVersion" // use kapt for Kotlin
+    // use kapt for Kotlin
 
     // optional - Test helpers for LiveData
     testImplementation "androidx.arch.core:core-testing:$rootProject.lifecycleVersion"
 
     // WorkManager
-    implementation("android.arch.work:work-runtime-ktx:$rootProject.workVersion") { // use -ktx for Kotlin
-            exclude group: 'com.google.guava', module: 'listenablefuture'
+    implementation("android.arch.work:work-runtime-ktx:$rootProject.workVersion") {
+        // use -ktx for Kotlin
+        exclude group: 'com.google.guava', module: 'listenablefuture'
     }
+
     // optional - Test helpers
     androidTestImplementation "android.arch.work:work-testing:$rootProject.workVersion"
 
@@ -99,8 +111,11 @@ dependencies {
 
     // Navigation
     implementation "android.arch.navigation:navigation-fragment-ktx:$rootProject.navigationVersion"
+
     // use -ktx for Kotlin
-    implementation "android.arch.navigation:navigation-ui-ktx:$rootProject.navigationVersion" // use -ktx for Kotlin
+    implementation "android.arch.navigation:navigation-ui-ktx:$rootProject.navigationVersion"
+
+    // use -ktx for Kotlin
 }
 
 task ktlint(type: JavaExec, group: "verification") {
