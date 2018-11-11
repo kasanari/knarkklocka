@@ -76,11 +76,11 @@ object TimerUtils {
     }
 
     /**
-     * Creates a new AlarmClock with the system [AlarmManager]
+     * Creates a new alarm with the system [AlarmManager]
      */
-     fun setNewAlarmClock(context: Context, id: Long, endTime: Date) = GlobalScope.launch {
-        //cancelAlarm(context, -1) /* Remove existing alarm */
-        val alarmManager = context.getSystemService(AlarmManager::class.java)
+    fun setNewAlarm(context: Context, id: Long, endTime: Date) = GlobalScope.launch {
+        AlarmNotificationsUtils.clearAllNotifications(context) /* Remove any current notifications */
+        AlarmBroadcasts.broadcastStopAlarm(context) /* Stop any vibration */
 
         val pendingAlarmIntent = getPI(context, id) /* Set AlarmService as the intent to start when alarm goes off */
 
@@ -97,8 +97,7 @@ object TimerUtils {
 
     fun cancelAlarm(context: Context, id: Long) = GlobalScope.launch {
         if (alarmIsSet(context, id)) {
-            val alarmManager = context.getSystemService(AlarmManager::class.java)
-            AlarmNotificationsUtils.clearAllNotifications(context)
+        AlarmNotificationsUtils.clearAllNotifications(context) /* Remove any current notifications */
             AlarmBroadcasts.broadcastStopAlarm(context) /* Stop any vibration */
             val pendingAlarmIntent = getPI(context, id) /*Create the same intent as the registered alarm in order to cancel it*/
             context.getSystemService(AlarmManager::class.java).run {
@@ -132,7 +131,7 @@ object TimerUtils {
         val snoozeDuration = PreferenceUtils.getSnoozeTimerLength(context)
         val newEndTime = Calendar.getInstance().apply { add(Calendar.MILLISECOND, snoozeDuration.toInt()) }.time
         GlobalScope.launch {
-            setNewAlarmClock(context, alarm.id, newEndTime)
+            setNewAlarm(context, alarm.id, newEndTime)
             alarm.snooze(newEndTime)
             AlarmNotificationsUtils.showSnoozingAlarmNotification(context, alarm)
             InjectorUtils.getAlarmRepository(context).run {
