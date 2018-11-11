@@ -78,6 +78,13 @@ class TimerActivity : AppCompatActivity() {
                         fab_start_timer.visibility = View.INVISIBLE
                         fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp)
                     }
+                    STATE_MISSED -> {
+                        setupChronometer(alarm.endTime)
+                        button_snooze_timer.visibility = View.VISIBLE
+                        button_remove_timer.visibility = View.VISIBLE
+                        fab_start_timer.visibility = View.VISIBLE
+                        fab_start_timer.setImageResource(R.drawable.ic_restart_black_24dp)
+                    }
                 }
             } else {
                 fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp)
