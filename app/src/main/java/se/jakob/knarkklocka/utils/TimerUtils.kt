@@ -84,10 +84,9 @@ object TimerUtils {
 
         val pendingAlarmIntent = getPI(context, id) /* Set AlarmService as the intent to start when alarm goes off */
 
-        val showAlarmPI = getTimerActivityIntent(context)
-        val alarmClockInfo = AlarmManager.AlarmClockInfo(endTime.time, showAlarmPI) /* Setup alarm clock info */
-
-        alarmManager.setAlarmClock(alarmClockInfo, pendingAlarmIntent) /* Register the alarm with the AlarmManager */
+        context.getSystemService(AlarmManager::class.java).run {
+            setExactAndAllowWhileIdle(RTC_WAKEUP, endTime.time, pendingAlarmIntent)
+        }
 
         if (BuildConfig.DEBUG) {
             val df = DateFormat.getTimeInstance(DateFormat.SHORT)
