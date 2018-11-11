@@ -46,10 +46,24 @@ class AlarmService : LifecycleService() {
         isRegistered = true
     }
 
+    private fun listenToAlarm(id : Long) {
+        repository.getLiveAlarmByID(id).observe(this, androidx.lifecycle.Observer { alarm ->
+            alarm?.let {
+                AlarmNotificationsUtils.clearAllNotifications(this)
+                when(alarm.state) {
+                    AlarmState.STATE_WAITING, AlarmState.STATE_DEAD, AlarmState.STATE_SNOOZING -> null
+                    AlarmState.STATE_ACTIVE -> AlarmNotificationsUtils.showActiveAlarmNotification(this, alarm)
+                    AlarmState.STATE_MISSED -> AlarmNotificationsUtils.showMissedAlarmNotification(this, alarm)
+                }
+            }
+        })
+    }
+
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         WakeLocker.acquire(this)
         val id = intent.getLongExtra(EXTRA_ALARM_ID, -1)
         intent.action?.let { action ->
+            listenToAlarm(id)
             handleIntent(action, id)
         }
         return super.onStartCommand(intent, flags, startId)
