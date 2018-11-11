@@ -34,6 +34,10 @@ data class Alarm constructor(
         get () {
             return state == AlarmState.STATE_DEAD
         }
+    var missed : Boolean = false
+        get() {
+            return state == AlarmState.STATE_MISSED
+        }
 
     @Ignore
     constructor(state: AlarmState, startTime: Date, endTime: Date) : this(id = 0, state = state, startTime = startTime, endTime = endTime)
@@ -48,6 +52,7 @@ data class Alarm constructor(
                 AlarmState.STATE_WAITING -> "Waiting"
                 AlarmState.STATE_DEAD -> "Dead"
                 AlarmState.STATE_SNOOZING -> "Snoozed"
+                AlarmState.STATE_MISSED -> "Missed"
             }
         }
 
@@ -62,9 +67,9 @@ data class Alarm constructor(
     }
 
     fun snooze(newEndTime: Date) {
-        if (!active) {
+        if (!(active or missed)) {
             if (BuildConfig.DEBUG) {
-                throw InvalidStateChangeException("Only an active Alarm can be snoozed.")
+                throw InvalidStateChangeException("Only an active or missed Alarm can be snoozed.")
             }
         } else {
             state = AlarmState.STATE_SNOOZING
@@ -76,6 +81,16 @@ data class Alarm constructor(
     fun kill() {
         this.endTime = Calendar.getInstance().time
         this.state = AlarmState.STATE_DEAD
+    }
+
+    fun miss() {
+        if (!active) {
+            if (BuildConfig.DEBUG) {
+                throw InvalidStateChangeException("Only an active Alarm can be missed.")
+            }
+        } else {
+            this.state = AlarmState.STATE_MISSED
+        }
     }
 
     private fun incrementSnoozeCount() {
