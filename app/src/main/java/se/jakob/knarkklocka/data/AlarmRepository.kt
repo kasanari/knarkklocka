@@ -34,6 +34,9 @@ class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
         runOnIoThread {
             alarmDao.deleteAll()
         }
+    
+    private fun ensureUnique(state: AlarmState) {
+        alarmDao.deleteAlarmsByStates(Converters().fromAlarmState(state))
     }
 
     fun insert(alarm: Alarm): Long {
@@ -46,9 +49,48 @@ class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
         }
     }
 
-    fun update(alarm: Alarm) {
-        runOnIoThread {
-            alarmDao.updateAlarm(alarm)
+    fun safeInsert(alarm: Alarm): Long? {
+        return if (alarm.state == AlarmState.STATE_WAITING) {
+            ensureUnique(AlarmState.STATE_WAITING)
+            insert(alarm)
+        } else {
+            if (BuildConfig.DEBUG) {
+                throw Exception("Can only insert waiting Alarms")
+            }
+            null
+        }
+    }
+
+    fun safeDelete(alarm: Alarm): Boolean {
+        return if (alarm.waiting) {
+            delete(alarm)
+            true
+        } else {
+            false
+        }
+    }
+
+    /**
+     * Update an alarm in the DB, and check for inconsistencies
+     * **/
+    fun safeUpdate(alarm: Alarm): Boolean {
+        when (alarm.state) {
+            AlarmState.STATE_WAITING -> {
+                if (BuildConfig.DEBUG) {
+                    throw Alarm.InvalidStateChangeException("Can not update an Alarm to be waiting.")
+                }
+                return false
+            }
+            AlarmState.STATE_DEAD, AlarmState.STATE_MISSED -> {
+                update(alarm)
+                return true
+            }
+
+            AlarmState.STATE_ACTIVE, AlarmState.STATE_SNOOZING -> {
+                ensureUnique(alarm.state)
+                update(alarm)
+                return true
+            }
         }
     }
 
