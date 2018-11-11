@@ -113,7 +113,7 @@ object TimerUtils {
         }
     }
 
-    fun startMainTimer(context: Context) = GlobalScope.launch {
+    fun startMainTimer(context: Context): Date {
         val timerDuration = PreferenceUtils.getMainTimerLength(context)
         val startTime = Calendar.getInstance().time
         val endTime = Calendar.getInstance().apply { add(Calendar.MILLISECOND, timerDuration.toInt()) }.time
@@ -125,6 +125,8 @@ object TimerUtils {
                 }
         }
         AlarmNotificationsUtils.showWaitingAlarmNotification(context, alarm)
+    }
+        return endTime
     }
 
     fun startSnoozeTimer(context: Context, alarm: Alarm): Date {
