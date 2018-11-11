@@ -22,10 +22,12 @@ object AlarmNotificationsUtils {
     private const val ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID = "firing_notification_channel"
     private const val ALARM_SNOOZE_NOTIFICATION_CHANNEL_ID = "snooze_notification_channel"
     private const val ALARM_WAITING_NOTIFICATION_CHANNEL_ID = "waiting_notification_channel"
+    private const val ALARM_MISSED_NOTIFICATION_CHANNEL_ID = "missed_notification_channel"
 
     private const val ALARM_WAITING_NOTIFICATION_ID = 5464
     private const val ALARM_SNOOZING_NOTIFICATION_ID = 9845
     private const val ALARM_ACTIVE_NOTIFICATION_ID = 1235
+    private const val ALARM_MISSED_NOTIFICATION_ID = 4231
 
     private const val LIGHT_COLOR_RED = 0xff0000
     private const val LIGHT_COLOR_BLUE = 0x0000ff
@@ -61,6 +63,21 @@ object AlarmNotificationsUtils {
         }
     }
 
+    private fun setupMissedNotificationChannel(context: Context) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val mChannel = NotificationChannel(
+                    ALARM_MISSED_NOTIFICATION_CHANNEL_ID,
+                    context.getString(R.string.snoozing_notification_channel_name),
+                    NotificationManager.IMPORTANCE_HIGH)
+            mChannel.setBypassDnd(true)
+            mChannel.setShowBadge(false)
+            mChannel.enableLights(true)
+            mChannel.lightColor = LIGHT_COLOR_RED
+            notificationManager.createNotificationChannel(mChannel)
+        }
+    }
+
     private fun setupWaitingNotificationChannel(context: Context) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -72,6 +89,34 @@ object AlarmNotificationsUtils {
             mChannel.setShowBadge(false)
             notificationManager.createNotificationChannel(mChannel)
         }
+    }
+
+    @Synchronized
+    fun showMissedAlarmNotification(service: Service, alarm: Alarm) {
+
+        setupMissedNotificationChannel(service)
+
+        val notification = Notification.Builder(service, ALARM_MISSED_NOTIFICATION_CHANNEL_ID)
+                .setColor(ContextCompat.getColor(service, R.color.colorAccent))
+                .setSmallIcon(R.drawable.ic_alarm_white_24dp)
+                .setLargeIcon(BitmapFactory.decodeResource(service.resources, R.mipmap.pill))
+                .setOngoing(true)
+                .setAutoCancel(true)
+                .setLocalOnly(true)
+                .setStyle(Notification.DecoratedCustomViewStyle())
+                .setCategory(Notification.CATEGORY_ALARM)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setChannelId(ALARM_MISSED_NOTIFICATION_CHANNEL_ID)
+
+        val pendingShowAlarm = TimerUtils.getTimerActivityIntent(service)
+        notification.setContentIntent(pendingShowAlarm)
+
+        val packageName = service.packageName
+        val stateText = service.resources.getString(R.string.missed_notification_text)
+        notification.setCustomContentView(buildMissedNotificationView(packageName, alarm, true, stateText))
+
+
+        service.startForeground(ALARM_MISSED_NOTIFICATION_ID, notification.build())
     }
 
     @Synchronized
@@ -204,6 +249,14 @@ object AlarmNotificationsUtils {
     }
 
     private fun buildActiveNotificationView(packageName: String, alarm: Alarm,
+                                            running: Boolean, stateText: CharSequence): RemoteViews {
+        val content = buildChronometer(packageName, alarm.endTime, running)
+        content.setTextViewText(R.id.notif_state, stateText)
+        content.setViewVisibility(R.id.notif_details, View.GONE)
+        return content
+    }
+
+    private fun buildMissedNotificationView(packageName: String, alarm: Alarm,
                                             running: Boolean, stateText: CharSequence): RemoteViews {
         val content = buildChronometer(packageName, alarm.endTime, running)
         content.setTextViewText(R.id.notif_state, stateText)
