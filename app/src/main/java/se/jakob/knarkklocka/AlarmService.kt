@@ -24,6 +24,7 @@ class AlarmService : LifecycleService() {
     private var isRegistered: Boolean = false
     private val binder: IBinder = Binder()
     private var isBound: Boolean = false
+    private var alarmIsHandled = false
 
 
     private val actionsReceiver = object : BroadcastReceiver() {
@@ -32,6 +33,10 @@ class AlarmService : LifecycleService() {
             when (action) {
                 ACTION_STOP_ALARM -> stopAlarm()
             }
+                ACTION_ALARM_HANDLED -> {
+                    alarmIsHandled = true
+        }
+    }
         }
     }
 
@@ -40,6 +45,7 @@ class AlarmService : LifecycleService() {
         Log.d(TAG, "Service got created")
         // Register the broadcast receiver
         val filter = IntentFilter(ACTION_STOP_ALARM)
+        filter.addAction(ACTION_ALARM_HANDLED)
         repository = InjectorUtils.getAlarmRepository(this)
         //filter.addAction(ACTION_SNOOZE_ALARM);
         registerReceiver(actionsReceiver, filter)
@@ -117,8 +123,11 @@ class AlarmService : LifecycleService() {
     }
 
     private fun stopAlarm() {
+        if (alarmIsHandled) {
         Klaxon.stopVibrate(this)
         stopForeground(true)
+            stopSelf()
+        }
     }
 
     override fun onDestroy() {
