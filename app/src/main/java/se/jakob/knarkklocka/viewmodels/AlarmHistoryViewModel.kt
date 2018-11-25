@@ -7,7 +7,7 @@ class AlarmHistoryViewModel internal constructor(private val repository: AlarmRe
     override var liveAlarm = repository.currentLiveAlarm
 
     fun clearHistory() {
-        repository.deleteAll()
+        deleteAll()
     }
 
     fun getAlarms() = allAlarms
