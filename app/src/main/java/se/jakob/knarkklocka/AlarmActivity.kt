@@ -85,6 +85,15 @@ class AlarmActivity : AppCompatActivity() {
         /* Close dialogs and window shade, so this is fully visible */
         sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
 
+        if (BuildConfig.DEBUG) {
+            button_miss_alarm.visibility = View.VISIBLE
+            button_miss_alarm.setOnClickListener {
+                finish()
+            }
+        } else {
+            button_miss_alarm.visibility = View.INVISIBLE
+        }
+
         button_snooze_alarm.setOnClickListener {
             finish()
         }
