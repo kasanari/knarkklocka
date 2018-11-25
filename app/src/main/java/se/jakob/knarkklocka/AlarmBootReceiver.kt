@@ -25,7 +25,7 @@ class AlarmBootReceiver : BroadcastReceiver() {
                 val repository = InjectorUtils.getAlarmRepository(context)
                 val alarm : Alarm = repository.currentAlarm
                 if (alarm.waiting or alarm.snoozing) {
-                    TimerUtils.setNewAlarmClock(context, alarm.id, alarm.endTime)
+                    TimerUtils.setNewAlarm(context, alarm.id, alarm.endTime)
                     if (alarm.snoozing) {
                         AlarmNotificationsUtils.showSnoozingAlarmNotification(context, alarm)
                     } else {
