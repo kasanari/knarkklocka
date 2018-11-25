@@ -1,11 +1,14 @@
 package se.jakob.knarkklocka.utils
 
 import android.app.AlarmManager
+import android.app.AlarmManager.RTC_WAKEUP
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.icu.util.Calendar
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import se.jakob.knarkklocka.AlarmBroadcasts
@@ -30,6 +33,7 @@ object TimerUtils {
     private const val ALARM_INTENT_ID = 76          //Arbitrary unique ID for the alarm intent
     private const val TIMER_ACTIVITY_INTENT_ID = 34 //Arbitrary unique ID for the TimerActivity intent
 
+    private val utilScope = CoroutineScope(Dispatchers.IO)
     /**
      * Returns whatever pending intent i am using at the moment
      */
@@ -78,7 +82,7 @@ object TimerUtils {
     /**
      * Creates a new alarm with the system [AlarmManager]
      */
-    fun setNewAlarm(context: Context, id: Long, endTime: Date) = GlobalScope.launch {
+    fun setNewAlarm(context: Context, id: Long, endTime: Date) {
         AlarmNotificationsUtils.clearAllNotifications(context) /* Remove any current notifications */
         AlarmBroadcasts.broadcastStopAlarm(context) /* Stop any vibration */
 
@@ -95,7 +99,7 @@ object TimerUtils {
         }
     }
 
-    fun cancelAlarm(context: Context, id: Long) = GlobalScope.launch {
+    fun cancelAlarm(context: Context, id: Long) {
         if (alarmIsSet(context, id)) {
         AlarmNotificationsUtils.clearAllNotifications(context) /* Remove any current notifications */
             AlarmBroadcasts.broadcastStopAlarm(context) /* Stop any vibration */
@@ -115,8 +119,8 @@ object TimerUtils {
         val timerDuration = PreferenceUtils.getMainTimerLength(context)
         val startTime = Calendar.getInstance().time
         val endTime = Calendar.getInstance().apply { add(Calendar.MILLISECOND, timerDuration.toInt()) }.time
-        GlobalScope.launch {
         val alarm = Alarm(AlarmState.STATE_WAITING, startTime, endTime)
+        utilScope.launch {
             InjectorUtils.getAlarmRepository(context).run {
                 safeInsert(alarm)?.let { id ->
                     setNewAlarm(context, id, alarm.endTime)
@@ -130,10 +134,10 @@ object TimerUtils {
     fun startSnoozeTimer(context: Context, alarm: Alarm): Date {
         val snoozeDuration = PreferenceUtils.getSnoozeTimerLength(context)
         val newEndTime = Calendar.getInstance().apply { add(Calendar.MILLISECOND, snoozeDuration.toInt()) }.time
-        GlobalScope.launch {
             setNewAlarm(context, alarm.id, newEndTime)
             alarm.snooze(newEndTime)
             AlarmNotificationsUtils.showSnoozingAlarmNotification(context, alarm)
+        utilScope.launch {
             InjectorUtils.getAlarmRepository(context).run {
                 safeUpdate(alarm)
             }
