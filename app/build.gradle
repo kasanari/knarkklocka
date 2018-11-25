@@ -46,11 +46,12 @@ android {
 }
 
 dependencies {
-
+    
     //Linting
     ktlint "com.github.shyiko:ktlint:0.29.0"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.coroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.coroutinesVersion"
 
     implementation "androidx.core:core-ktx:$rootProject.ktxVersion"
     implementation "com.google.android.material:material:$rootProject.supportLibraryVersion"
