@@ -1,5 +1,6 @@
 package se.jakob.knarkklocka
 
+import android.app.Notification
 import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
@@ -17,10 +18,7 @@ import kotlinx.android.synthetic.main.content_timer.*
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmState.*
 import se.jakob.knarkklocka.settings.SettingsActivity
-import se.jakob.knarkklocka.utils.InjectorUtils
-import se.jakob.knarkklocka.utils.Klaxon
-import se.jakob.knarkklocka.utils.TimerUtils
-import se.jakob.knarkklocka.utils.Utils
+import se.jakob.knarkklocka.utils.*
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
 
 import java.util.*
@@ -128,11 +126,13 @@ class TimerActivity : AppCompatActivity() {
     }
 
     private fun restartAlarm() {
+        AlarmBroadcasts.broadcastAlarmHandled(this)
         viewModel.kill() /* Kill any running alarms. */
         setupChronometer(TimerUtils.startMainTimer(this))
     }
 
     private fun sleep(v: View) {
+        AlarmBroadcasts.broadcastAlarmHandled(this)
         viewModel.sleep() /* Delete or kill any running alarm */
         currentAlarm?.let {
             TimerUtils.cancelAlarm(this, it.id)
@@ -142,6 +142,7 @@ class TimerActivity : AppCompatActivity() {
     }
 
     private fun snooze(v: View) {
+        AlarmBroadcasts.broadcastAlarmHandled(this)
         currentAlarm?.let {alarm ->
             setupChronometer(TimerUtils.startSnoozeTimer(this, alarm))
             Snackbar.make(v, "You are only postponing the inevitable...", Snackbar.LENGTH_LONG).show()
