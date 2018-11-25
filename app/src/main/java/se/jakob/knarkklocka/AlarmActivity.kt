@@ -146,7 +146,9 @@ class AlarmActivity : AppCompatActivity() {
         if (alarmIsActive) {
             snooze()
         }
-        WakeLocker.release()
+
+    private fun miss() {
+        viewModel.miss()
     }
 
     private fun snooze() {
