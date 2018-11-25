@@ -3,7 +3,9 @@ package se.jakob.knarkklocka.viewmodels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import se.jakob.knarkklocka.BuildConfig
 import se.jakob.knarkklocka.data.Alarm
@@ -15,6 +17,21 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
 
     abstract var liveAlarm: LiveData<Alarm>
 
+    /**
+     * This is the job for all coroutines started by this ViewModel.
+     *
+     * Cancelling this job will cancel all coroutines started by this ViewModel.
+     */
+    private val viewModelJob = Job()
+
+    /**
+     * This is the main scope for all coroutines launched by MainViewModel.
+     *
+     * Since we pass viewModelJob, you can cancel all coroutines launched by uiScope by calling
+     * viewModelJob.cancel()
+     */
+    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
+
     var hasAlarm: Boolean = false
         get() = liveAlarm.value != null
 
@@ -23,40 +40,89 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
         return liveAlarm.value
     }
 
-    fun add(alarm: Alarm): Long? {
-        return repository.safeInsert(alarm)
+    internal fun deleteAll() {
+        launchDataLoad {
+            repository.deleteAll()
+        }
     }
 
-    fun sleep() = GlobalScope.launch {
+    fun sleep() {
         var success: Boolean
-        liveAlarm.value?.let { alarm ->
-            success = when {
-                alarm.active or alarm.snoozing -> {
+        getData { alarm: Alarm ->
+            launchDataLoad {
+                success = when {
+                    alarm.active or alarm.snoozing or alarm.missed -> {
+                        alarm.kill()
+                        repository.safeUpdate(alarm)
+                    }
+                    alarm.waiting -> repository.safeDelete(alarm)
+                    else -> false
+                }
+                if (!success) {
+                    if (BuildConfig.DEBUG) {
+                        throw Exception("Failed to put alarm to sleep")
+                    }
+                }
+            }
+        }
+    }
+
+    fun kill() {
+        getData { alarm: Alarm ->
+            launchDataLoad {
+                if (!alarm.dead) {
                     alarm.kill()
                     repository.safeUpdate(alarm)
                 }
-                alarm.waiting -> repository.safeDelete(alarm)
-                else -> false
-            }
-            if (!success) {
-                if (BuildConfig.DEBUG) {
-                    throw Exception("Failed to put alarm to sleep")
-                }
             }
         }
     }
 
-    fun kill() = GlobalScope.launch {
-        liveAlarm.value?.let { alarm ->
-            alarm.kill()
-            repository.safeUpdate(alarm)
+    fun miss() {
+        getData { alarm: Alarm ->
+            launchDataLoad {
+                alarm.miss()
+                repository.safeUpdate(alarm)
+            }
         }
     }
 
-    fun snooze(endTime: Date) = GlobalScope.launch {
-        liveAlarm.value?.let { alarm ->
-            alarm.snooze(endTime)
-            repository.safeUpdate(alarm)
+    fun snooze(endTime: Date) = {
+        getData { alarm: Alarm ->
+            launchDataLoad {
+                alarm.snooze(endTime)
+                repository.safeUpdate(alarm)
+            }
         }
     }
+
+    /**
+     * Cancel all coroutines when the ViewModel is cleared
+     */
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
+    }
+
+    /**
+     * Helper function to call a data load function with a loading spinner, errors will trigger a
+     * snackbar.
+     *
+     * By marking `block` as `suspend` this creates a suspend lambda which can call suspend
+     * functions.
+     *
+     * @param block lambda to actually load data. It is called in the uiScope.
+     */
+    private fun launchDataLoad(block: suspend () -> Unit): Job {
+        return uiScope.launch {
+            block()
+        }
+    }
+
+    private fun getData(block: (Alarm) -> Unit) {
+        liveAlarm.value?.let { alarm: Alarm ->
+                block(alarm)
+        }
+    }
+
 }
