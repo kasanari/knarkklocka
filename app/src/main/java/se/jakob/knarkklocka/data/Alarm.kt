@@ -84,7 +84,7 @@ data class Alarm constructor(
     }
 
     fun miss() {
-        if (!active) {
+        if (!(active or snoozing)) {
             if (BuildConfig.DEBUG) {
                 throw InvalidStateChangeException("Only an active Alarm can be missed.")
             }
