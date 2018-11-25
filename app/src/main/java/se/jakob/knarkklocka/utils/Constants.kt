@@ -6,3 +6,4 @@ package se.jakob.knarkklocka.utils
 const val ACTION_ACTIVATE_ALARM = "activate-alarm"
 const val ACTION_STOP_ALARM = "stop-alarm"
 const val ACTION_WAITING_ALARM = "wating-alarm"
+const val ACTION_ALARM_HANDLED = "alarm-handled"
