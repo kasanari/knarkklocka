@@ -95,9 +95,15 @@ class AlarmActivity : AppCompatActivity() {
         }
 
         button_snooze_alarm.setOnClickListener {
+            alarmIsHandled = true
+            if (alarmIsActive) {
+                snooze()
+            } else {
             finish()
         }
+        }
         button_dismiss_alarm.setOnLongClickListener {
+            alarmIsHandled = true
             if (alarmIsActive) {
                 dismiss()
             } else {
