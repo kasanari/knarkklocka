@@ -34,6 +34,8 @@
     <string name="waiting_notification_text">The drug timer is running.</string>
     <string name="active_notification_text">Time for drugs!</string>
     <string name="viewholder_no_alarms">No Alarms</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="missed_notification_text">Oh no! The Alarm was missed, this is not good.</string>
 
 
 </resources>
