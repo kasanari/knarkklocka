@@ -152,10 +152,10 @@ class AlarmActivity : AppCompatActivity() {
     }
 
     private fun snooze() {
-        viewModel.getCurrentAlarm()?.let {
-            TimerUtils.startSnoozeTimer(this, it)
+        viewModel.getCurrentAlarm()?.let { alarm ->
+            TimerUtils.startSnoozeTimer(this, alarm)
         }
-        stopAlarm()
+        finish()
     }
 
     private fun dismiss() {
