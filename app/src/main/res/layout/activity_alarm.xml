@@ -41,6 +41,15 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
+        android:id="@+id/button_miss_alarm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="128dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="Miss" />
+
+    <Button
         android:id="@+id/button_snooze_alarm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
