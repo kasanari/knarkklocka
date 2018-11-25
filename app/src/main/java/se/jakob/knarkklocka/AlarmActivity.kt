@@ -1,4 +1,5 @@
 package se.jakob.knarkklocka
+
 import android.app.AlarmManager
 import android.app.AlarmManager.RTC_WAKEUP
 import android.content.ComponentName
@@ -9,25 +10,24 @@ import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.os.SystemClock
-import androidx.core.content.ContextCompat
 import android.text.format.DateUtils.MINUTE_IN_MILLIS
 import android.text.format.DateUtils.SECOND_IN_MILLIS
 import android.util.Log
 import android.view.View
+import android.view.WindowManager.LayoutParams.*
 import android.widget.Chronometer
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_alarm.*
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmState
-import se.jakob.knarkklocka.utils.ACTION_STOP_ALARM
 import se.jakob.knarkklocka.utils.InjectorUtils
 import se.jakob.knarkklocka.utils.TimerUtils
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID
 import se.jakob.knarkklocka.utils.WakeLocker
 import se.jakob.knarkklocka.viewmodels.AlarmActivityViewModel
-import android.view.WindowManager.LayoutParams.*
 
 
 class AlarmActivity : AppCompatActivity() {
@@ -35,6 +35,7 @@ class AlarmActivity : AppCompatActivity() {
     private lateinit var viewModel: AlarmActivityViewModel
 
     private var alarmIsActive = false
+    private var alarmIsHandled = false
     private var mServiceBound: Boolean = false
 
     private val alarmCallback = AlarmManager.OnAlarmListener {
@@ -69,14 +70,14 @@ class AlarmActivity : AppCompatActivity() {
             setTurnScreenOn(true)      //Replaces FLAG_TURN_SCREEN_ON
             setShowWhenLocked(true)    //Replaces FLAG_SHOW_WHEN_LOCKED
             win.addFlags(
-                FLAG_KEEP_SCREEN_ON or 
-                FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
+                    FLAG_KEEP_SCREEN_ON or
+                            FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
         } else {
             win.addFlags(
                     FLAG_SHOW_WHEN_LOCKED or
-                    FLAG_TURN_SCREEN_ON or
-                    FLAG_KEEP_SCREEN_ON or
-                    FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
+                            FLAG_TURN_SCREEN_ON or
+                            FLAG_KEEP_SCREEN_ON or
+                            FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
         }
 
         /*Hide navigation bar*/
@@ -99,8 +100,8 @@ class AlarmActivity : AppCompatActivity() {
             if (alarmIsActive) {
                 snooze()
             } else {
-            finish()
-        }
+                finish()
+            }
         }
         button_dismiss_alarm.setOnLongClickListener {
             alarmIsHandled = true
@@ -158,9 +159,15 @@ class AlarmActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (alarmIsActive) {
-            snooze()
+        if (alarmIsHandled) {
+            AlarmBroadcasts.broadcastAlarmHandled(this)
+            stopAlarm()
+            WakeLocker.release()
+        } else {
+            miss()
         }
+        unbindAlarmService()
+    }
 
     private fun miss() {
         viewModel.miss()
@@ -176,7 +183,6 @@ class AlarmActivity : AppCompatActivity() {
     private fun dismiss() {
         viewModel.kill()
         TimerUtils.startMainTimer(this)
-        stopAlarm()
         finish()
     }
 
@@ -199,13 +205,7 @@ class AlarmActivity : AppCompatActivity() {
         stopTimeoutClock()
         alarmIsActive = false
         viewModel.liveAlarm.removeObservers(this)
-        viewModel.getCurrentAlarm()?.let {
-            val alarmIntent = Intent(this, AlarmService::class.java)
-            alarmIntent.putExtra(EXTRA_ALARM_ID, it.id)
-            alarmIntent.action = ACTION_STOP_ALARM
-            startService(alarmIntent)
-        }
-        unbindAlarmService()
+        AlarmBroadcasts.broadcastStopAlarm(this)
     }
 
     private fun startTimeoutClock() {
