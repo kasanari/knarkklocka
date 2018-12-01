@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory
 import android.media.AudioAttributes.USAGE_NOTIFICATION
 import android.os.Build
 import android.os.SystemClock
+import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
@@ -36,6 +37,7 @@ object AlarmNotificationsUtils {
     private const val LIGHT_COLOR_BLUE = 0x0000ff
 
     private val mVibratePattern = longArrayOf(1000, 1500, 1000)
+    private const val TAG = "AlarmNotificationsUtils"
 
     fun setupChannels(context: Context) {
         setupNotificationChannel(context, ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID)
@@ -147,6 +149,7 @@ object AlarmNotificationsUtils {
             setCustomContentView(buildMissedNotificationView(packageName, alarm, true, stateText))
             service.startForeground(ALARM_MISSED_NOTIFICATION_ID, build())
         }
+        Log.d(TAG, "Showing MISSED notification.")
     }
 
     @Synchronized
@@ -170,6 +173,7 @@ object AlarmNotificationsUtils {
             setContentIntent(pendingFullScreen)
             service.startForeground(ALARM_ACTIVE_NOTIFICATION_ID, build())
         }
+        Log.d(TAG, "Showing ACTIVE notification.")
     }
 
     @Synchronized
@@ -189,6 +193,7 @@ object AlarmNotificationsUtils {
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).run {
             notify(ALARM_SNOOZING_NOTIFICATION_ID, notification.build())
         }
+        Log.d(TAG, "Showing SNOOZING notification.")
     }
 
     @Synchronized
@@ -207,11 +212,13 @@ object AlarmNotificationsUtils {
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).run {
             notify(ALARM_WAITING_NOTIFICATION_ID, notification.build())
         }
+        Log.d(TAG, "Showing WAITING notification.")
     }
 
     fun clearAllNotifications(context: Context) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancelAll()
+        Log.d(TAG, "Notifications cleared.")
     }
 
 
