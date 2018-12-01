@@ -42,14 +42,13 @@ class AlarmService : LifecycleService() {
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG, "Service got created")
         // Register the broadcast receiver
         val filter = IntentFilter(ACTION_STOP_ALARM)
         filter.addAction(ACTION_ALARM_HANDLED)
         repository = InjectorUtils.getAlarmRepository(this)
-        //filter.addAction(ACTION_SNOOZE_ALARM);
         registerReceiver(actionsReceiver, filter)
         isRegistered = true
+        Log.d(TAG, "AlarmService was created")
     }
 
     private fun listenToAlarm(id : Long) {
