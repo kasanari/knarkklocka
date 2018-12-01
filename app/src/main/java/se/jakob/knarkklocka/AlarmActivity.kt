@@ -165,15 +165,10 @@ class AlarmActivity : AppCompatActivity() {
             AlarmBroadcasts.broadcastAlarmHandled(this)
             stopAlarm()
             WakeLocker.release()
-        } else {
-            miss()
         }
         unbindAlarmService()
     }
 
-    private fun miss() {
-        viewModel.miss()
-    }
 
     private fun snooze() {
         viewModel.getCurrentAlarm()?.let { alarm ->
