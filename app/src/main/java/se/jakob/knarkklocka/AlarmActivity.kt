@@ -80,8 +80,10 @@ class AlarmActivity : AppCompatActivity() {
                             FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
         }
 
-        /*Hide navigation bar*/
-        hideNavigationBar()
+        /*Hide navigation and status bar*/
+        hideUIElements()
+
+        setContentView(R.layout.activity_alarm)
 
         /* Close dialogs and window shade, so this is fully visible */
         sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
@@ -186,10 +188,14 @@ class AlarmActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun hideNavigationBar() {
-        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+    private fun hideUIElements() {
+        window.decorView.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        or View.SYSTEM_UI_FLAG_FULLSCREEN
+                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+        supportActionBar?.hide()
     }
 
     override fun onBackPressed() {
