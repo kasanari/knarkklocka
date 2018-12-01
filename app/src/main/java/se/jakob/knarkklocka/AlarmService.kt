@@ -159,6 +159,18 @@ class AlarmService : LifecycleService() {
 
     override fun onUnbind(intent: Intent?): Boolean {
         isBound = false
+        if (!alarmIsHandled) {
+            Log.d(TAG, "AlarmActivity stopped but alarm was not handled!")
+            serviceScope.launch {
+                currentAlarm.miss()
+                repository.safeUpdate(currentAlarm)
+            }
+            if (BuildConfig.DEBUG) {
+                startTimeout(10000)
+            } else {
+                startTimeout(timeoutLength)
+            }
+        }
         return super.onUnbind(intent)
     }
 
