@@ -1,57 +1,69 @@
 package se.jakob.knarkklocka.data
+
 import androidx.lifecycle.LiveData
-import se.jakob.knarkklocka.utils.runOnIoThread
+import kotlinx.coroutines.*
+import se.jakob.knarkklocka.BuildConfig
 
 class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
+
+    val currentLiveAlarm
+        get() = alarmDao.getMostRecentLiveAlarm()
 
     val currentAlarm
         get() = alarmDao.getMostRecentAlarm()
 
-    fun getLiveAlarmByID(id: Long): LiveData<Alarm> {
+     fun getLiveAlarmByID(id: Long): LiveData<Alarm> {
         return alarmDao.getLiveAlarm(id)
+        }
+
+    suspend fun getAlarmByID(id: Long): Alarm? {
+        return GlobalScope.async { alarmDao.getAlarm(id) }.await()
     }
 
-    fun getAlarmByID(id: Long): Alarm? {
-        return alarmDao.getAlarm(id)
+    internal fun getLiveAlarmsByStates(vararg states: AlarmState): LiveData<List<Alarm>> {
+        return alarmDao.getLiveAlarmsByStates(*Converters().fromAlarmState(*states))
     }
 
-    internal fun getAlarmsByStates(vararg states: AlarmState): LiveData<List<Alarm>> {
+    internal fun getAlarmsByStates(vararg states: AlarmState): List<Alarm> {
         return alarmDao.getAlarmsByStates(*Converters().fromAlarmState(*states))
     }
 
-    fun changeAlarmState(alarm: Alarm, state: AlarmState) {
-        alarm.state = state
-        runOnIoThread {
-            alarmDao.updateAlarm(alarm)
-        }
-    }
-
-    fun getAllAlarms(): LiveData<List<Alarm>> {
+     fun getAllAlarms(): LiveData<List<Alarm>> {
         return alarmDao.getAllAlarms()
     }
 
-    fun deleteAll() = GlobalScope.launch {
+    suspend fun deleteAll() {
+        withContext(Dispatchers.IO) {
             alarmDao.deleteAll()
         }
-    
-    private fun ensureUnique(state: AlarmState) {
-        alarmDao.deleteAlarmsByStates(Converters().fromAlarmState(state))
     }
 
-    fun insert(alarm: Alarm): Long {
-        return alarmDao.insert(alarm)
+    private suspend fun ensureUnique(state: AlarmState) {
+        withContext(Dispatchers.IO) {
+            alarmDao.deleteAlarmsByStates(Converters().fromAlarmState(state))
+        }
     }
 
-    fun delete(alarm: Alarm) {
-        runOnIoThread {
+    internal fun insert(alarm: Alarm): Deferred<Long> {
+        return GlobalScope.async { alarmDao.insert(alarm) }
+    }
+
+    private suspend fun delete(alarm: Alarm) {
+        withContext(Dispatchers.IO) {
             alarmDao.deleteAlarm(alarm)
         }
     }
 
-    fun safeInsert(alarm: Alarm): Long? {
+    private suspend fun update(alarm: Alarm) {
+        withContext(Dispatchers.IO) {
+            alarmDao.updateAlarm(alarm)
+        }
+    }
+
+    suspend fun safeInsert(alarm: Alarm): Long? {
         return if (alarm.state == AlarmState.STATE_WAITING) {
             ensureUnique(AlarmState.STATE_WAITING)
-            insert(alarm)
+            insert(alarm).await()
         } else {
             if (BuildConfig.DEBUG) {
                 throw Exception("Can only insert waiting Alarms")
@@ -60,7 +72,7 @@ class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
         }
     }
 
-    fun safeDelete(alarm: Alarm): Boolean {
+    suspend fun safeDelete(alarm: Alarm): Boolean {
         return if (alarm.waiting) {
             delete(alarm)
             true
@@ -72,7 +84,7 @@ class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
     /**
      * Update an alarm in the DB, and check for inconsistencies
      * **/
-    fun safeUpdate(alarm: Alarm): Boolean {
+    suspend fun safeUpdate(alarm: Alarm): Boolean {
         when (alarm.state) {
             AlarmState.STATE_WAITING -> {
                 if (BuildConfig.DEBUG) {
@@ -103,5 +115,5 @@ class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
                     instance ?: AlarmRepository(alarmDao).also { instance = it }
                 }
     }
-    
+
 }
