@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import se.jakob.knarkklocka.BuildConfig
 import se.jakob.knarkklocka.R
 import java.text.SimpleDateFormat
 import java.util.*
@@ -29,9 +30,12 @@ class AlarmListAdapter(context: Context) : RecyclerView.Adapter<AlarmListAdapter
         mAlarms?.run {
             val currentAlarm = this[position]
             val dateString = SimpleDateFormat("HH:mm", Locale.getDefault()).format(currentAlarm.endTime)
-            //val dateString = dateFormat.format(currentLiveAlarm.endTime)
-            //val string = currentLiveAlarm.id.toString() + " " + dateString
-            holder.dueTimeItemView.text = String.format(Locale.getDefault(), "%d: \t %s", currentAlarm.id, dateString)
+
+            if (BuildConfig.DEBUG) {
+                holder.dueTimeItemView.text = String.format(Locale.getDefault(), "%d: \t %s", currentAlarm.id, dateString)
+            } else {
+                holder.dueTimeItemView.text = String.format(dateString)
+            }
 
             val stateString = currentAlarm.stateToString
             holder.stateItemView.text = stateString
