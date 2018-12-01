@@ -5,10 +5,10 @@
     <se.jakob.knarkklocka.settings.TimerLengthPreference
         android:key="@string/pref_timer_length_key"
         android:title="@string/pref_timer_length"
-        android:defaultValue="6000" />
+        android:defaultValue="14400000" />
     <se.jakob.knarkklocka.settings.TimerLengthPreference
         android:key="@string/pref_snooze_length_key"
         android:title="@string/pref_snooze_length"
-        android:defaultValue="6000" />
+        android:defaultValue="300000" />
 
 </androidx.preference.PreferenceScreen>
