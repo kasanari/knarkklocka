@@ -5,6 +5,14 @@ apply plugin: 'kotlin-kapt'
 
 
 android {
+    signingConfigs {
+        signing {
+            keyAlias 'key0'
+            keyPassword 'CuQv3BsSTS0pg1rSG6lC'
+            storeFile file('T:/AndroidCert/appkey.jks')
+            storePassword '205id8katmiHt54IlZVy'
+        }
+    }
     compileSdkVersion rootProject.compileSdkVersion
     defaultConfig {
         applicationId "se.jakob.knarkklocka"
@@ -19,6 +27,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.signing
         }
     }
     dataBinding {
@@ -36,6 +45,7 @@ android {
             dimension "version"
             applicationIdSuffix ".experimental"
             versionNameSuffix "-experimental"
+            signingConfig signingConfigs.signing
         }
         stable {
             dimension "version"
@@ -46,13 +56,11 @@ android {
 }
 
 dependencies {
-    
+
     //Linting
     ktlint "com.github.shyiko:ktlint:0.29.0"
-
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.coroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.coroutinesVersion"
-
     implementation "androidx.core:core-ktx:$rootProject.ktxVersion"
     implementation "com.google.android.material:material:$rootProject.supportLibraryVersion"
     implementation "androidx.legacy:legacy-support-v4:$rootProject.supportLibraryVersion"
@@ -70,7 +78,10 @@ dependencies {
 
     //Room
     implementation "androidx.room:room-runtime:$rootProject.roomVersion"
-    kapt "androidx.room:room-compiler:$rootProject.roomVersion" // use kapt for Kotlin
+    kapt "androidx.room:room-compiler:$rootProject.roomVersion"
+
+    // use kapt for Kotlin
+
     // optional - RxJava support for Room
     implementation "androidx.room:room-rxjava2:$rootProject.roomVersion"
 
