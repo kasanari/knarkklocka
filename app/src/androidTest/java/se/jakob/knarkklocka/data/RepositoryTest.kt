@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -41,19 +42,21 @@ class RepositoryTest {
     fun insertConsistencyTest() {
         var alarm1 = createTestAlarm(testCalendar, testTimerLength)
         var alarm2 = createTestAlarm(testCalendar, testTimerLength)
-        val id1 = repository.safeInsert(alarm1)
-        val id2 = repository.safeInsert(alarm2)
-        Thread.sleep(2000)
-        alarm1 = getValue(repository.getLiveAlarmByID(id1))
-        alarm2 = getValue(repository.getLiveAlarmByID(id2))
-        assertNull(alarm1)
-        assertEquals(AlarmState.STATE_WAITING, alarm2.state)
-        alarm2.activate()
-        try {
-            repository.safeInsert(alarm2)
-            fail()
-        } catch (e : Exception) {
-            // Success
+        runBlocking {
+            val id1 = repository.safeInsert(alarm1)
+            val id2 = repository.safeInsert(alarm2)
+            Thread.sleep(2000)
+            alarm1 = getValue(repository.getLiveAlarmByID(id1!!))
+            alarm2 = getValue(repository.getLiveAlarmByID(id2!!))
+            assertNull(alarm1)
+            assertEquals(AlarmState.STATE_WAITING, alarm2.state)
+            alarm2.activate()
+            try {
+                repository.safeInsert(alarm2)
+                fail()
+            } catch (e : Exception) {
+                // Success
+            }
         }
     }
 
@@ -61,32 +64,33 @@ class RepositoryTest {
     fun updateConsistencyTest() {
         var alarm1 = createTestAlarm(testCalendar, testTimerLength)
         var alarm2 = createTestAlarm(testCalendar, testTimerLength)
-        alarm1.id = repository.insert(alarm1)
-        alarm2.id = repository.insert(alarm2)
-        Thread.sleep(2000)
-        alarm1.activate()
-        alarm2.activate()
-        repository.safeUpdate(alarm1)
-        repository.safeUpdate(alarm2)
-        Thread.sleep(4000)
-        alarm1 = getValue(repository.getLiveAlarmByID(alarm1.id))
-        alarm2 = getValue(repository.getLiveAlarmByID(alarm2.id))
-        assertNull(alarm1)
-        assertEquals(AlarmState.STATE_ACTIVE, alarm2.state)
-
-
+        runBlocking {
+            alarm1.id = repository.insert(alarm1).await()
+            alarm2.id = repository.insert(alarm2).await()
+            Thread.sleep(2000)
+            alarm1.activate()
+            alarm2.activate()
+            repository.safeUpdate(alarm1)
+            repository.safeUpdate(alarm2)
+            Thread.sleep(4000)
+            alarm1 = getValue(repository.getLiveAlarmByID(alarm1.id))
+            alarm2 = getValue(repository.getLiveAlarmByID(alarm2.id))
+            assertNull(alarm1)
+            assertEquals(AlarmState.STATE_ACTIVE, alarm2.state)
+        }
     }
 
     @Test
     fun deleteConsistencyTest() {
         var alarm1 = createTestAlarm(testCalendar, testTimerLength)
         alarm1.activate()
-        val id1 = repository.safeInsert(alarm1)
-        Thread.sleep(2000)
-        alarm1 = getValue(repository.getLiveAlarmByID(id1))
-        repository.safeDelete(alarm1)
+        runBlocking {
+            val id1 = repository.safeInsert(alarm1)
+            Thread.sleep(2000)
+            alarm1 = getValue(repository.getLiveAlarmByID(id1!!))
+            repository.safeDelete(alarm1)
 
-        alarm1 = getValue(repository.getLiveAlarmByID(id1))
+            alarm1 = getValue(repository.getLiveAlarmByID(id1))
+        }
     }
-
 }

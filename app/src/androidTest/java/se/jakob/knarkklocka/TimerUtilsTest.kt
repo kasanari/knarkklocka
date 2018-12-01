@@ -5,6 +5,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.runner.AndroidJUnit4
 import org.junit.runner.RunWith
 import androidx.test.core.app.ApplicationProvider
+import kotlinx.coroutines.runBlocking
 
 
 import org.junit.After
@@ -27,14 +28,17 @@ class TimerUtilsTest {
     @get:Rule
     var instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    lateinit var repository: AlarmRepository
+    private lateinit var repository: AlarmRepository
 
     @Before
     fun waitForABit() { // To let the system settle
         Thread.sleep(1000)
         val context = ApplicationProvider.getApplicationContext<Context>()
         repository = InjectorUtils.getAlarmRepository(context)
-        repository.deleteAll()
+        runBlocking {
+            repository.deleteAll()
+        }
+        PreferenceUtils.shortMode = false
         PreferenceUtils.setMainTimerLength(context, testTimerLength)
         PreferenceUtils.setSnoozeTimerLength(context, testSnoozeLength)
     }
@@ -73,13 +77,15 @@ class TimerUtilsTest {
         var alarm = createTestAlarm(Calendar.getInstance(), testTimerLength)
         val newEndTime = Calendar.getInstance().apply { add(Calendar.MILLISECOND, testSnoozeLength.toInt()) }.time
         alarm.activate()
-        val id = repository.safeInsert(alarm)
-        alarm.id = id
-        TimerUtils.startSnoozeTimer(context, alarm)
-        Thread.sleep(2000) //Wait a bit for db operation to finish
-        alarm = getValue(repository.getLiveAlarmByID(id))
-        assertEquals(alarm.state, AlarmState.STATE_SNOOZING)
-        assertEquals(alarm.endTime.time/1000, newEndTime.time/1000)
+        runBlocking {
+            val id = repository.insert(alarm).await()
+            alarm.id = id
+            TimerUtils.startSnoozeTimer(context, alarm)
+            Thread.sleep(2000) //Wait a bit for db operation to finish
+            alarm = getValue(repository.getLiveAlarmByID(id))
+            assertEquals(alarm.state, AlarmState.STATE_SNOOZING)
+            assertEquals(alarm.endTime.time/1000, newEndTime.time/1000)
+        }
     }
 
     @After

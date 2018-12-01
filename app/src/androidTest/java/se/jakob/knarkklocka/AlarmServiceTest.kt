@@ -1,11 +1,11 @@
 package se.jakob.knarkklocka
 
 import android.content.Context
-import android.os.IBinder
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.rule.ServiceTestRule
 import androidx.test.runner.AndroidJUnit4
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -38,7 +38,9 @@ class AlarmServiceTest {
         Thread.sleep(1000)
         val context = ApplicationProvider.getApplicationContext<Context>()
         repository = InjectorUtils.getAlarmRepository(context)
-        repository.deleteAll()
+        runBlocking {
+            repository.deleteAll()
+        }
         PreferenceUtils.setMainTimerLength(context, testTimerLength)
         PreferenceUtils.setSnoozeTimerLength(context, testSnoozeLength)
     }
@@ -47,16 +49,15 @@ class AlarmServiceTest {
     fun startServiceTest() {
         var alarm = createTestAlarm(Calendar.getInstance(), testTimerLength)
         val context = ApplicationProvider.getApplicationContext<Context>()
-        var id = repository.insert(alarm)
-        Thread.sleep(2000)
-
+        var id : Long = 0
+        runBlocking {
+            id = repository.insert(alarm).await()
+            alarm = getValue(repository.getLiveAlarmByID(id))
+        }
         val intent = TimerUtils.getAlarmServiceIntent(context, id)
-
-        Thread.sleep(2000)
-        alarm = getValue(repository.getLiveAlarmByID(id))
         serviceRule.startService(intent)
         Thread.sleep(2000)
         assertEquals(AlarmState.STATE_ACTIVE, alarm.state)
     }
-
+    
 }
