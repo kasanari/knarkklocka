@@ -83,7 +83,6 @@ object TimerUtils {
      * Creates a new alarm with the system [AlarmManager]
      */
     fun setNewAlarm(context: Context, id: Long, endTime: Date) {
-        AlarmNotificationsUtils.clearAllNotifications(context) /* Remove any current notifications */
         AlarmBroadcasts.broadcastStopAlarm(context) /* Stop any vibration */
 
         val pendingAlarmIntent = getPI(context, id) /* Set AlarmService as the intent to start when alarm goes off */
