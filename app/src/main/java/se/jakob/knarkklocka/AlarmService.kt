@@ -1,18 +1,22 @@
 package se.jakob.knarkklocka
 
-import android.app.Service
+import android.app.AlarmManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Binder
 import android.os.IBinder
+import android.text.format.DateUtils.MINUTE_IN_MILLIS
 import android.util.Log
 import androidx.lifecycle.LifecycleService
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmRepository
+import se.jakob.knarkklocka.data.AlarmState
 import se.jakob.knarkklocka.utils.*
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID
 import java.text.DateFormat
@@ -25,7 +29,10 @@ class AlarmService : LifecycleService() {
     private val binder: IBinder = Binder()
     private var isBound: Boolean = false
     private var alarmIsHandled = false
-
+    private lateinit var currentAlarm: Alarm
+    
+    private var serviceJob: Job = Job()
+    private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
 
     private val timeoutLength = 5 * MINUTE_IN_MILLIS
 
@@ -44,12 +51,12 @@ class AlarmService : LifecycleService() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
             when (action) {
-                ACTION_STOP_ALARM -> stopAlarm()
-            }
+                ACTION_STOP_ALARM -> { stopAlarm()
+                }
                 ACTION_ALARM_HANDLED -> {
                     alarmIsHandled = true
-        }
-    }
+                }
+            }
         }
     }
 
@@ -64,10 +71,10 @@ class AlarmService : LifecycleService() {
         Log.d(TAG, "AlarmService was created")
     }
 
-    private fun listenToAlarm(id : Long) {
+    private fun listenToAlarm(id: Long) {
         repository.getLiveAlarmByID(id).observe(this, androidx.lifecycle.Observer { alarm ->
             alarm?.let {
-                AlarmNotificationsUtils.clearAllNotifications(this)
+                currentAlarm = alarm
                 when(alarm.state) {
                     AlarmState.STATE_WAITING, AlarmState.STATE_DEAD, AlarmState.STATE_SNOOZING -> null
                     AlarmState.STATE_ACTIVE -> AlarmNotificationsUtils.showActiveAlarmNotification(this, alarm)
@@ -82,12 +89,14 @@ class AlarmService : LifecycleService() {
         val id = intent.getLongExtra(EXTRA_ALARM_ID, -1)
         intent.action?.let { action ->
             listenToAlarm(id)
-            handleIntent(action, id)
+            serviceScope.launch {
+                handleIntent(action, id)
+            }
         }
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun activateAlarm(alarm: Alarm) {
+    private suspend fun activateAlarm(alarm: Alarm) {
         if (BuildConfig.DEBUG) {
             val df = DateFormat.getTimeInstance(DateFormat.SHORT)
             val debugString = String.format(
@@ -97,28 +106,27 @@ class AlarmService : LifecycleService() {
                     df.format(alarm.endTime))
             Log.d(TAG, debugString)
         }
-        if (alarm.snoozes < 10) { //Check if alarm has already been snoozed a bunch of times
+        if (alarm.snoozes < 5) { //Check if alarm has already been snoozed a bunch of times
             if (alarm.active) {
                 Log.e(TAG, "Service attempted to activate an already activated alarm!")
             } else {
                 alarm.activate()
                 repository.safeUpdate(alarm)
-                startAlarm(alarm)
+                startAlarm()
             }
-        } else { // if it has, then kill it
-            alarm.kill()
+        } else { // if it has, then set it as missed
+            alarm.miss()
             repository.safeUpdate(alarm)
-            stopAlarm()
             stopSelf()
         }
     }
 
     /*Intent handler meant to be run on separate thread*/
-    private fun handleIntent(action: String, id: Long) = GlobalScope.launch {
+    private suspend fun handleIntent(action: String, id: Long) {
         repository.getAlarmByID(id)?.let { alarm ->
             when (action) {
                 ACTION_ACTIVATE_ALARM -> {
-                   activateAlarm(alarm)
+                    activateAlarm(alarm)
                 }
                 ACTION_STOP_ALARM -> {
                     stopAlarm()
@@ -135,7 +143,7 @@ class AlarmService : LifecycleService() {
     private fun stopAlarm() {
         if (alarmIsHandled) {
             Klaxon.stopVibrate(applicationContext)
-        stopForeground(true)
+            stopForeground(true)
             stopSelf()
         }
     }
@@ -147,6 +155,7 @@ class AlarmService : LifecycleService() {
             unregisterReceiver(actionsReceiver)
             isRegistered = false
         }
+        serviceJob.cancel()
         stopTimeout()
         WakeLocker.release()
     }
