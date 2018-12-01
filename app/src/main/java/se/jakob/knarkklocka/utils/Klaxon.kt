@@ -12,23 +12,27 @@ object Klaxon {
 
     fun vibrateOnce(context: Context) {
         val vibe = VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE)
-        context.getSystemService(Vibrator::class.java).run {
+        getVibrator(context).run {
             vibrate(vibe)
         }
     }
 
     fun vibrateAlarm(context: Context) {
         val effect = VibrationEffect.createWaveform(mVibratePattern, amps, 0)
-        context.getSystemService(Vibrator::class.java).run {
+        getVibrator(context).run {
             vibrate(effect)
             Log.d(TAG, "Vibration started")
         }
     }
 
     fun stopVibrate(context: Context) {
-        context.getSystemService(Vibrator::class.java)?.run {
+        getVibrator(context).run {
             cancel()
             Log.d(TAG, "Vibration stopped")
         }
+    }
+
+    private fun getVibrator(context: Context) : Vibrator {
+        return context.applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     }
 }
