@@ -38,6 +38,8 @@ class AlarmActivity : AppCompatActivity() {
     private var alarmIsHandled = false
     private var mServiceBound: Boolean = false
 
+    private val timeoutLength = 5 * MINUTE_IN_MILLIS
+
     private val alarmCallback = AlarmManager.OnAlarmListener {
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "Timeout reached. Snoozing...")
@@ -58,26 +60,25 @@ class AlarmActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "AlarmActivity started")
-        setContentView(R.layout.activity_alarm)
 
         bindAlarmService()
 
         WakeLocker.acquire(this)
 
         /*Ensure that screen turns on*/
-        val win = window
         if (Build.VERSION.SDK_INT >= 27) {
             setTurnScreenOn(true)      //Replaces FLAG_TURN_SCREEN_ON
             setShowWhenLocked(true)    //Replaces FLAG_SHOW_WHEN_LOCKED
-            win.addFlags(
-                    FLAG_KEEP_SCREEN_ON or
-                            FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
+            window.addFlags(
+                    FLAG_KEEP_SCREEN_ON
+                            or FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
         } else {
-            win.addFlags(
-                    FLAG_SHOW_WHEN_LOCKED or
-                            FLAG_TURN_SCREEN_ON or
-                            FLAG_KEEP_SCREEN_ON or
-                            FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
+            window.addFlags(
+                    FLAG_SHOW_WHEN_LOCKED
+                            or FLAG_TURN_SCREEN_ON
+                            or FLAG_KEEP_SCREEN_ON
+                            or FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
+                            or FLAG_DISMISS_KEYGUARD)
         }
 
         /*Hide navigation and status bar*/
@@ -186,7 +187,7 @@ class AlarmActivity : AppCompatActivity() {
     private fun hideUIElements() {
         window.decorView.systemUiVisibility = (
                 View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                         or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                         or View.SYSTEM_UI_FLAG_FULLSCREEN
                         or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
@@ -214,7 +215,7 @@ class AlarmActivity : AppCompatActivity() {
         val timeout = if (BuildConfig.DEBUG) {
             10 * SECOND_IN_MILLIS
         } else {
-            2 * MINUTE_IN_MILLIS
+            timeoutLength
         }
 
         alarmManager.setExact(RTC_WAKEUP, System.currentTimeMillis() + timeout, "tag", alarmCallback, null)
