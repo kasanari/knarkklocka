@@ -46,12 +46,13 @@
         </activity>
         <activity
             android:name=".AlarmActivity"
-            android:configChanges="keyboardHidden|orientation"
+            android:configChanges="keyboardHidden|orientation|screenSize|keyboard|navigation"
             android:excludeFromRecents="true"
-            android:launchMode="singleTask"
-            android:noHistory="true"
+            android:directBootAware="true"
+            android:launchMode="singleInstance"
             android:resizeableActivity="false"
             android:screenOrientation="portrait"
+            android:showOnLockScreen="true"
             android:taskAffinity=""
             android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
