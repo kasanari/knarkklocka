@@ -27,6 +27,19 @@ class AlarmService : LifecycleService() {
     private var alarmIsHandled = false
 
 
+    private val timeoutLength = 5 * MINUTE_IN_MILLIS
+
+    private val alarmCallback = AlarmManager.OnAlarmListener {
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "Timeout reached. Snoozing...")
+        }
+        if (!alarmIsHandled) {
+            TimerUtils.startSnoozeTimer(this, currentAlarm)
+            alarmIsHandled = true
+            stopAlarm()
+        }
+    }
+
     private val actionsReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
@@ -136,7 +149,7 @@ class AlarmService : LifecycleService() {
             unregisterReceiver(actionsReceiver)
             isRegistered = false
         }
-        stopAlarm()
+        stopTimeout()
         WakeLocker.release()
     }
 
@@ -149,6 +162,18 @@ class AlarmService : LifecycleService() {
     override fun onUnbind(intent: Intent?): Boolean {
         isBound = false
         return super.onUnbind(intent)
+    }
+
+    private fun startTimeout(length: Long) {
+        getSystemService(AlarmManager::class.java).run {
+            setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + length, "tag", alarmCallback, null)
+        }
+    }
+
+    private fun stopTimeout() {
+        getSystemService(AlarmManager::class.java).run {
+            cancel(alarmCallback)
+        }
     }
 
     companion object {
