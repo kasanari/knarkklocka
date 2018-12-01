@@ -13,6 +13,13 @@ object PreferenceUtils {
     private const val DEFAULT_MAIN_TIMER_LENGTH = 4 * HOUR_IN_MILLIS
     private const val DEFAULT_SNOOZE_TIMER_LENGTH = 5 * MINUTE_IN_MILLIS
 
+    var shortMode  =
+            if (BuildConfig.DEBUG) {
+                true /*This can be set to true for testing purposes, otherwise it should be set to false*/
+            } else {
+                false /*Should not be changed*/
+            }
+
     private fun getDefaultLength(key: String): Long {
         return when (key) {
             KEY_SNOOZE_TIMER_LENGTH -> DEFAULT_SNOOZE_TIMER_LENGTH
@@ -36,14 +43,7 @@ object PreferenceUtils {
     private fun getTimerLength(context: Context, key: String): Long {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
-        val quickTimerMode =
-                if (BuildConfig.DEBUG) {
-                    false /*This can be set to true for testing purposes, otherwise it should be set to false*/
-                } else {
-                    false /*Should not be changed*/
-                }
-
-        return if (quickTimerMode) {
+        return if (shortMode) {
             getShortDefault(key)
         } else {
             sharedPreferences.getLong(key, getDefaultLength(key))
