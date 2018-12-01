@@ -128,15 +128,13 @@ class AlarmService : LifecycleService() {
         }
     }
 
-    private fun startAlarm(alarm: Alarm) {
-        AlarmNotificationsUtils.clearAllNotifications(this)
-        Klaxon.vibrateAlarm(this)
-        AlarmNotificationsUtils.showActiveAlarmNotification(this, alarm)
+    private fun startAlarm() {
+        Klaxon.vibrateAlarm(applicationContext)
     }
 
     private fun stopAlarm() {
         if (alarmIsHandled) {
-        Klaxon.stopVibrate(this)
+            Klaxon.stopVibrate(applicationContext)
         stopForeground(true)
             stopSelf()
         }
