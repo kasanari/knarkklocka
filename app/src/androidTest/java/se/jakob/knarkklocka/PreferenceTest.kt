@@ -6,12 +6,8 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import se.jakob.knarkklocka.data.Alarm
-import se.jakob.knarkklocka.utilities.getValue
 import se.jakob.knarkklocka.utilities.testTimerLength
 import se.jakob.knarkklocka.utils.PreferenceUtils
-import se.jakob.knarkklocka.utils.TimerUtils
-import java.util.*
 
 @RunWith(AndroidJUnit4::class)
 class TimerUtilsTest {

@@ -1,11 +1,12 @@
 package se.jakob.knarkklocka
 
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.longClick
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import org.junit.Rule
 import androidx.test.rule.ActivityTestRule
+import org.junit.Rule
 import org.junit.Test
 
 class TimerActivityTest {

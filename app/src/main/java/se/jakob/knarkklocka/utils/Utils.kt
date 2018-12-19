@@ -4,8 +4,7 @@ import android.content.Context
 import android.os.PowerManager
 import android.util.Log
 import se.jakob.knarkklocka.BuildConfig
-import se.jakob.knarkklocka.TimerActivity
-import java.util.Locale
+import java.util.*
 
 object Utils {
 

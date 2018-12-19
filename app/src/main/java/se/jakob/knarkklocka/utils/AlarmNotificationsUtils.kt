@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.media.AudioAttributes.USAGE_NOTIFICATION
 import android.os.Build
 import android.os.SystemClock
 import android.util.Log
@@ -14,7 +13,6 @@ import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import se.jakob.knarkklocka.AlarmActivity
-import se.jakob.knarkklocka.BuildConfig
 import se.jakob.knarkklocka.R
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID

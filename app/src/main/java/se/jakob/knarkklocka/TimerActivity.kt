@@ -1,7 +1,5 @@
 package se.jakob.knarkklocka
 
-import android.app.Notification
-import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
@@ -12,6 +10,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.content_timer.*
@@ -20,7 +19,6 @@ import se.jakob.knarkklocka.data.AlarmState.*
 import se.jakob.knarkklocka.settings.SettingsActivity
 import se.jakob.knarkklocka.utils.*
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
-
 import java.util.*
 
 class TimerActivity : AppCompatActivity() {

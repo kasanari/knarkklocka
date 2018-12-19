@@ -9,7 +9,6 @@ import android.icu.util.Calendar
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import se.jakob.knarkklocka.AlarmBroadcasts
 import se.jakob.knarkklocka.AlarmService
@@ -100,7 +99,7 @@ object TimerUtils {
 
     fun cancelAlarm(context: Context, id: Long) {
         if (alarmIsSet(context, id)) {
-        AlarmNotificationsUtils.clearAllNotifications(context) /* Remove any current notifications */
+            AlarmNotificationsUtils.clearAllNotifications(context) /* Remove any current notifications */
             AlarmBroadcasts.broadcastStopAlarm(context) /* Stop any vibration */
             val pendingAlarmIntent = getPI(context, id) /*Create the same intent as the registered alarm in order to cancel it*/
             context.getSystemService(AlarmManager::class.java).run {
@@ -124,18 +123,18 @@ object TimerUtils {
                 safeInsert(alarm)?.let { id ->
                     setNewAlarm(context, id, alarm.endTime)
                 }
+            }
+            AlarmNotificationsUtils.showWaitingAlarmNotification(context, alarm)
         }
-        AlarmNotificationsUtils.showWaitingAlarmNotification(context, alarm)
-    }
         return endTime
     }
 
     fun startSnoozeTimer(context: Context, alarm: Alarm): Date {
         val snoozeDuration = PreferenceUtils.getSnoozeTimerLength(context)
         val newEndTime = Calendar.getInstance().apply { add(Calendar.MILLISECOND, snoozeDuration.toInt()) }.time
-            setNewAlarm(context, alarm.id, newEndTime)
-            alarm.snooze(newEndTime)
-            AlarmNotificationsUtils.showSnoozingAlarmNotification(context, alarm)
+        setNewAlarm(context, alarm.id, newEndTime)
+        alarm.snooze(newEndTime)
+        AlarmNotificationsUtils.showSnoozingAlarmNotification(context, alarm)
         utilScope.launch {
             InjectorUtils.getAlarmRepository(context).run {
                 safeUpdate(alarm)
