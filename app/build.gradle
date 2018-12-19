@@ -64,12 +64,12 @@ dependencies {
     implementation "androidx.core:core-ktx:$rootProject.ktxVersion"
     implementation "com.google.android.material:material:$rootProject.supportLibraryVersion"
     implementation "androidx.legacy:legacy-support-v4:$rootProject.supportLibraryVersion"
-    implementation 'androidx.annotation:annotation:1.0.0'
+    implementation "androidx.annotation:annotation:$rootProject.annotationsVersion"
     implementation "androidx.constraintlayout:constraintlayout:$rootProject.constraintLayoutVersion"
 
     // Testing dependencies
     androidTestImplementation "androidx.arch.core:core-testing:$rootProject.coreTestingVersion"
-    androidTestImplementation 'androidx.test:core:1.0.0-beta02'
+    androidTestImplementation "androidx.test:core:$rootProject.testVersion"
     androidTestImplementation "androidx.test.espresso:espresso-contrib:$rootProject.espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-intents:$rootProject.espressoVersion"
