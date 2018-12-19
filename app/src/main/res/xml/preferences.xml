@@ -1,6 +1,5 @@
 <androidx.preference.PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/preferences">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <se.jakob.knarkklocka.settings.TimerLengthPreference
         android:key="@string/pref_timer_length_key"
