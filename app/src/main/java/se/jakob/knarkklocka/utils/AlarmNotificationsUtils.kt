@@ -34,7 +34,6 @@ object AlarmNotificationsUtils {
     private const val LIGHT_COLOR_RED = 0xff0000
     private const val LIGHT_COLOR_BLUE = 0x0000ff
 
-    private val mVibratePattern = longArrayOf(1000, 1500, 1000)
     private const val TAG = "AlarmNotificationsUtils"
 
     fun setupChannels(context: Context) {

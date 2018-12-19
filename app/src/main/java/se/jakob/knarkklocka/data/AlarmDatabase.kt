@@ -38,14 +38,14 @@ abstract class AlarmDatabase : RoomDatabase() {
         }
 
         private fun buildDatabase(context: Context): AlarmDatabase {
-            if (BuildConfig.DEBUG) {
-                return Room.databaseBuilder(context, AlarmDatabase::class.java,
+            return if (BuildConfig.DEBUG) {
+                 Room.databaseBuilder(context, AlarmDatabase::class.java,
                         "alarm_database_debug")
                         .addCallback(databaseDebugCallback)
                         .fallbackToDestructiveMigration()
                         .build()
             } else {
-                return Room.databaseBuilder(context,
+                 Room.databaseBuilder(context,
                         AlarmDatabase::class.java, "alarm_database")
                         .fallbackToDestructiveMigration()
                         .build()

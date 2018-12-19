@@ -31,7 +31,7 @@ class AlarmServiceTest {
     @get:Rule
     val serviceRule = ServiceTestRule()
 
-    lateinit var repository: AlarmRepository
+    private lateinit var repository: AlarmRepository
 
     @Before
     fun waitForABit() { // To let the system settle
