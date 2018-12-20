@@ -105,7 +105,7 @@ object AlarmNotificationsUtils {
                 NotificationManager.IMPORTANCE_LOW).apply {
             setBypassDnd(true)
             setShowBadge(false)
-            enableLights(true)
+            enableLights(false)
             lightColor = LIGHT_COLOR_BLUE
         }
     }
@@ -129,6 +129,7 @@ object AlarmNotificationsUtils {
                 NotificationManager.IMPORTANCE_LOW).apply {
             setBypassDnd(true)
             setShowBadge(false)
+            enableLights(false)
         }
     }
 
