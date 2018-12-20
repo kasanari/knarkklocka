@@ -1,41 +1,31 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:colorBackground">@color/colorBackground</item>
+        <item name="android:fontFamily">@font/varela_round</item>
         <item name="android:textColorPrimary">@color/colorText</item>
+        <item name="android:textColor">@color/colorText</item>
         <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
         <item name="android:colorForeground">@color/colorText</item>
         <item name="colorButtonNormal">@color/colorDecorative</item>
-        <item name="coordinatorLayoutStyle">@style/Widget.Design.CoordinatorLayout</item>
-        <!-- AppCompat Dialog Attributes -->
-        <item name="android:dialogTheme">@style/AppCompatDialog</item>
-        <item name="android:alertDialogTheme">@style/AppCompatAlert</item>
+        <item name="alertDialogTheme">@style/AppAlertDialog</item>
+        <item name="coordinatorLayoutStyle">@style/Widget.Support.CoordinatorLayout</item>
+        <item name="floatingActionButtonStyle">@style/Widget.Design.FloatingActionButton</item>
     </style>
 
-    <!-- Generic Dialog Theme -->
-    <style name="AppCompatDialog" parent="Theme.AppCompat.Dialog">
-        <item name="android:textColorPrimary">@color/colorPrimary</item>
-        <!-- Used for the background -->
-        <item name="android:background">@color/colorBackground</item>
-        <!-- Used for the buttons -->
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="colorControlHighlight">@color/colorPrimary</item>
 
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-    </style>
 
-    <!-- Alert Dialog Theme -->
-    <style name="AppCompatAlert" parent="Theme.AppCompat.Dialog.Alert">
+    <!-- Style for a DialogPreference Entry -->
+    <style name="AppAlertDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
         <item name="android:background">@color/colorBackground</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorControlHighlight">@color/colorPrimary</item>
-        <item name="android:textColorPrimary">@color/colorText</item>
+        <item name="android:textColor">@color/colorText</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
     </style>
@@ -49,13 +39,10 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <!-- The default font for RecyclerView items is too small.
-    The margin is a simple delimiter between the words. -->
-    <style name="alarm_title">
+    <style name="alarm_list_entry">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">26dp</item>
         <item name="android:textSize">18sp</item>
-        <item name="android:textStyle">bold</item>
         <item name="android:layout_marginBottom">6dp</item>
         <item name="android:paddingLeft">8dp</item>
     </style>
@@ -66,8 +53,12 @@
         <item name="android:fontFamily">@font/quicksand</item>
     </style>
 
-    <style name="numberpicker">
+    <style name="numberPicker">
         <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="button_style">
+
     </style>
 
 </resources>

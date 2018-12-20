@@ -20,4 +20,11 @@
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.Compat.Notification" />
 
+    <TextView
+        android:id="@+id/notif_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.Compat.Notification" />
+
 </LinearLayout>

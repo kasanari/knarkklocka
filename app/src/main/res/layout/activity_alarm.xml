@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -10,16 +10,17 @@
 
     <Chronometer
         android:id="@+id/alarm_chronometer"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
         android:countDown="true"
         android:textColor="@color/colorAccent"
         android:theme="@style/chronometer"
         app:layout_constraintBottom_toTopOf="@+id/tv_alarm_text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -30,12 +31,9 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginTop="8dp"
+        android:fontFamily="@font/varela_round"
         android:text="ALARM!"
         android:theme="@style/chronometer"
-        android:shadowColor="@color/colorDecorative"
-        android:shadowDx="0"
-        android:shadowDy="-8"
-        android:shadowRadius="0.01"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -43,7 +41,16 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/snooze"
+        android:id="@+id/button_miss_alarm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="128dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="Miss" />
+
+    <Button
+        android:id="@+id/button_snooze_alarm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="128dp"
@@ -52,10 +59,10 @@
         android:text="@string/snooze"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/dismiss" />
+        app:layout_constraintStart_toEndOf="@+id/button_dismiss_alarm" />
 
     <Button
-        android:id="@+id/dismiss"
+        android:id="@+id/button_dismiss_alarm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="128dp"
@@ -63,6 +70,6 @@
         android:layout_marginStart="8dp"
         android:text="@string/dismiss"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/snooze"
+        app:layout_constraintEnd_toStartOf="@+id/button_snooze_alarm"
         app:layout_constraintStart_toStartOf="parent" />
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

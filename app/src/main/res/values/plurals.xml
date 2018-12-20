@@ -22,4 +22,9 @@
         <item quantity="one">%d snooze</item>
         <item quantity="other">%d snoozes</item>
     </plurals>
+    <plurals name="times">
+        <item quantity="zero">%d times</item>
+        <item quantity="one">%d time</item>
+        <item quantity="other">%d times</item>
+    </plurals>
 </resources>
