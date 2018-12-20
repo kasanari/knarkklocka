@@ -14,6 +14,9 @@ class TimerActivityTest {
     @JvmField
     var activityTestRule = ActivityTestRule(TimerActivity::class.java)
 
+    @get:Rule
+    var instantTaskExecutorRule = InstantTaskExecutorRule()
+
     @Test fun clickOnOpenSettings() {
         onView(withId(R.id.action_settings)).perform(click())
     }
