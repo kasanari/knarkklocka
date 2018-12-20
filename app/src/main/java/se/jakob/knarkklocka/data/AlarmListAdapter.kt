@@ -29,12 +29,15 @@ class AlarmListAdapter(context: Context) : RecyclerView.Adapter<AlarmListAdapter
     override fun onBindViewHolder(holder: AlarmViewHolder, position: Int) {
         mAlarms?.run {
             val currentAlarm = this[position]
-            val dateString = SimpleDateFormat("HH:mm", Locale.getDefault()).format(currentAlarm.endTime)
+            val df = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val endTimeString = df.format(currentAlarm.endTime)
+            val startTimeString = df.format(currentAlarm.startTime)
+
 
             if (BuildConfig.DEBUG) {
-                holder.dueTimeItemView.text = String.format(Locale.getDefault(), "%d: \t %s", currentAlarm.id, dateString)
+                holder.dueTimeItemView.text = String.format(Locale.getDefault(), "%d: \t %s - %s", currentAlarm.id, startTimeString, endTimeString)
             } else {
-                holder.dueTimeItemView.text = String.format(dateString)
+                holder.dueTimeItemView.text = String.format(Locale.getDefault(), "%s - %s", startTimeString, endTimeString)
             }
 
             val stateString = currentAlarm.stateToString
@@ -42,7 +45,6 @@ class AlarmListAdapter(context: Context) : RecyclerView.Adapter<AlarmListAdapter
 
             val snoozes = currentAlarm.snoozes
             val snoozeString = res.getQuantityString(R.plurals.snoozes, snoozes, snoozes)
-            //String snoozeString = "Snoozes: " + snoozes;
             holder.snoozeItemView.text = snoozeString
         } ?: run {
             // Covers the case of data not being ready yet.
