@@ -2,6 +2,7 @@ package se.jakob.knarkklocka
 
 import android.app.AlarmManager
 import android.app.AlarmManager.RTC_WAKEUP
+import android.app.KeyguardManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -67,8 +68,10 @@ class AlarmActivity : AppCompatActivity() {
 
         /*Ensure that screen turns on*/
         if (Build.VERSION.SDK_INT >= 27) {
-            setTurnScreenOn(true)      //Replaces FLAG_TURN_SCREEN_ON
             setShowWhenLocked(true)    //Replaces FLAG_SHOW_WHEN_LOCKED
+            setTurnScreenOn(true)      //Replaces FLAG_TURN_SCREEN_ON
+            val keyguardManager = (getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager)
+            keyguardManager.requestDismissKeyguard(this, null)
             window.addFlags(
                     FLAG_KEEP_SCREEN_ON
                             or FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
