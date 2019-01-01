@@ -22,11 +22,16 @@
     <string name="waiting_notification_channel_name">Waiting Alarms</string>
     <string name="active_notification_channel_name">Active Alarms</string>
 
-    <string name="snoozing_notification_text">The drug timer is snoozing.</string>
-    <string name="waiting_notification_text">The drug timer is running.</string>
-    <string name="active_notification_text">Time for drugs!</string>
-    <string name="viewholder_no_alarms">No Alarms</string>
-    <string name="missed_notification_text">Oh no! The Alarm was missed, this is not good.</string>
+    <string name="snoozing_notification_text">Drug timer snoozing.</string>
+    <string name="waiting_notification_text">Drug timer running.</string>
+    <string name="active_notification_text">Drug timer expired. Time for drugs.</string>
+    <string name="viewholder_no_alarms">No alarms</string>
+    <string name="missed_notification_text">Alarm missed.</string>
+
+    <string name="snackbar_alarm_cancelled">Timer cancelled. Goodnight.</string>
+    <string name="snackbar_alarm_created">Timer started.</string>
+    <string name="snackbar_alarm_snoozed">Timer snoozed.</string>
+
 
 
 </resources>
