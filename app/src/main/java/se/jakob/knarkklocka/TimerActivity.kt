@@ -7,13 +7,20 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.Chronometer
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.preference.PreferenceManager
+import androidx.transition.Fade
+import androidx.transition.Scene
+import androidx.transition.Transition
+import androidx.transition.TransitionManager
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.content_timer.*
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmState.*
 import se.jakob.knarkklocka.settings.SettingsActivity
@@ -26,10 +33,11 @@ class TimerActivity : AppCompatActivity() {
     private lateinit var viewModel: MainActivityViewModel
 
     private var currentAlarm: Alarm? = null
+    private var chronometer : Chronometer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_timer)
+        setContentView(R.layout.timer_main)
 
         AlarmNotificationsUtils.setupChannels(this)
         
@@ -37,8 +45,12 @@ class TimerActivity : AppCompatActivity() {
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true)
 
-        button_remove_timer.visibility = View.INVISIBLE
-        chronometer_main.visibility = View.INVISIBLE
+        val mSceneRoot: ViewGroup = findViewById(R.id.scene_root)
+        val deadScene: Scene = Scene.getSceneForLayout(mSceneRoot, R.layout.timer_dead, this)
+        val waitingScene: Scene = Scene.getSceneForLayout(mSceneRoot, R.layout.timer_waiting, this)
+        val activeScene: Scene = Scene.getSceneForLayout(mSceneRoot, R.layout.timer_active, this)
+        val snoozeScene: Scene = Scene.getSceneForLayout(mSceneRoot, R.layout.timer_snooze, this)
+        val mFadeTransition: Transition = Fade()
 
         val factory = InjectorUtils.provideMainActivityViewModelFactory(this)
         viewModel = ViewModelProviders.of(this, factory).get(MainActivityViewModel::class.java)
@@ -49,47 +61,25 @@ class TimerActivity : AppCompatActivity() {
                 val state = alarm.state
                 when (state) {
                     STATE_ACTIVE -> {
-                        setupChronometer(alarm.endTime)
-                        button_snooze_timer.visibility = View.VISIBLE
-                        button_remove_timer.visibility = View.VISIBLE
-                        fab_start_timer.visibility = View.VISIBLE
-                        fab_start_timer.setImageResource(R.drawable.ic_restart_black_24dp)
+                        TransitionManager.go(activeScene, mFadeTransition)
                     }
                     STATE_DEAD -> {
-                        fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp)
-                        fab_start_timer.visibility = View.VISIBLE
-                        button_remove_timer.visibility = View.INVISIBLE
-                        button_snooze_timer.visibility = View.INVISIBLE
-                        chronometer_main.visibility = View.INVISIBLE
+                        TransitionManager.go(deadScene, mFadeTransition)
                     }
                     STATE_SNOOZING -> {
-                        setupChronometer(alarm.endTime)
-                        button_snooze_timer.visibility = View.INVISIBLE
-                        button_remove_timer.visibility = View.VISIBLE
-                        fab_start_timer.visibility = View.VISIBLE
-                        fab_start_timer.setImageResource(R.drawable.ic_restart_black_24dp)
+                        TransitionManager.go(snoozeScene, mFadeTransition)
                     }
                     STATE_WAITING -> {
-                        setupChronometer(alarm.endTime)
-                        button_snooze_timer.visibility = View.INVISIBLE
-                        button_remove_timer.visibility = View.VISIBLE
-                        fab_start_timer.visibility = View.INVISIBLE
-                        fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp)
+                        TransitionManager.go(waitingScene, mFadeTransition)
                     }
                     STATE_MISSED -> {
-                        setupChronometer(alarm.endTime)
-                        button_snooze_timer.visibility = View.VISIBLE
-                        button_remove_timer.visibility = View.VISIBLE
-                        fab_start_timer.visibility = View.VISIBLE
-                        fab_start_timer.setImageResource(R.drawable.ic_restart_black_24dp)
+                        TransitionManager.go(activeScene, mFadeTransition)
                     }
                 }
+                registerButtonListeners()
+                setupChronometer(alarm.endTime)
             } else {
-                fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp)
-                fab_start_timer.visibility = View.VISIBLE
-                button_remove_timer.visibility = View.INVISIBLE
-                button_snooze_timer.visibility = View.INVISIBLE
-                chronometer_main.visibility = View.INVISIBLE
+                TransitionManager.go(deadScene, mFadeTransition)
             }
         })
 
@@ -98,29 +88,36 @@ class TimerActivity : AppCompatActivity() {
         toolbar.title = "Timer control"
         setSupportActionBar(toolbar)
 
-        /* Setting up OnClick listeners */
-        fab_start_timer.setOnLongClickListener { v ->
+    }
+
+    private fun registerButtonListeners() {
+
+        val fabStartTimer = findViewById<FloatingActionButton?>(R.id.fab_start_timer)
+        val buttonRemoveTimer = findViewById<Button?>(R.id.button_remove_timer)
+        val buttonSnoozeTimer = findViewById<Button?>(R.id.button_snooze_timer)
+
+        fabStartTimer?.setOnLongClickListener { v ->
             Klaxon.vibrateOnce(this)
             restartAlarm()
             Snackbar.make(v, "Started new timer!", Snackbar.LENGTH_LONG).show()
             true
         }
 
-        button_remove_timer.setOnLongClickListener { v ->
+        buttonRemoveTimer?.setOnLongClickListener { v ->
             Klaxon.vibrateOnce(this)
             sleep(v)
             true
         }
 
-        button_snooze_timer.setOnClickListener { v -> snooze(v) }
-
+        buttonSnoozeTimer?.setOnClickListener { v -> snooze(v) }
     }
 
     private fun setupChronometer(endTime: Date) {
         val timeDelta = endTime.time - System.currentTimeMillis()
-        chronometer_main.base = SystemClock.elapsedRealtime() + timeDelta
-        chronometer_main.start()
-        chronometer_main.visibility = View.VISIBLE
+        findViewById<Chronometer?>(R.id.chronometer_main)?.run {
+            base = SystemClock.elapsedRealtime() + timeDelta
+            start()
+        }
     }
 
     private fun restartAlarm() {
@@ -155,14 +152,14 @@ class TimerActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (viewModel.hasAlarm) {
-            chronometer_main.start()
+            chronometer?.start()
         }
     }
 
     override fun onPause() {
         super.onPause()
-        chronometer_main.stop()
-        Log.d(TAG, "Application paused, chronometer stopped")
+        chronometer?.stop()
+        Log.d(TAG, "Application paused, chronometer stopped.")
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
