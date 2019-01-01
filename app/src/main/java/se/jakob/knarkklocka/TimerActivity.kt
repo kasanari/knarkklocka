@@ -98,8 +98,8 @@ class TimerActivity : AppCompatActivity() {
 
         fabStartTimer?.setOnLongClickListener { v ->
             Klaxon.vibrateOnce(this)
-            restartAlarm()
-            Snackbar.make(v, "Started new timer!", Snackbar.LENGTH_LONG).show()
+            restartAlarm(v)
+
             true
         }
 
@@ -123,7 +123,8 @@ class TimerActivity : AppCompatActivity() {
     private fun restartAlarm() {
         AlarmBroadcasts.broadcastAlarmHandled(this)
         viewModel.kill() /* Kill any running alarms. */
-        setupChronometer(TimerUtils.startMainTimer(this))
+        val message = resources.getString(R.string.snackbar_alarm_created)
+        Snackbar.make(v, message, Snackbar.LENGTH_LONG).show()
     }
 
     private fun sleep(v: View) {
@@ -131,8 +132,9 @@ class TimerActivity : AppCompatActivity() {
         viewModel.sleep() /* Delete or kill any running alarm */
         currentAlarm?.let {
             TimerUtils.cancelAlarm(this, it.id)
+            val message = resources.getString(R.string.snackbar_alarm_cancelled)
+            Snackbar.make(v, message, Snackbar.LENGTH_LONG).show()
             Log.d(TAG, "Sleep mode engaged...")
-            Snackbar.make(v, "Goodnight", Snackbar.LENGTH_LONG).show()
         }
     }
 
@@ -140,7 +142,8 @@ class TimerActivity : AppCompatActivity() {
         AlarmBroadcasts.broadcastAlarmHandled(this)
         currentAlarm?.let {alarm ->
             setupChronometer(TimerUtils.startSnoozeTimer(this, alarm))
-            Snackbar.make(v, "You are only postponing the inevitable...", Snackbar.LENGTH_LONG).show()
+            val message = resources.getString(R.string.snackbar_alarm_snoozed)
+            Snackbar.make(v, message, Snackbar.LENGTH_LONG).show()
         }
     }
 
