@@ -39,7 +39,7 @@ class TimerActivity : AppCompatActivity() {
         setContentView(R.layout.timer_main)
 
         AlarmNotificationsUtils.setupChannels(this)
-        
+
         Utils.checkIfWhiteListed(this)
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true)
@@ -144,6 +144,7 @@ class TimerActivity : AppCompatActivity() {
         viewModel.kill() /* Kill any running alarms. */
         TimerUtils.startMainTimer(this)
         displayChronometer()
+        showSnackBar(v, R.string.snackbar_alarm_created)
     }
 
     private fun sleep(v: View) {
@@ -152,16 +153,16 @@ class TimerActivity : AppCompatActivity() {
         currentAlarm?.let {
             TimerUtils.cancelAlarm(this, it.id)
             hideChronometer()
+            showSnackBar(v, R.string.snackbar_alarm_cancelled)
             Log.d(TAG, "Sleep mode engaged...")
         }
     }
 
     private fun snooze(v: View) {
         AlarmBroadcasts.broadcastAlarmHandled(this)
-        currentAlarm?.let {alarm ->
-            setupChronometer(TimerUtils.startSnoozeTimer(this, alarm))
-            val message = resources.getString(R.string.snackbar_alarm_snoozed)
-            Snackbar.make(v, message, Snackbar.LENGTH_LONG).show()
+        currentAlarm?.let { alarm ->
+            TimerUtils.startSnoozeTimer(this, alarm)
+            showSnackBar(v, R.string.snackbar_alarm_snoozed)
         }
     }
 
@@ -205,5 +206,13 @@ class TimerActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "TimerActivity"
+    }
+
+    private fun showSnackBar(v: View, message_id: Int) {
+        val message = resources.getString(message_id)
+        Snackbar.make(v, message, Snackbar.LENGTH_LONG).run {
+            view.setBackgroundColor(getColor(R.color.colorPrimary))
+            show()
+        }
     }
 }
