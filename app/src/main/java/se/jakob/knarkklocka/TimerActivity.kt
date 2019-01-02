@@ -173,9 +173,6 @@ class TimerActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (viewModel.hasAlarm) {
-            displayChronometer()
-        }
     }
 
     override fun onPause() {

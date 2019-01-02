@@ -42,6 +42,11 @@ class ChronometerFragment : Fragment() {
         return rootView
     }
 
+    override fun onResume() {
+        super.onResume()
+        chronometer.start()
+    }
+
     override fun onStop() {
         chronometer.stop()
         super.onStop()
