@@ -5,10 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include
-        android:id="@+id/include3"
-        layout="@layout/timer_container" />
-
     <Button
         android:id="@+id/button_remove_timer"
         android:layout_width="85dp"
@@ -22,7 +18,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/fab_start_timer"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/include3"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.8" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -36,7 +32,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/include3"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.8"
         app:srcCompat="@drawable/ic_alarm_blue_24dp" />
 
@@ -53,7 +49,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/fab_start_timer"
-        app:layout_constraintTop_toBottomOf="@+id/include3"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.8" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

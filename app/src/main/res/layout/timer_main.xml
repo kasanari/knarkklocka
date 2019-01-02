@@ -19,6 +19,15 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
+        android:id="@+id/fragment_container"
+        android:animateLayoutChanges="true"
+        android:name="ChronometerFragment"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        tools:layout="@layout/chronometer_fragment">
+    </FrameLayout>
+
+    <FrameLayout
         android:id="@+id/scene_root"
         android:layout_height="match_parent"
         android:layout_width="match_parent">

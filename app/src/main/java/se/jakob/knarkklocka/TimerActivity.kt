@@ -2,20 +2,18 @@ package se.jakob.knarkklocka
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.SystemClock
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.Chronometer
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.preference.PreferenceManager
-import androidx.transition.Fade
+import androidx.transition.AutoTransition
 import androidx.transition.Scene
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
@@ -24,16 +22,17 @@ import com.google.android.material.snackbar.Snackbar
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmState.*
 import se.jakob.knarkklocka.settings.SettingsActivity
+import se.jakob.knarkklocka.ui.ChronometerFragment
 import se.jakob.knarkklocka.utils.*
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
-import java.util.*
 
 class TimerActivity : AppCompatActivity() {
 
     private lateinit var viewModel: MainActivityViewModel
 
     private var currentAlarm: Alarm? = null
-    private var chronometer : Chronometer? = null
+
+    private var chronometerVisible = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +49,7 @@ class TimerActivity : AppCompatActivity() {
         val waitingScene: Scene = Scene.getSceneForLayout(mSceneRoot, R.layout.timer_waiting, this)
         val activeScene: Scene = Scene.getSceneForLayout(mSceneRoot, R.layout.timer_active, this)
         val snoozeScene: Scene = Scene.getSceneForLayout(mSceneRoot, R.layout.timer_snooze, this)
-        val mFadeTransition: Transition = Fade()
+        val mFadeTransition: Transition = AutoTransition()
 
         val factory = InjectorUtils.provideMainActivityViewModelFactory(this)
         viewModel = ViewModelProviders.of(this, factory).get(MainActivityViewModel::class.java)
@@ -59,28 +58,34 @@ class TimerActivity : AppCompatActivity() {
             if (alarm != null) {
                 currentAlarm = alarm
                 val state = alarm.state
-                when (state) {
+                val scene = when (state) {
                     STATE_ACTIVE -> {
-                        TransitionManager.go(activeScene, mFadeTransition)
+                        displayChronometer()
+                        activeScene
                     }
                     STATE_DEAD -> {
-                        TransitionManager.go(deadScene, mFadeTransition)
+                        hideChronometer()
+                        deadScene
                     }
                     STATE_SNOOZING -> {
-                        TransitionManager.go(snoozeScene, mFadeTransition)
+                        displayChronometer()
+                        snoozeScene
                     }
                     STATE_WAITING -> {
-                        TransitionManager.go(waitingScene, mFadeTransition)
+                        displayChronometer()
+                        waitingScene
                     }
                     STATE_MISSED -> {
-                        TransitionManager.go(activeScene, mFadeTransition)
+                        displayChronometer()
+                        activeScene
                     }
                 }
-                registerButtonListeners()
-                setupChronometer(alarm.endTime)
+                TransitionManager.go(scene, mFadeTransition)
             } else {
                 TransitionManager.go(deadScene, mFadeTransition)
+                hideChronometer()
             }
+            registerButtonListeners()
         })
 
         /* Setting up Toolbar instead of ActionBar */
@@ -112,19 +117,33 @@ class TimerActivity : AppCompatActivity() {
         buttonSnoozeTimer?.setOnClickListener { v -> snooze(v) }
     }
 
-    private fun setupChronometer(endTime: Date) {
-        val timeDelta = endTime.time - System.currentTimeMillis()
-        findViewById<Chronometer?>(R.id.chronometer_main)?.run {
-            base = SystemClock.elapsedRealtime() + timeDelta
-            start()
+    private fun displayChronometer() {
+        if (!chronometerVisible) {
+            val chronometerFragment = ChronometerFragment()
+            val transaction = supportFragmentManager.beginTransaction()
+            transaction.replace(R.id.fragment_container, chronometerFragment)
+            transaction.commit()
+            chronometerVisible = true
         }
     }
 
-    private fun restartAlarm() {
+    private fun hideChronometer() {
+        if (chronometerVisible) {
+            val chronometerFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+            if (chronometerFragment != null) {
+                val transaction = supportFragmentManager.beginTransaction()
+                transaction.remove(chronometerFragment)
+                transaction.commit()
+            }
+            chronometerVisible = false
+        }
+    }
+
+    private fun restartAlarm(v: View) {
         AlarmBroadcasts.broadcastAlarmHandled(this)
         viewModel.kill() /* Kill any running alarms. */
-        val message = resources.getString(R.string.snackbar_alarm_created)
-        Snackbar.make(v, message, Snackbar.LENGTH_LONG).show()
+        TimerUtils.startMainTimer(this)
+        displayChronometer()
     }
 
     private fun sleep(v: View) {
@@ -132,8 +151,7 @@ class TimerActivity : AppCompatActivity() {
         viewModel.sleep() /* Delete or kill any running alarm */
         currentAlarm?.let {
             TimerUtils.cancelAlarm(this, it.id)
-            val message = resources.getString(R.string.snackbar_alarm_cancelled)
-            Snackbar.make(v, message, Snackbar.LENGTH_LONG).show()
+            hideChronometer()
             Log.d(TAG, "Sleep mode engaged...")
         }
     }
@@ -155,13 +173,12 @@ class TimerActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (viewModel.hasAlarm) {
-            chronometer?.start()
+            displayChronometer()
         }
     }
 
     override fun onPause() {
         super.onPause()
-        chronometer?.stop()
         Log.d(TAG, "Application paused, chronometer stopped.")
     }
 
