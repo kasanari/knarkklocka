@@ -110,13 +110,11 @@ class AlarmService : LifecycleService() {
             if (alarm.active) {
                 Log.e(TAG, "Service attempted to activate an already activated alarm!")
             } else {
-                alarm.activate()
-                repository.safeUpdate(alarm)
+                AlarmStateChanger.activate(alarm, repository)
                 startAlarm()
             }
         } else { // if it has, then set it as missed
-            alarm.miss()
-            repository.safeUpdate(alarm)
+            AlarmStateChanger.miss(alarm, repository)
             stopSelf()
         }
     }
@@ -133,8 +131,10 @@ class AlarmService : LifecycleService() {
                     stopSelf()
                 }
                 ACTION_SLEEP -> {
-                    repository.safeDelete(alarm)
+                    AlarmStateChanger.sleep(alarm, repository)
                     TimerUtils.cancelAlarm(this, alarm.id)
+                    Log.d(TAG, "Service received action to cancel alarm.")
+                }
                 ACTION_START_ALARM -> {
                     Log.d(TAG, "Service received action to start alarm.")
                     TimerUtils.startMainTimer(this)
@@ -185,8 +185,7 @@ class AlarmService : LifecycleService() {
         if (!alarmIsHandled) {
             Log.d(TAG, "AlarmActivity stopped but alarm was not handled!")
             serviceScope.launch {
-                currentAlarm.miss()
-                repository.safeUpdate(currentAlarm)
+                AlarmStateChanger.miss(currentAlarm, repository)
             }
             if (BuildConfig.DEBUG) {
                 startTimeout(10000)
