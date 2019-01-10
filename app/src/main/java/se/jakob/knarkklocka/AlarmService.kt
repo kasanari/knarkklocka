@@ -135,7 +135,13 @@ class AlarmService : LifecycleService() {
                 ACTION_SLEEP -> {
                     repository.safeDelete(alarm)
                     TimerUtils.cancelAlarm(this, alarm.id)
-                    stopSelf()
+                ACTION_START_ALARM -> {
+                    Log.d(TAG, "Service received action to start alarm.")
+                    TimerUtils.startMainTimer(this)
+                }
+                ACTION_SNOOZE_ALARM -> {
+                    Log.d(TAG, "Service received action to snooze alarm.")
+                    TimerUtils.startSnoozeTimer(this, alarm)
                 }
                 else -> {
                     stopSelf()
