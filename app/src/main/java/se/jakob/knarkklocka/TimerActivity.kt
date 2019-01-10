@@ -24,6 +24,10 @@ import se.jakob.knarkklocka.data.AlarmState.*
 import se.jakob.knarkklocka.settings.SettingsActivity
 import se.jakob.knarkklocka.ui.ChronometerFragment
 import se.jakob.knarkklocka.utils.*
+import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.clearAllNotifications
+import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.showMissedAlarmNotification
+import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.showSnoozingAlarmNotification
+import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.showWaitingAlarmNotification
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
 
 class TimerActivity : AppCompatActivity() {
@@ -69,10 +73,12 @@ class TimerActivity : AppCompatActivity() {
                     }
                     STATE_SNOOZING -> {
                         displayChronometer()
+                        showSnoozingAlarmNotification(this, alarm)
                         snoozeScene
                     }
                     STATE_WAITING -> {
                         displayChronometer()
+                        showWaitingAlarmNotification(this, alarm)
                         waitingScene
                     }
                     STATE_MISSED -> {
@@ -84,6 +90,7 @@ class TimerActivity : AppCompatActivity() {
             } else {
                 TransitionManager.go(deadScene, mFadeTransition)
                 hideChronometer()
+                clearAllNotifications(this)
             }
             registerButtonListeners()
         })
