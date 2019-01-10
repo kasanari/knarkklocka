@@ -122,9 +122,9 @@ object TimerUtils {
             InjectorUtils.getAlarmRepository(context).run {
                 safeInsert(alarm)?.let { id ->
                     setNewAlarm(context, id, alarm.endTime)
+                    AlarmNotificationsUtils.showWaitingAlarmNotification(context, alarm)
                 }
             }
-            AlarmNotificationsUtils.showWaitingAlarmNotification(context, alarm)
         }
         return endTime
     }
@@ -133,11 +133,10 @@ object TimerUtils {
         val snoozeDuration = PreferenceUtils.getSnoozeTimerLength(context)
         val newEndTime = Calendar.getInstance().apply { add(Calendar.MILLISECOND, snoozeDuration.toInt()) }.time
         setNewAlarm(context, alarm.id, newEndTime)
-        alarm.snooze(newEndTime)
-        AlarmNotificationsUtils.showSnoozingAlarmNotification(context, alarm)
         utilScope.launch {
-            InjectorUtils.getAlarmRepository(context).run {
-                safeUpdate(alarm)
+            InjectorUtils.getAlarmRepository(context).let { repository ->
+                AlarmStateChanger.snooze(alarm, newEndTime, repository)
+        AlarmNotificationsUtils.showSnoozingAlarmNotification(context, alarm)
             }
         }
         return newEndTime
