@@ -121,6 +121,7 @@ object TimerUtils {
         utilScope.launch {
             InjectorUtils.getAlarmRepository(context).run {
                 safeInsert(alarm)?.let { id ->
+                    alarm.id = id
                     setNewAlarm(context, id, alarm.endTime)
                     AlarmNotificationsUtils.showWaitingAlarmNotification(context, alarm)
                 }
