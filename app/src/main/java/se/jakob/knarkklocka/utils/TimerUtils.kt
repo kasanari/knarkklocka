@@ -29,7 +29,7 @@ object TimerUtils {
     const val EXTRA_ALARM_ID = "alarm-id"
 
     private const val TAG = "TimerUtils"
-    private const val ALARM_INTENT_ID = 76          //Arbitrary unique ID for the alarm intent
+    const val ALARM_INTENT_ID = 76          //Arbitrary unique ID for the alarm intent
     private const val TIMER_ACTIVITY_INTENT_ID = 34 //Arbitrary unique ID for the TimerActivity intent
 
     private val utilScope = CoroutineScope(Dispatchers.IO)
@@ -37,11 +37,11 @@ object TimerUtils {
      * Returns whatever pending intent i am using at the moment
      */
     private fun getPI(context: Context, id: Long): PendingIntent {
-        return getAlarmServicePendingIntent(context, id)
+        return getAlarmServicePendingIntent(context, id, ACTION_ACTIVATE_ALARM)
     }
 
     fun alarmIsSet(context: Context, id: Long): Boolean {
-        val alarmIntent = getAlarmServiceIntent(context, id)
+        val alarmIntent = getAlarmServiceIntent(context, id, ACTION_ACTIVATE_ALARM)
         val service = PendingIntent.getForegroundService(
                 context,
                 ALARM_INTENT_ID,
@@ -50,19 +50,19 @@ object TimerUtils {
         return service != null
     }
 
-    fun getAlarmServiceIntent(context: Context, id: Long): Intent {
+    fun getAlarmServiceIntent(context: Context, id: Long, action_id: String): Intent {
         val alarmIntent = Intent(context, AlarmService::class.java)
         alarmIntent.putExtra(EXTRA_ALARM_ID, id)
-        alarmIntent.action = ACTION_ACTIVATE_ALARM
+        alarmIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+        alarmIntent.action = action_id
         return alarmIntent
     }
 
     /**
      * Returns the pending intent that starts [AlarmService]
      */
-    private fun getAlarmServicePendingIntent(context: Context, id: Long): PendingIntent {
-        val alarmIntent = getAlarmServiceIntent(context, id)
-        alarmIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+    fun getAlarmServicePendingIntent(context: Context, id: Long, action_id: String): PendingIntent {
+        val alarmIntent = getAlarmServiceIntent(context, id, action_id)
         return PendingIntent.getForegroundService(
                 context,
                 ALARM_INTENT_ID,
