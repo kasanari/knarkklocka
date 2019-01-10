@@ -132,6 +132,14 @@ class AlarmService : LifecycleService() {
                     stopAlarm()
                     stopSelf()
                 }
+                ACTION_SLEEP -> {
+                    repository.safeDelete(alarm)
+                    TimerUtils.cancelAlarm(this, alarm.id)
+                    stopSelf()
+                }
+                else -> {
+                    stopSelf()
+                }
             }
         }
     }
