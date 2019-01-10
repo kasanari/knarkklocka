@@ -137,7 +137,7 @@ object TimerUtils {
         utilScope.launch {
             InjectorUtils.getAlarmRepository(context).let { repository ->
                 AlarmStateChanger.snooze(alarm, newEndTime, repository)
-        AlarmNotificationsUtils.showSnoozingAlarmNotification(context, alarm)
+                AlarmNotificationsUtils.showSnoozingAlarmNotification(context, alarm)
             }
         }
         return newEndTime
