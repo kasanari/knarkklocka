@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.SystemClock
 import android.util.Log
@@ -13,9 +14,13 @@ import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import se.jakob.knarkklocka.AlarmActivity
+import se.jakob.knarkklocka.AlarmService
 import se.jakob.knarkklocka.R
 import se.jakob.knarkklocka.data.Alarm
+import se.jakob.knarkklocka.utils.TimerUtils.ALARM_INTENT_ID
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID
+import se.jakob.knarkklocka.utils.TimerUtils.getAlarmServiceIntent
+import se.jakob.knarkklocka.utils.TimerUtils.getAlarmServicePendingIntent
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -87,15 +92,15 @@ object AlarmNotificationsUtils {
     }
 
     private fun getActiveNotificationChannel(context: Context): NotificationChannel {
-            return NotificationChannel(
-                    ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID,
-                    context.getString(R.string.active_notification_channel_name),
-                    NotificationManager.IMPORTANCE_HIGH).apply {
-                enableLights(true)
-                setBypassDnd(true)
-                setShowBadge(false)
-                lightColor = LIGHT_COLOR_RED
-            }
+        return NotificationChannel(
+                ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID,
+                context.getString(R.string.active_notification_channel_name),
+                NotificationManager.IMPORTANCE_HIGH).apply {
+            enableLights(true)
+            setBypassDnd(true)
+            setShowBadge(false)
+            lightColor = LIGHT_COLOR_RED
+        }
     }
 
     private fun getSnoozeNotificationChannel(context: Context): NotificationChannel {
@@ -201,10 +206,22 @@ object AlarmNotificationsUtils {
         val packageName = context.packageName
         val stateText = context.resources.getString(R.string.waiting_notification_text)
         val pendingShowAlarm = TimerUtils.getTimerActivityIntent(context)
+
+        val sleepIntent = getAlarmServiceIntent(context, alarm.id, ACTION_SLEEP)
+
+        val sleepPendingIntent: PendingIntent =
+                PendingIntent.getService(context, ALARM_INTENT_ID, sleepIntent, FLAG_UPDATE_CURRENT)
+
+        val action = Notification.Action.Builder(
+                Icon.createWithResource(context, R.drawable.ic_remove_black),
+                context.getString(R.string.remove),
+                sleepPendingIntent).build()
+
         val notification = baseNotification(context, ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID).apply {
             setCategory(Notification.CATEGORY_SERVICE)
             setContentIntent(pendingShowAlarm)
             setCustomContentView(buildWaitingNotificationView(packageName, alarm.endTime, true, stateText))
+            addAction(action)
         }
 
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).run {
