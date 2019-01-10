@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import se.jakob.knarkklocka.BuildConfig
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmRepository
+import se.jakob.knarkklocka.utils.AlarmStateChanger
 import java.util.*
 
 abstract class AlarmViewModel internal constructor(private val repository: AlarmRepository)
@@ -50,14 +51,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
         var success: Boolean
         getData { alarm: Alarm ->
             launchDataLoad {
-                success = when {
-                    alarm.active or alarm.snoozing or alarm.missed -> {
-                        alarm.kill()
-                        repository.safeUpdate(alarm)
-                    }
-                    alarm.waiting -> repository.safeDelete(alarm)
-                    else -> false
-                }
+                success = AlarmStateChanger.sleep(alarm, repository)
                 if (!success) {
                     if (BuildConfig.DEBUG) {
                         throw Exception("Failed to put alarm to sleep")
@@ -71,8 +65,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
         getData { alarm: Alarm ->
             launchDataLoad {
                 if (!alarm.dead) {
-                    alarm.kill()
-                    repository.safeUpdate(alarm)
+                    AlarmStateChanger.kill(alarm, repository)
                 }
             }
         }
@@ -81,8 +74,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
     fun miss() {
         getData { alarm: Alarm ->
             launchDataLoad {
-                alarm.miss()
-                repository.safeUpdate(alarm)
+                AlarmStateChanger.miss(alarm, repository)
             }
         }
     }
@@ -90,8 +82,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
     fun snooze(endTime: Date) = {
         getData { alarm: Alarm ->
             launchDataLoad {
-                alarm.snooze(endTime)
-                repository.safeUpdate(alarm)
+                AlarmStateChanger.snooze(alarm, endTime, repository)
             }
         }
     }
