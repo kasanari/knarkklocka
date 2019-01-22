@@ -68,7 +68,7 @@ class AlarmService : LifecycleService() {
         repository = InjectorUtils.getAlarmRepository(this)
         registerReceiver(actionsReceiver, filter)
         isRegistered = true
-        Log.d(TAG, "AlarmService was created")
+        Log.d(TAG, "AlarmService was created.")
     }
 
     private fun listenToAlarm(id: Long) {
@@ -163,7 +163,7 @@ class AlarmService : LifecycleService() {
     }
 
     override fun onDestroy() {
-        Log.d(TAG, "AlarmService.onDestroy() called")
+        Log.d(TAG, "AlarmService.onDestroy() called.")
         super.onDestroy()
         if (isRegistered) {
             unregisterReceiver(actionsReceiver)
