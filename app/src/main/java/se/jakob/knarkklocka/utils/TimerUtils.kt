@@ -40,6 +40,11 @@ object TimerUtils {
         return getAlarmServicePendingIntent(context, id, ACTION_ACTIVATE_ALARM)
     }
 
+    /**
+     * Checks if the AlarmManager has a alarm registered for the
+     * supplied id.
+     * @param id the id of the alarm to be checked.
+     */
     fun alarmIsSet(context: Context, id: Long): Boolean {
         val alarmIntent = getAlarmServiceIntent(context, id, ACTION_ACTIVATE_ALARM)
         val service = PendingIntent.getForegroundService(
@@ -92,27 +97,38 @@ object TimerUtils {
 
         if (BuildConfig.DEBUG) {
             val df = DateFormat.getTimeInstance(DateFormat.SHORT)
-            val debugString = String.format(Locale.getDefault(), "Set alarm with id %d due %s", id, df.format(endTime))
+            val debugString = String.format(Locale.getDefault(), "Set alarm with id %d due %s.", id, df.format(endTime))
             Log.d(TAG, debugString)
         }
     }
 
+    /**
+     * Cancel the AlarmManager alarm with the supplied id
+     * @param id The id of the alarm to be cancelled
+     */
     fun cancelAlarm(context: Context, id: Long) {
         if (alarmIsSet(context, id)) {
-            AlarmNotificationsUtils.clearAllNotifications(context) /* Remove any current notifications */
-            AlarmBroadcasts.broadcastStopAlarm(context) /* Stop any vibration */
+            AlarmNotificationsUtils.clearAllNotifications(context) /* Remove any currently visible notifications */
+            AlarmBroadcasts.broadcastStopAlarm(context) /* Stop all vibrations */
             val pendingAlarmIntent = getPI(context, id) /*Create the same intent as the registered alarm in order to cancel it*/
             context.getSystemService(AlarmManager::class.java).run {
                 cancel(pendingAlarmIntent)
             }
             pendingAlarmIntent.cancel()
             if (BuildConfig.DEBUG) {
-                val debugString = String.format(Locale.getDefault(), "Cancelled alarm with id %d", id)
+                val debugString = String.format(Locale.getDefault(), "Cancelled alarm with id %d.", id)
                 Log.d(TAG, debugString)
             }
         }
     }
 
+    /**
+     * Start an instance of the main timer, this will set an alarm with AlarmManager
+     * with the length saved in SharedPreferences. A new alarm will also be created and saved to the DB.
+     * A notification will also be shown.
+     * @param context
+     * @return The expiration time of the started alarm
+     */
     fun startMainTimer(context: Context): Date {
         val timerDuration = PreferenceUtils.getMainTimerLength(context)
         val startTime = Calendar.getInstance().time
@@ -130,6 +146,14 @@ object TimerUtils {
         return endTime
     }
 
+    /**
+     *  Start an instance of the snooze timer, this will set an alarm with AlarmManager
+     *  with the length saved in SharedPreferences. The specified alarm will have its due time
+     *  updated and a notification is shown.
+     *  @param context
+     *  @param alarm The alarm that is to be snoozed.
+     *  @return The new due time of the snoozed alarm.
+     */
     fun startSnoozeTimer(context: Context, alarm: Alarm): Date {
         val snoozeDuration = PreferenceUtils.getSnoozeTimerLength(context)
         val newEndTime = Calendar.getInstance().apply { add(Calendar.MILLISECOND, snoozeDuration.toInt()) }.time
