@@ -9,6 +9,7 @@ object Klaxon {
     private const val TAG = "Klaxon"
     private val mVibratePattern = longArrayOf(1000, 1500)
     private  val amps = intArrayOf(255, 0)
+    private var activated = false
 
     fun vibrateOnce(context: Context) {
         val vibe = VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE)
@@ -21,14 +22,18 @@ object Klaxon {
         val effect = VibrationEffect.createWaveform(mVibratePattern, amps, 0)
         getVibrator(context).run {
             vibrate(effect)
-            Log.d(TAG, "Vibration started")
+            Log.d(TAG, "Vibration started.")
+            activated = true
         }
     }
 
     fun stopVibrate(context: Context) {
         getVibrator(context).run {
             cancel()
-            Log.d(TAG, "Vibration stopped")
+            if (activated) {
+                Log.d(TAG, "Vibration stopped.")
+                activated = false
+            }
         }
     }
 
