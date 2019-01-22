@@ -76,9 +76,11 @@ class AlarmService : LifecycleService() {
         repository.getLiveAlarmByID(id).observe(this, androidx.lifecycle.Observer { alarm ->
             alarm?.let {
                 currentAlarm = alarm
-                when(alarm.state) {
+                when (alarm.state) {
                     AlarmState.STATE_WAITING, AlarmState.STATE_DEAD, AlarmState.STATE_SNOOZING -> null
-                    AlarmState.STATE_ACTIVE -> AlarmNotificationsUtils.showActiveAlarmNotification(this, alarm)
+                    AlarmState.STATE_ACTIVE -> {
+                        AlarmNotificationsUtils.showActiveAlarmNotification(this, alarm)
+                    }
                     AlarmState.STATE_MISSED -> AlarmNotificationsUtils.showMissedAlarmNotification(this, alarm)
                 }
             }
