@@ -50,22 +50,23 @@ class AlarmService : LifecycleService() {
 
     private val actionsReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val action = intent.action
-            when (action) {
-                ACTION_STOP_ALARM -> { stopAlarm()
+             intent.action?.let { a ->
+                 currentAlarm?.let { alarm ->
+                     handleBroadcastAction(a, alarm)
                 }
-                ACTION_ALARM_HANDLED -> {
-                    alarmIsHandled = true
                 }
             }
         }
-    }
 
     override fun onCreate() {
         super.onCreate()
         // Register the broadcast receiver
-        val filter = IntentFilter(ACTION_STOP_ALARM)
-        filter.addAction(ACTION_ALARM_HANDLED)
+        val filter = IntentFilter().apply {
+            addAction(ACTION_STOP_ALARM)
+            addAction(ACTION_ALARM_HANDLED)
+            addAction(ACTION_DISMISS_ALARM)
+            addAction(ACTION_SNOOZE_ALARM)
+        }
         repository = InjectorUtils.getAlarmRepository(this)
         registerReceiver(actionsReceiver, filter)
         isRegistered = true
@@ -119,6 +120,33 @@ class AlarmService : LifecycleService() {
         } else { // if it has, then set it as missed
             AlarmStateChanger.miss(alarm, repository)
             stopSelf()
+        }
+    }
+
+    private fun handleBroadcastAction(action: String, alarm: Alarm) {
+        when (action) {
+            ACTION_STOP_ALARM -> {
+                stopAlarm()
+            }
+            ACTION_ALARM_HANDLED -> {
+                alarmIsHandled = true
+            }
+            ACTION_SNOOZE_ALARM -> {
+                alarmIsHandled = true
+                TimerUtils.startSnoozeTimer(applicationContext, alarm)
+                Log.d(TAG, "Service received action to snooze alarm.")
+                stopAlarm()
+            }
+            ACTION_DISMISS_ALARM -> {
+                alarmIsHandled = true
+                serviceScope.launch {
+                    TimerUtils.cancelAlarm(applicationContext, alarm.id)
+                    AlarmStateChanger.sleep(alarm, repository)
+                    TimerUtils.startMainTimer(applicationContext)
+                    Log.d(TAG, "Service received action to dismiss alarm.")
+                    stopAlarm()
+                }
+            }
         }
     }
 
