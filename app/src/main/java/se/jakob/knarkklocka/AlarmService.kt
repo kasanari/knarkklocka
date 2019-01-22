@@ -29,8 +29,8 @@ class AlarmService : LifecycleService() {
     private val binder: IBinder = Binder()
     private var isBound: Boolean = false
     private var alarmIsHandled = false
-    private lateinit var currentAlarm: Alarm
-    
+    private var currentAlarm: Alarm? = null
+
     private var serviceJob: Job = Job()
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
 
@@ -42,7 +42,9 @@ class AlarmService : LifecycleService() {
             Log.d(TAG, "Timeout reached. Snoozing...")
         }
         if (!alarmIsHandled) {
-            TimerUtils.startSnoozeTimer(this, currentAlarm)
+            currentAlarm?.let { alarm ->
+                TimerUtils.startSnoozeTimer(this, alarm)
+            }
             alarmIsHandled = true
             stopAlarm()
         }
@@ -53,10 +55,10 @@ class AlarmService : LifecycleService() {
              intent.action?.let { a ->
                  currentAlarm?.let { alarm ->
                      handleBroadcastAction(a, alarm)
-                }
-                }
+                 }
             }
         }
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -164,9 +166,9 @@ class AlarmService : LifecycleService() {
                     if (!alarmIsHandled) {
                         alarmIsHandled = true
                         TimerUtils.cancelAlarm(applicationContext, alarm.id)
-                    AlarmStateChanger.sleep(alarm, repository)
-                    Log.d(TAG, "Service received action to cancel alarm.")
-                }
+                        AlarmStateChanger.sleep(alarm, repository)
+                        Log.d(TAG, "Service received action to cancel alarm.")
+                    }
                     stopAlarm()
                 }
                 ACTION_RESTART_ALARM -> {
@@ -174,7 +176,7 @@ class AlarmService : LifecycleService() {
                         alarmIsHandled = true
                         TimerUtils.startMainTimer(applicationContext)
                         Log.d(TAG, "Service received action to restart alarm.")
-                }
+                    }
                     stopAlarm()
                 }
                 else -> {
@@ -219,7 +221,9 @@ class AlarmService : LifecycleService() {
         if (!alarmIsHandled) {
             Log.d(TAG, "AlarmActivity stopped but alarm was not handled!")
             serviceScope.launch {
-                AlarmStateChanger.miss(currentAlarm, repository)
+                currentAlarm?.let { alarm ->
+                    AlarmStateChanger.miss(alarm, repository)
+                }
             }
             if (BuildConfig.DEBUG) {
                 startTimeout(10000)
@@ -232,8 +236,8 @@ class AlarmService : LifecycleService() {
 
     private fun startTimeout(length: Long) {
         if (!timeoutRunning) {
-        getSystemService(AlarmManager::class.java).run {
-            setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + length, "tag", alarmCallback, null)
+            getSystemService(AlarmManager::class.java).run {
+                setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + length, "tag", alarmCallback, null)
                 timeoutRunning = true
             }
         }
@@ -241,8 +245,8 @@ class AlarmService : LifecycleService() {
 
     private fun stopTimeout() {
         if (timeoutRunning) {
-        getSystemService(AlarmManager::class.java).run {
-            cancel(alarmCallback)
+            getSystemService(AlarmManager::class.java).run {
+                cancel(alarmCallback)
                 timeoutRunning = false
             }
         }
