@@ -35,6 +35,7 @@ class AlarmService : LifecycleService() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
 
     private val timeoutLength = 5 * MINUTE_IN_MILLIS
+    private var timeoutRunning = false
 
     private val alarmCallback = AlarmManager.OnAlarmListener {
         if (BuildConfig.DEBUG) {
@@ -197,14 +198,20 @@ class AlarmService : LifecycleService() {
     }
 
     private fun startTimeout(length: Long) {
+        if (!timeoutRunning) {
         getSystemService(AlarmManager::class.java).run {
             setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + length, "tag", alarmCallback, null)
+                timeoutRunning = true
+            }
         }
     }
 
     private fun stopTimeout() {
+        if (timeoutRunning) {
         getSystemService(AlarmManager::class.java).run {
             cancel(alarmCallback)
+                timeoutRunning = false
+            }
         }
     }
 
