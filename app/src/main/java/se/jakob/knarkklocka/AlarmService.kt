@@ -159,20 +159,23 @@ class AlarmService : LifecycleService() {
                 }
                 ACTION_STOP_ALARM -> {
                     stopAlarm()
-                    stopSelf()
                 }
                 ACTION_SLEEP -> {
+                    if (!alarmIsHandled) {
+                        alarmIsHandled = true
+                        TimerUtils.cancelAlarm(applicationContext, alarm.id)
                     AlarmStateChanger.sleep(alarm, repository)
-                    TimerUtils.cancelAlarm(this, alarm.id)
                     Log.d(TAG, "Service received action to cancel alarm.")
                 }
-                ACTION_START_ALARM -> {
-                    Log.d(TAG, "Service received action to start alarm.")
-                    TimerUtils.startMainTimer(this)
+                    stopAlarm()
                 }
-                ACTION_SNOOZE_ALARM -> {
-                    Log.d(TAG, "Service received action to snooze alarm.")
-                    TimerUtils.startSnoozeTimer(this, alarm)
+                ACTION_RESTART_ALARM -> {
+                    if (!alarmIsHandled) {
+                        alarmIsHandled = true
+                        TimerUtils.startMainTimer(applicationContext)
+                        Log.d(TAG, "Service received action to restart alarm.")
+                }
+                    stopAlarm()
                 }
                 else -> {
                     stopSelf()
