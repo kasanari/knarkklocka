@@ -23,6 +23,7 @@ import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmState.*
 import se.jakob.knarkklocka.settings.SettingsActivity
 import se.jakob.knarkklocka.ui.ChronometerFragment
+import se.jakob.knarkklocka.ui.ControllerFragment
 import se.jakob.knarkklocka.utils.*
 import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.clearAllNotifications
 import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.showMissedAlarmNotification
@@ -30,7 +31,7 @@ import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.showSnoozingAlarmNotif
 import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.showWaitingAlarmNotification
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
 
-class TimerActivity : AppCompatActivity() {
+class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventListener{
 
     private lateinit var viewModel: MainActivityViewModel
 
@@ -102,26 +103,21 @@ class TimerActivity : AppCompatActivity() {
 
     }
 
-    private fun registerButtonListeners() {
-
-        val fabStartTimer = findViewById<FloatingActionButton?>(R.id.fab_start_timer)
-        val buttonRemoveTimer = findViewById<Button?>(R.id.button_remove_timer)
-        val buttonSnoozeTimer = findViewById<Button?>(R.id.button_snooze_timer)
-
-        fabStartTimer?.setOnLongClickListener { v ->
-            Klaxon.vibrateOnce(this)
-            restartAlarm(v)
-
-            true
+    override fun onControllerEvent(v: View, event: String) {
+        when(event) {
+            ACTION_RESTART_ALARM -> {
+                restartAlarm()
+                showSnackBar(v, R.string.snackbar_alarm_created)
+            }
+            ACTION_SNOOZE_ALARM -> {
+                snooze()
+                showSnackBar(v, R.string.snackbar_alarm_snoozed)
+            }
+            ACTION_SLEEP -> {
+                sleep()
+                showSnackBar(v, R.string.snackbar_alarm_cancelled)
         }
-
-        buttonRemoveTimer?.setOnLongClickListener { v ->
-            Klaxon.vibrateOnce(this)
-            sleep(v)
-            true
         }
-
-        buttonSnoozeTimer?.setOnClickListener { v -> snooze(v) }
     }
 
     private fun displayChronometer() {
