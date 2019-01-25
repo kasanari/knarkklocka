@@ -19,6 +19,7 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.timer_main.*
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmState.*
 import se.jakob.knarkklocka.settings.SettingsActivity
@@ -26,7 +27,6 @@ import se.jakob.knarkklocka.ui.ChronometerFragment
 import se.jakob.knarkklocka.ui.ControllerFragment
 import se.jakob.knarkklocka.utils.*
 import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.clearAllNotifications
-import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.showMissedAlarmNotification
 import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.showSnoozingAlarmNotification
 import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.showWaitingAlarmNotification
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
@@ -49,13 +49,6 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true)
 
-        val mSceneRoot: ViewGroup = findViewById(R.id.scene_root)
-        val deadScene: Scene = Scene.getSceneForLayout(mSceneRoot, R.layout.timer_dead, this)
-        val waitingScene: Scene = Scene.getSceneForLayout(mSceneRoot, R.layout.timer_waiting, this)
-        val activeScene: Scene = Scene.getSceneForLayout(mSceneRoot, R.layout.timer_active, this)
-        val snoozeScene: Scene = Scene.getSceneForLayout(mSceneRoot, R.layout.timer_snooze, this)
-        val mFadeTransition: Transition = AutoTransition()
-
         val factory = InjectorUtils.provideMainActivityViewModelFactory(this)
         viewModel = ViewModelProviders.of(this, factory).get(MainActivityViewModel::class.java)
 
@@ -63,37 +56,29 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
             if (alarm != null) {
                 currentAlarm = alarm
                 val state = alarm.state
-                val scene = when (state) {
+                when (state) {
                     STATE_ACTIVE -> {
                         displayChronometer()
-                        activeScene
                     }
                     STATE_DEAD -> {
                         hideChronometer()
-                        deadScene
                     }
                     STATE_SNOOZING -> {
                         displayChronometer()
                         showSnoozingAlarmNotification(this, alarm)
-                        snoozeScene
                     }
                     STATE_WAITING -> {
                         displayChronometer()
                         showWaitingAlarmNotification(this, alarm)
-                        waitingScene
                     }
                     STATE_MISSED -> {
                         displayChronometer()
-                        activeScene
                     }
                 }
-                TransitionManager.go(scene, mFadeTransition)
             } else {
-                TransitionManager.go(deadScene, mFadeTransition)
                 hideChronometer()
                 clearAllNotifications(this)
             }
-            registerButtonListeners()
         })
 
         /* Setting up Toolbar instead of ActionBar */
