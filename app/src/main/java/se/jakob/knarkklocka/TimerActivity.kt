@@ -101,7 +101,7 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
             ACTION_SLEEP -> {
                 sleep()
                 showSnackBar(v, R.string.snackbar_alarm_cancelled)
-        }
+            }
         }
     }
 
@@ -127,40 +127,33 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         }
     }
 
-    private fun restartAlarm(v: View) {
+    private fun restartAlarm() {
         AlarmBroadcasts.broadcastAlarmHandled(this)
         viewModel.kill() /* Kill any running alarms. */
         TimerUtils.startMainTimer(this)
         displayChronometer()
-        showSnackBar(v, R.string.snackbar_alarm_created)
     }
 
-    private fun sleep(v: View) {
+    private fun sleep() {
         AlarmBroadcasts.broadcastAlarmHandled(this)
         viewModel.sleep() /* Delete or kill any running alarm */
         currentAlarm?.let {
             TimerUtils.cancelAlarm(this, it.id)
             hideChronometer()
-            showSnackBar(v, R.string.snackbar_alarm_cancelled)
             Log.d(TAG, "Sleep mode engaged...")
         }
     }
 
-    private fun snooze(v: View) {
+    private fun snooze() {
         AlarmBroadcasts.broadcastAlarmHandled(this)
         currentAlarm?.let { alarm ->
             TimerUtils.startSnoozeTimer(this, alarm)
-            showSnackBar(v, R.string.snackbar_alarm_snoozed)
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_timer, menu) // Inflate the menu; this adds items to the action bar if it is present.
         return true
-    }
-
-    override fun onResume() {
-        super.onResume()
     }
 
     override fun onPause() {
@@ -195,7 +188,7 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
 
     private fun showSnackBar(v: View, message_id: Int) {
         val message = resources.getString(message_id)
-        Snackbar.make(v, message, Snackbar.LENGTH_LONG).run {
+        Snackbar.make(main_activity, message, Snackbar.LENGTH_LONG).run {
             view.setBackgroundColor(getColor(R.color.colorPrimary))
             show()
         }
