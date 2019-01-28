@@ -2,6 +2,7 @@ package se.jakob.knarkklocka.viewmodels
 
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,7 +11,9 @@ import kotlinx.coroutines.launch
 import se.jakob.knarkklocka.BuildConfig
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmRepository
+import se.jakob.knarkklocka.data.AlarmState
 import se.jakob.knarkklocka.utils.AlarmStateChanger
+import java.text.SimpleDateFormat
 import java.util.*
 
 abstract class AlarmViewModel internal constructor(private val repository: AlarmRepository)
@@ -24,6 +27,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
      * Cancelling this job will cancel all coroutines started by this ViewModel.
      */
     private val viewModelJob = Job()
+    private val df = SimpleDateFormat("HH:mm", Locale.getDefault())
 
     /**
      * This is the main scope for all coroutines launched by MainViewModel.
@@ -33,9 +37,28 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
      */
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
-    var hasAlarm: Boolean = false
+   val hasAlarm: Boolean
         get() = liveAlarm.value != null
 
+    val isDead: LiveData<Boolean>
+        get() = Transformations.map(liveAlarm) { alarm ->
+            (alarm?.dead)
+        }
+
+    val isFiring: LiveData<Boolean>
+        get() = Transformations.map(liveAlarm) { alarm ->
+            (alarm.active or alarm.missed)
+        }
+
+    val buttonText : LiveData<String>
+        get() = Transformations.map(liveAlarm) { alarm ->
+            ( if(alarm.dead) "Start" else "Restart" )
+        }
+
+    val endTimeString : LiveData<String>
+        get() = Transformations.map(liveAlarm) { alarm ->
+            (df.format(alarm.endTime))
+        }
 
     fun getCurrentAlarm(): Alarm? {
         return liveAlarm.value
@@ -112,7 +135,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
 
     private fun getData(block: (Alarm) -> Unit) {
         liveAlarm.value?.let { alarm: Alarm ->
-                block(alarm)
+            block(alarm)
         }
     }
 
