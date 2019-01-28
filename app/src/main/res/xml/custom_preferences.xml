@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreferenceCompat
+        android:key="@string/pref_custom_timer_enabled_key"
+        android:title="Use custom timer"
+        android:defaultValue="false"/>
+    <se.jakob.knarkklocka.settings.TimerLengthPreference
+        android:key="@string/pref_custom_timer_length_key"
+        android:title="@string/pref_custom_timer_length"
+        android:defaultValue="14400000" />
+</androidx.preference.PreferenceScreen>
