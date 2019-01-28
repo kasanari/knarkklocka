@@ -36,6 +36,7 @@
     <string name="snackbar_alarm_created">Timer started.</string>
     <string name="snackbar_alarm_snoozed">Timer snoozed.</string>
     <string name="restart">Restart</string>
+    <string name="start">Start</string>
 
 
 </resources>
