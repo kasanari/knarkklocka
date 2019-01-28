@@ -9,6 +9,8 @@ object PreferenceUtils {
 
     private const val KEY_MAIN_TIMER_LENGTH = "timer_length"
     private const val KEY_SNOOZE_TIMER_LENGTH = "snooze_length"
+    private const val KEY_CUSTOM_TIMER_ENABLED = "custom_timer_enabled"
+    private const val KEY_CUSTOM_TIMER_LENGTH = "custom_timer"
 
     private const val DEFAULT_MAIN_TIMER_LENGTH = 4 * HOUR_IN_MILLIS
     private const val DEFAULT_SNOOZE_TIMER_LENGTH = 5 * MINUTE_IN_MILLIS
@@ -73,4 +75,22 @@ object PreferenceUtils {
         setTimerLength(context, KEY_SNOOZE_TIMER_LENGTH, length)
     }
 
+    fun setCustomTimerEnabled(context: Context, enabled: Boolean) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val editor = prefs!!.edit()
+        editor.putBoolean(KEY_CUSTOM_TIMER_ENABLED, enabled)
+        editor.apply()
+    }
+
+    fun getCustomTimerEnabled(context: Context) : Boolean {
+        return PreferenceManager.getDefaultSharedPreferences(context).run {
+            getBoolean(KEY_CUSTOM_TIMER_ENABLED, false)
+        }
+    }
+
+    fun getCustomTimerLength(context: Context) : Long {
+        return PreferenceManager.getDefaultSharedPreferences(context).run {
+            getLong(KEY_CUSTOM_TIMER_LENGTH, getDefaultLength(KEY_MAIN_TIMER_LENGTH))
+        }
+    }
 }
