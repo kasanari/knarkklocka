@@ -130,7 +130,12 @@ object TimerUtils {
      * @return The expiration time of the started alarm
      */
     fun startMainTimer(context: Context): Date {
-        val timerDuration = PreferenceUtils.getMainTimerLength(context)
+        val timerDuration : Long = if (PreferenceUtils.getCustomTimerEnabled(context)) {
+            PreferenceUtils.getCustomTimerLength(context)
+        } else {
+            PreferenceUtils.getMainTimerLength(context)
+        }
+        PreferenceUtils.setCustomTimerEnabled(context, false)
         val startTime = Calendar.getInstance().time
         val endTime = Calendar.getInstance().apply { add(Calendar.MILLISECOND, timerDuration.toInt()) }.time
         val alarm = Alarm(AlarmState.STATE_WAITING, startTime, endTime)
