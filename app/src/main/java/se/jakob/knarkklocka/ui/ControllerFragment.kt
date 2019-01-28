@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -17,6 +18,7 @@ import se.jakob.knarkklocka.viewmodels.AlarmViewModel
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
 import kotlinx.android.synthetic.main.controller_fragment.*
 import se.jakob.knarkklocka.AlarmBroadcasts
+import se.jakob.knarkklocka.databinding.ControllerFragmentBinding
 import se.jakob.knarkklocka.utils.*
 
 class ControllerFragment : Fragment() {
@@ -61,10 +63,28 @@ class ControllerFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.controller_fragment, container, false)
-        registerButtonListeners(rootView)
-        subscribeUI()
-        return rootView
+        val factory = InjectorUtils.provideMainActivityViewModelFactory(requireActivity())
+        model = ViewModelProviders.of(this, factory).get(MainActivityViewModel::class.java)
+
+        val binding = DataBindingUtil.inflate<ControllerFragmentBinding>(
+                inflater, R.layout.controller_fragment, container, false).apply {
+            viewModel = model
+            setLifecycleOwner(this@ControllerFragment)
+            fabStartTimer.setOnClickListener { v ->
+                Klaxon.vibrateOnce(activity!!)
+                mListener?.onControllerEvent(v, ACTION_RESTART_ALARM)
+            }
+            buttonRemoveTimer.setOnLongClickListener { v ->
+                Klaxon.vibrateOnce(activity!!)
+                mListener?.onControllerEvent(v, ACTION_SLEEP)
+                true
+            }
+            buttonSnoozeTimer.setOnClickListener { v ->
+                mListener?.onControllerEvent(v, ACTION_SNOOZE_ALARM)
+            }
+        }
+
+        return binding.root
     }
 
     fun subscribeUI() {
