@@ -14,6 +14,10 @@
     <string name="pref_timer_length_key">timer_length</string>
     <string name="pref_timer_length">Timer length</string>
 
+    <string name="pref_custom_timer_length_key">custom_timer</string>
+    <string name="pref_custom_timer_length">Custom timer length</string>
+    <string name="pref_custom_timer_enabled_key">custom_timer_enabled</string>
+
     <string name="pref_snooze_length_key">snooze_length</string>
     <string name="pref_snooze_length">Snoozing length</string>
 
