@@ -18,8 +18,10 @@ import se.jakob.knarkklocka.viewmodels.AlarmViewModel
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
 import kotlinx.android.synthetic.main.controller_fragment.*
 import se.jakob.knarkklocka.AlarmBroadcasts
+import se.jakob.knarkklocka.TimerActivity
 import se.jakob.knarkklocka.databinding.ControllerFragmentBinding
 import se.jakob.knarkklocka.utils.*
+import se.jakob.knarkklocka.viewmodels.AlarmActivityViewModel
 
 class ControllerFragment : Fragment() {
 
@@ -64,8 +66,8 @@ class ControllerFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         if (requireActivity() is TimerActivity) {
-        val factory = InjectorUtils.provideMainActivityViewModelFactory(requireActivity())
-        model = ViewModelProviders.of(this, factory).get(MainActivityViewModel::class.java)
+            val factory = InjectorUtils.provideMainActivityViewModelFactory(requireActivity())
+            model = ViewModelProviders.of(this, factory).get(MainActivityViewModel::class.java)
         } else {
             model = activity?.run {
                 ViewModelProviders.of(this).get(AlarmActivityViewModel::class.java)
@@ -80,10 +82,9 @@ class ControllerFragment : Fragment() {
                 Klaxon.vibrateOnce(activity!!)
                 mListener?.onControllerEvent(v, ACTION_RESTART_ALARM)
             }
-            buttonRemoveTimer.setOnLongClickListener { v ->
+            buttonRemoveTimer.setOnClickListener { v ->
                 Klaxon.vibrateOnce(activity!!)
                 mListener?.onControllerEvent(v, ACTION_SLEEP)
-                true
             }
             buttonSnoozeTimer.setOnClickListener { v ->
                 mListener?.onControllerEvent(v, ACTION_SNOOZE_ALARM)
