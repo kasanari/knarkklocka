@@ -27,8 +27,9 @@ import se.jakob.knarkklocka.data.AlarmState
 import se.jakob.knarkklocka.utils.InjectorUtils
 import se.jakob.knarkklocka.utils.TimerUtils
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID
-import se.jakob.knarkklocka.utils.WakeLocker
 import se.jakob.knarkklocka.viewmodels.AlarmActivityViewModel
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 
 
 class AlarmActivity : AppCompatActivity() {
@@ -38,6 +39,9 @@ class AlarmActivity : AppCompatActivity() {
     private var alarmIsActive = false
     private var alarmIsHandled = false
     private var mServiceBound: Boolean = false
+
+    // Animation
+    private lateinit var animBlink : Animation
 
     private val timeoutLength = 5 * MINUTE_IN_MILLIS
 
@@ -142,24 +146,23 @@ class AlarmActivity : AppCompatActivity() {
             }
         })
 
+        // load the animation
+        animBlink = AnimationUtils.loadAnimation(this,
+                R.anim.blink)
+
+        // set animation listener
+        //animBlink.setAnimationListener(this)
+
+        tv_alarm_text.startAnimation(animBlink)
+
+    }
     }
 
     private fun setupChronometer(alarm: Alarm) {
         alarm_chronometer.visibility = View.VISIBLE
-        tv_alarm_text.visibility = View.VISIBLE
         val endTime = alarm.endTime
         val timeDelta = endTime.time - System.currentTimeMillis()
         alarm_chronometer.base = SystemClock.elapsedRealtime() + timeDelta
-        alarm_chronometer.onChronometerTickListener = Chronometer.OnChronometerTickListener {
-            val onColor = ContextCompat.getColor(application, R.color.colorAccent)
-            val offColor = ContextCompat.getColor(application, android.R.color.darker_gray)
-            val currentColor = tv_alarm_text.currentTextColor
-            if (currentColor == onColor) {
-                tv_alarm_text.setTextColor(offColor)
-            } else {
-                tv_alarm_text.setTextColor(onColor)
-            }
-        }
         alarm_chronometer.start()
     }
 
