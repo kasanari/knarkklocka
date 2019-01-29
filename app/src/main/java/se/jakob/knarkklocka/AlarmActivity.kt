@@ -24,15 +24,15 @@ import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_alarm.*
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmState
-import se.jakob.knarkklocka.utils.InjectorUtils
-import se.jakob.knarkklocka.utils.TimerUtils
+import se.jakob.knarkklocka.ui.ControllerFragment
+import se.jakob.knarkklocka.utils.*
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID
 import se.jakob.knarkklocka.viewmodels.AlarmActivityViewModel
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 
 
-class AlarmActivity : AppCompatActivity() {
+class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventListener {
 
     private lateinit var viewModel: AlarmActivityViewModel
 
@@ -91,6 +91,13 @@ class AlarmActivity : AppCompatActivity() {
         /*Hide navigation and status bar*/
         hideUIElements()
 
+        /*Get the ID of the Alarm that is going off*/
+        val id = intent.getLongExtra(EXTRA_ALARM_ID, -1)
+
+        /*Setup ViewModel and Observer*/
+        val factory = InjectorUtils.provideAlarmActivityViewModelFactory(this, id)
+        viewModel = ViewModelProviders.of(this, factory).get(AlarmActivityViewModel::class.java)
+
         setContentView(R.layout.activity_alarm)
 
         /* Close dialogs and window shade, so this is fully visible */
@@ -105,33 +112,11 @@ class AlarmActivity : AppCompatActivity() {
             button_miss_alarm.visibility = View.INVISIBLE
         }
 
-        button_snooze_alarm.setOnClickListener {
-            alarmIsHandled = true
-            if (alarmIsActive) {
-                snooze()
-            } else {
-                finish()
-            }
-        }
-        button_dismiss_alarm.setOnLongClickListener {
-            alarmIsHandled = true
-            if (alarmIsActive) {
-                dismiss()
-            } else {
-                finish()
-            }
-            true
-        }
 
         /*Start timeout timer, so that alarm is not going off forever */
         startTimeoutClock()
 
-        /*Get the ID of the Alarm that is going off*/
-        val id = intent.getLongExtra(EXTRA_ALARM_ID, -1)
 
-        /*Setup ViewModel and Observer*/
-        val factory = InjectorUtils.provideAlarmActivityViewModelFactory(this, id)
-        viewModel = ViewModelProviders.of(this, factory).get(AlarmActivityViewModel::class.java)
 
         viewModel.liveAlarm.observe(this, Observer {alarm : Alarm? ->
             if (alarm != null) {
@@ -156,6 +141,34 @@ class AlarmActivity : AppCompatActivity() {
         tv_alarm_text.startAnimation(animBlink)
 
     }
+
+    override fun onControllerEvent(v: View, event: String) {
+        when (event) {
+            ACTION_RESTART_ALARM -> {
+                alarmIsHandled = true
+                if (alarmIsActive) {
+                    dismiss()
+                } else {
+                    finish()
+                }
+            }
+            ACTION_SNOOZE_ALARM -> {
+                alarmIsHandled = true
+                if (alarmIsActive) {
+                    snooze()
+                } else {
+                    finish()
+                }
+            }
+            ACTION_SLEEP -> {
+                alarmIsHandled = true
+                if (alarmIsActive) {
+                    sleep()
+                } else {
+                    finish()
+                }
+            }
+        }
     }
 
     private fun setupChronometer(alarm: Alarm) {
@@ -188,6 +201,13 @@ class AlarmActivity : AppCompatActivity() {
         viewModel.kill()
         TimerUtils.startMainTimer(this)
         finish()
+    }
+
+    private fun sleep() {
+        viewModel.getCurrentAlarm()?.let { alarm ->
+            TimerUtils.cancelAlarm(this, alarm.id)
+        }
+        viewModel.sleep() /* Delete or kill any running alarm */
     }
 
     private fun hideUIElements() {
