@@ -63,8 +63,14 @@ class ControllerFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        if (requireActivity() is TimerActivity) {
         val factory = InjectorUtils.provideMainActivityViewModelFactory(requireActivity())
         model = ViewModelProviders.of(this, factory).get(MainActivityViewModel::class.java)
+        } else {
+            model = activity?.run {
+                ViewModelProviders.of(this).get(AlarmActivityViewModel::class.java)
+            } ?: throw Exception("Invalid Activity")
+        }
 
         val binding = DataBindingUtil.inflate<ControllerFragmentBinding>(
                 inflater, R.layout.controller_fragment, container, false).apply {
