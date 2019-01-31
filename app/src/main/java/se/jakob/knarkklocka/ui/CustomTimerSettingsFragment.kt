@@ -21,12 +21,6 @@ class CustomTimerSettingsFragment : PreferenceFragmentCompat(), SharedPreference
         preferenceScreen.findPreference("custom_timer").isVisible = switcher.isChecked
     }
 
-    override fun onPreferenceTreeClick(preference: Preference?): Boolean {
-        if (preference is SwitchPreferenceCompat) {
-            preferenceScreen.findPreference("custom_timer").isVisible = preference.isChecked
-        }
-        return super.onPreferenceTreeClick(preference)
-    }
 
     override fun onDisplayPreferenceDialog(preference: Preference?) {
         // Try if the preference is one of our custom Preferences
