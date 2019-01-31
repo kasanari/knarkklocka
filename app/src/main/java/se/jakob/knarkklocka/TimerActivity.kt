@@ -6,18 +6,12 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.preference.PreferenceManager
-import androidx.transition.AutoTransition
-import androidx.transition.Scene
-import androidx.transition.Transition
-import androidx.transition.TransitionManager
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.timer_main.*
 import se.jakob.knarkklocka.data.Alarm
@@ -25,13 +19,14 @@ import se.jakob.knarkklocka.data.AlarmState.*
 import se.jakob.knarkklocka.settings.SettingsActivity
 import se.jakob.knarkklocka.ui.ChronometerFragment
 import se.jakob.knarkklocka.ui.ControllerFragment
+import se.jakob.knarkklocka.ui.CustomTimerSettingsFragment
 import se.jakob.knarkklocka.utils.*
 import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.clearAllNotifications
 import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.showSnoozingAlarmNotification
 import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.showWaitingAlarmNotification
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
 
-class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventListener{
+class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventListener {
 
     private lateinit var viewModel: MainActivityViewModel
 
@@ -59,23 +54,29 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
                 when (state) {
                     STATE_ACTIVE -> {
                         displayChronometer()
+                        hideSettings()
                     }
                     STATE_DEAD -> {
                         hideChronometer()
+                        displaySettings()
                     }
                     STATE_SNOOZING -> {
+                        hideSettings()
                         displayChronometer()
                         showSnoozingAlarmNotification(this, alarm)
                     }
                     STATE_WAITING -> {
+                        hideSettings()
                         displayChronometer()
                         showWaitingAlarmNotification(this, alarm)
                     }
                     STATE_MISSED -> {
+                        hideSettings()
                         displayChronometer()
                     }
                 }
             } else {
+                displaySettings()
                 hideChronometer()
                 clearAllNotifications(this)
             }
@@ -89,7 +90,7 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
     }
 
     override fun onControllerEvent(v: View, event: String) {
-        when(event) {
+        when (event) {
             ACTION_RESTART_ALARM -> {
                 restartAlarm()
                 showSnackBar(v, R.string.snackbar_alarm_created)
@@ -105,10 +106,27 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         }
     }
 
+    private fun displaySettings() {
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+        transaction.replace(R.id.settings_fragment_container, CustomTimerSettingsFragment())
+        transaction.commit()
+    }
+
+    private fun hideSettings() {
+        supportFragmentManager.findFragmentById(R.id.settings_fragment_container)?.let { fragment ->
+            val transaction = supportFragmentManager.beginTransaction()
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+            transaction.remove(fragment)
+            transaction.commit()
+        }
+    }
+
     private fun displayChronometer() {
         if (!chronometerVisible) {
             val chronometerFragment = ChronometerFragment()
             val transaction = supportFragmentManager.beginTransaction()
+            transaction.setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_top)
             transaction.replace(R.id.fragment_container, chronometerFragment)
             transaction.commit()
             chronometerVisible = true
@@ -120,6 +138,7 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
             val chronometerFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
             if (chronometerFragment != null) {
                 val transaction = supportFragmentManager.beginTransaction()
+                transaction.setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_top)
                 transaction.remove(chronometerFragment)
                 transaction.commit()
             }
@@ -184,6 +203,7 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
 
     companion object {
         private const val TAG = "TimerActivity"
+        val STATE_CHECKED = "customTimerChecked"
     }
 
     private fun showSnackBar(v: View, message_id: Int) {
