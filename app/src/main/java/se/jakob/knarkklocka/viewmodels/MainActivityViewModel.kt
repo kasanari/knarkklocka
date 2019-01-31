@@ -10,7 +10,7 @@ class MainActivityViewModel(repository: AlarmRepository) : AlarmViewModel(reposi
 
     fun getStateText(): LiveData<String> {
         return Transformations.map(liveAlarm) { alarm ->
-            (alarm.stateToString)
+            (alarm?.stateToString ?: "No alarm")
         }
     }
 }
