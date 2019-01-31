@@ -41,23 +41,32 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
         get() = liveAlarm.value != null
 
     val isDead: LiveData<Boolean>
-        get() = Transformations.map(liveAlarm) { alarm ->
-            (alarm?.dead)
+        get() = Transformations.map(liveAlarm) { alarm : Alarm? ->
+            alarm?.run {
+                dead
+            } ?: true
         }
 
     val isFiring: LiveData<Boolean>
-        get() = Transformations.map(liveAlarm) { alarm ->
-            (alarm.active or alarm.missed)
+        get() = Transformations.map(liveAlarm) { alarm : Alarm? ->
+            alarm?.run {
+                active or missed
+            } ?: false
         }
 
     val buttonText : LiveData<String>
-        get() = Transformations.map(liveAlarm) { alarm ->
-            ( if(alarm.dead) "Start" else "Restart" )
+        get() = Transformations.map(liveAlarm) { alarm : Alarm? ->
+            alarm?.run {
+                if(dead) "Start" else "Restart"
+            } ?: "Start"
         }
 
     val endTimeString : LiveData<String>
         get() = Transformations.map(liveAlarm) { alarm ->
-            (df.format(alarm.endTime))
+            alarm?.run {
+                (df.format(alarm.endTime))
+            } ?: "No alarm"
+
         }
 
     fun getCurrentAlarm(): Alarm? {
