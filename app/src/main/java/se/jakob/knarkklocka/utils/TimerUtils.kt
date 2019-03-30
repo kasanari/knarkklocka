@@ -66,7 +66,7 @@ object TimerUtils {
     /**
      * Returns the pending intent that starts [AlarmService]
      */
-    fun getAlarmServicePendingIntent(context: Context, id: Long, action_id: String): PendingIntent {
+    private fun getAlarmServicePendingIntent(context: Context, id: Long, action_id: String): PendingIntent {
         val alarmIntent = getAlarmServiceIntent(context, id, action_id)
         return PendingIntent.getForegroundService(
                 context,

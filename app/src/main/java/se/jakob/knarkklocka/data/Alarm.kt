@@ -18,23 +18,23 @@ data class Alarm constructor(
         @ColumnInfo(name = "number_of_snoozes") var snoozes: Int = 0
 ) {
 
-    var waiting : Boolean = true
+    val waiting : Boolean
     get () {
         return state == AlarmState.STATE_WAITING
     }
-    var active : Boolean = false
+    val active : Boolean
         get () {
             return state == AlarmState.STATE_ACTIVE
         }
-    var snoozing : Boolean = false
+    val snoozing : Boolean
         get () {
             return state == AlarmState.STATE_SNOOZING
         }
-    var dead : Boolean = false
+    val dead : Boolean
         get () {
             return state == AlarmState.STATE_DEAD
         }
-    var missed : Boolean = false
+    val missed : Boolean
         get() {
             return state == AlarmState.STATE_MISSED
         }

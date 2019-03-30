@@ -47,7 +47,7 @@ class ControllerFragment : Fragment() {
         val binding = DataBindingUtil.inflate<ControllerFragmentBinding>(
                 inflater, R.layout.controller_fragment, container, false).apply {
             viewModel = model
-            setLifecycleOwner(this@ControllerFragment)
+            lifecycleOwner = this@ControllerFragment
             buttonStartTimer.setOnClickListener { v ->
                 Klaxon.vibrateOnce(activity!!)
                 mListener?.onControllerEvent(v, ACTION_RESTART_ALARM)

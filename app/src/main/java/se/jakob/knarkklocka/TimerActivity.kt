@@ -93,15 +93,15 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         when (event) {
             ACTION_RESTART_ALARM -> {
                 restartAlarm()
-                showSnackBar(v, R.string.snackbar_alarm_created)
+                showSnackBar(R.string.snackbar_alarm_created)
             }
             ACTION_SNOOZE_ALARM -> {
                 snooze()
-                showSnackBar(v, R.string.snackbar_alarm_snoozed)
+                showSnackBar(R.string.snackbar_alarm_snoozed)
             }
             ACTION_SLEEP -> {
                 sleep()
-                showSnackBar(v, R.string.snackbar_alarm_cancelled)
+                showSnackBar(R.string.snackbar_alarm_cancelled)
             }
         }
     }
@@ -203,10 +203,10 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
 
     companion object {
         private const val TAG = "TimerActivity"
-        val STATE_CHECKED = "customTimerChecked"
+        const val STATE_CHECKED = "customTimerChecked"
     }
 
-    private fun showSnackBar(v: View, message_id: Int) {
+    private fun showSnackBar(message_id: Int) {
         val message = resources.getString(message_id)
         Snackbar.make(main_activity, message, Snackbar.LENGTH_LONG).run {
             view.setBackgroundColor(getColor(R.color.colorPrimary))

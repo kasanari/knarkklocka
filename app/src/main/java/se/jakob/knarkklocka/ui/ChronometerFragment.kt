@@ -21,7 +21,7 @@ import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
 class ChronometerFragment : Fragment() {
 
     private lateinit var model: AlarmViewModel
-    lateinit var chronometer : Chronometer
+    private lateinit var chronometer : Chronometer
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
@@ -31,7 +31,7 @@ class ChronometerFragment : Fragment() {
         val binding = DataBindingUtil.inflate<ChronometerFragmentBinding>(
                 inflater, R.layout.chronometer_fragment, container, false).apply {
             viewModel = model as MainActivityViewModel
-            setLifecycleOwner(this@ChronometerFragment)
+            lifecycleOwner = this@ChronometerFragment
         }
 
         chronometer = binding.chronometerMain

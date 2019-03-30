@@ -22,7 +22,7 @@ class HistoryActivity : AppCompatActivity() {
 
     private var currentAlarm: Alarm? = null
 
-    lateinit var adapter : AlarmListAdapter
+    private lateinit var adapter : AlarmListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -144,7 +144,7 @@ object AlarmNotificationsUtils {
         Log.d(TAG, "Showing MISSED notification.")
     }
 
-    fun getMissedAlarmNotification(context: Context, alarm: Alarm) : Notification {
+    private fun getMissedAlarmNotification(context: Context, alarm: Alarm) : Notification {
         val pendingShowAlarm = TimerUtils.getTimerActivityIntent(context)
         val packageName = context.packageName
         val stateText = context.resources.getString(R.string.missed_notification_text)
@@ -162,7 +162,7 @@ object AlarmNotificationsUtils {
         }
     }
 
-    fun getActiveAlarmNotification(context: Context, alarm: Alarm) : Notification {
+    private fun getActiveAlarmNotification(context: Context, alarm: Alarm) : Notification {
         // Full screen intent has flags so it is different than the content intent.
         val fullScreen = Intent(context, AlarmActivity::class.java).apply {
             flags = (Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_USER_ACTION)
