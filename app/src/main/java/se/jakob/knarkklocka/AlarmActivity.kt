@@ -198,16 +198,17 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
     }
 
     private fun dismiss() {
-        viewModel.kill()
-        TimerUtils.startMainTimer(this)
+        viewModel.kill() /* Kill old timer */
+        TimerUtils.startMainTimer(this) /* Start a new timer */
         finish()
     }
 
     private fun sleep() {
         viewModel.getCurrentAlarm()?.let { alarm ->
-            TimerUtils.cancelAlarm(this, alarm.id)
+            TimerUtils.cancelAlarm(this, alarm.id) /* Cancel alarm in AlarmManager */
         }
-        viewModel.sleep() /* Delete or kill any running alarm */
+        viewModel.sleep() /* Update alarm in DB */
+        finish()
     }
 
     private fun hideUIElements() {
