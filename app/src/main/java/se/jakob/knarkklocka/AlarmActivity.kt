@@ -16,9 +16,9 @@ import android.text.format.DateUtils.SECOND_IN_MILLIS
 import android.util.Log
 import android.view.View
 import android.view.WindowManager.LayoutParams.*
-import android.widget.Chronometer
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_alarm.*
@@ -28,8 +28,6 @@ import se.jakob.knarkklocka.ui.ControllerFragment
 import se.jakob.knarkklocka.utils.*
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID
 import se.jakob.knarkklocka.viewmodels.AlarmActivityViewModel
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 
 
 class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventListener {

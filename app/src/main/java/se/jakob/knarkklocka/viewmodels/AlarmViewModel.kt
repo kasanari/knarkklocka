@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import se.jakob.knarkklocka.BuildConfig
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmRepository
-import se.jakob.knarkklocka.data.AlarmState
 import se.jakob.knarkklocka.utils.AlarmStateChanger
 import java.text.SimpleDateFormat
 import java.util.*
