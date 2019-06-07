@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.SystemClock
 import android.util.Log
@@ -15,7 +16,9 @@ import androidx.core.content.ContextCompat
 import se.jakob.knarkklocka.AlarmActivity
 import se.jakob.knarkklocka.R
 import se.jakob.knarkklocka.data.Alarm
+import se.jakob.knarkklocka.utils.TimerUtils.ALARM_INTENT_ID
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID
+import se.jakob.knarkklocka.utils.TimerUtils.getAlarmServiceIntent
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -87,15 +90,15 @@ object AlarmNotificationsUtils {
     }
 
     private fun getActiveNotificationChannel(context: Context): NotificationChannel {
-            return NotificationChannel(
-                    ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID,
-                    context.getString(R.string.active_notification_channel_name),
-                    NotificationManager.IMPORTANCE_HIGH).apply {
-                enableLights(true)
-                setBypassDnd(true)
-                setShowBadge(false)
-                lightColor = LIGHT_COLOR_RED
-            }
+        return NotificationChannel(
+                ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID,
+                context.getString(R.string.active_notification_channel_name),
+                NotificationManager.IMPORTANCE_HIGH).apply {
+            enableLights(true)
+            setBypassDnd(true)
+            setShowBadge(false)
+            lightColor = LIGHT_COLOR_RED
+        }
     }
 
     private fun getSnoozeNotificationChannel(context: Context): NotificationChannel {
@@ -134,43 +137,62 @@ object AlarmNotificationsUtils {
     }
 
     @Synchronized
-    fun showMissedAlarmNotification(service: Service, alarm: Alarm) {
-        clearAllNotifications(service)
-
-        val pendingShowAlarm = TimerUtils.getTimerActivityIntent(service)
-        val packageName = service.packageName
-        val stateText = service.resources.getString(R.string.missed_notification_text)
-
-        baseNotification(service, ALARM_MISSED_NOTIFICATION_CHANNEL_ID).run {
-            setCategory(Notification.CATEGORY_ALARM)
-            setContentIntent(pendingShowAlarm)
-            setCustomContentView(buildMissedNotificationView(packageName, alarm, true, stateText))
-            service.startForeground(ALARM_MISSED_NOTIFICATION_ID, build())
-        }
+    fun showMissedAlarmNotification(service : Service, alarm: Alarm) {
+        clearAllNotifications(service.applicationContext)
+        val notification = getMissedAlarmNotification(service, alarm)
+        service.startForeground(ALARM_MISSED_NOTIFICATION_ID, notification)
         Log.d(TAG, "Showing MISSED notification.")
     }
 
-    @Synchronized
-    fun showActiveAlarmNotification(service: Service, alarm: Alarm) {
-        clearAllNotifications(service)
+    private fun getMissedAlarmNotification(context: Context, alarm: Alarm) : Notification {
+        val pendingShowAlarm = TimerUtils.getTimerActivityIntent(context)
+        val packageName = context.packageName
+        val stateText = context.resources.getString(R.string.missed_notification_text)
 
+        val dismissAction = getDismissAction(context.applicationContext)
+        val snoozeAction = getSnoozeAction(context.applicationContext)
+
+        return baseNotification(context, ALARM_MISSED_NOTIFICATION_CHANNEL_ID).run {
+            setCategory(Notification.CATEGORY_ALARM)
+            setContentIntent(pendingShowAlarm)
+            setCustomContentView(buildMissedNotificationView(packageName, alarm, true, stateText))
+            addAction(dismissAction)
+            addAction(snoozeAction)
+            build()
+        }
+    }
+
+    private fun getActiveAlarmNotification(context: Context, alarm: Alarm) : Notification {
         // Full screen intent has flags so it is different than the content intent.
-        val fullScreen = Intent(service, AlarmActivity::class.java).apply {
+        val fullScreen = Intent(context, AlarmActivity::class.java).apply {
             flags = (Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_USER_ACTION)
             putExtra(EXTRA_ALARM_ID, alarm.id)
         }
 
-        val packageName = service.packageName
-        val stateText = service.resources.getString(R.string.active_notification_text)
-        val pendingFullScreen = PendingIntent.getActivity(service, 0, fullScreen, FLAG_UPDATE_CURRENT)
+        val packageName = context.packageName
+        val stateText = context.resources.getString(R.string.active_notification_text)
+        val pendingFullScreen = PendingIntent.getActivity(context, 0, fullScreen, FLAG_UPDATE_CURRENT)
 
-        baseNotification(service, ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID).run {
+        val dismissAction = getDismissAction(context.applicationContext)
+        val snoozeAction = getSnoozeAction(context.applicationContext)
+
+        return baseNotification(context, ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID).run {
             setCategory(Notification.CATEGORY_ALARM)
             setCustomContentView(buildActiveNotificationView(packageName, alarm, true, stateText))
             setFullScreenIntent(pendingFullScreen, true)
             setContentIntent(pendingFullScreen)
-            service.startForeground(ALARM_ACTIVE_NOTIFICATION_ID, build())
+            addAction(dismissAction)
+            addAction(snoozeAction)
+            build()
         }
+    }
+
+    @Synchronized
+    fun showActiveAlarmNotification(service: Service, alarm: Alarm) {
+        clearAllNotifications(service.applicationContext)
+
+        val notification = getActiveAlarmNotification(service, alarm)
+        service.startForeground(ALARM_ACTIVE_NOTIFICATION_ID, notification)
         Log.d(TAG, "Showing ACTIVE notification.")
     }
 
@@ -182,10 +204,15 @@ object AlarmNotificationsUtils {
         val packageName = context.packageName
         val stateText = context.resources.getString(R.string.snoozing_notification_text)
 
+        val sleepAction = getSleepAction(context, alarm)
+        val startAction = getRestartAction(context, alarm)
+
         val notification = baseNotification(context, ALARM_SNOOZING_NOTIFICATION_CHANNEL_ID).apply {
             setCategory(Notification.CATEGORY_ALARM)
             setCustomContentView(buildSnoozingNotificationView(context, packageName, alarm, true, stateText))
             setContentIntent(pendingShowAlarm)
+            addAction(sleepAction)
+            addAction(startAction)
         }
 
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).run {
@@ -201,10 +228,14 @@ object AlarmNotificationsUtils {
         val packageName = context.packageName
         val stateText = context.resources.getString(R.string.waiting_notification_text)
         val pendingShowAlarm = TimerUtils.getTimerActivityIntent(context)
+
+        val action = getSleepAction(context, alarm)
+
         val notification = baseNotification(context, ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID).apply {
             setCategory(Notification.CATEGORY_SERVICE)
             setContentIntent(pendingShowAlarm)
             setCustomContentView(buildWaitingNotificationView(packageName, alarm.endTime, true, stateText))
+            addAction(action)
         }
 
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).run {
@@ -213,6 +244,56 @@ object AlarmNotificationsUtils {
         Log.d(TAG, "Showing WAITING notification.")
     }
 
+
+    private fun getSleepAction(context: Context, alarm: Alarm) : Notification.Action {
+        val intent = getAlarmServiceIntent(context, alarm.id, ACTION_SLEEP)
+
+        val pendingIntent: PendingIntent =
+                PendingIntent.getService(context, ALARM_INTENT_ID, intent, FLAG_UPDATE_CURRENT)
+
+        return  Notification.Action.Builder(
+                Icon.createWithResource(context, R.drawable.ic_remove_black),
+                context.getString(R.string.remove),
+                pendingIntent).build()
+    }
+
+    private fun getRestartAction(context: Context, alarm: Alarm) : Notification.Action {
+        val intent = getAlarmServiceIntent(context, alarm.id, ACTION_RESTART_ALARM)
+
+        val pendingIntent: PendingIntent =
+                PendingIntent.getService(context, ALARM_INTENT_ID, intent, FLAG_UPDATE_CURRENT)
+
+        return Notification.Action.Builder(
+                Icon.createWithResource(context, R.drawable.ic_remove_black),
+                context.getString(R.string.restart),
+                pendingIntent).build()
+    }
+
+    private fun getDismissAction(context: Context) : Notification.Action {
+        val intent = Intent().also { it.action = ACTION_DISMISS_ALARM }
+
+        val pendingIntent: PendingIntent =
+                PendingIntent.getBroadcast(context, ALARM_INTENT_ID, intent, FLAG_UPDATE_CURRENT)
+
+        return Notification.Action.Builder(
+                Icon.createWithResource(context, R.drawable.ic_remove_black),
+                context.getString(R.string.dismiss),
+                pendingIntent).build()
+    }
+
+    private fun getSnoozeAction(context: Context) : Notification.Action {
+        val intent = Intent().also { it.action = ACTION_SNOOZE_ALARM }
+
+        val pendingIntent: PendingIntent =
+                PendingIntent.getBroadcast(context, ALARM_INTENT_ID, intent, FLAG_UPDATE_CURRENT)
+
+        return Notification.Action.Builder(
+                Icon.createWithResource(context, R.drawable.ic_remove_black),
+                context.getString(R.string.snooze),
+                pendingIntent).build()
+    }
+
+    @Synchronized
     fun clearAllNotifications(context: Context) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancelAll()

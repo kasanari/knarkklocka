@@ -2,6 +2,7 @@ package se.jakob.knarkklocka.viewmodels
 
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,6 +11,8 @@ import kotlinx.coroutines.launch
 import se.jakob.knarkklocka.BuildConfig
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmRepository
+import se.jakob.knarkklocka.utils.AlarmStateChanger
+import java.text.SimpleDateFormat
 import java.util.*
 
 abstract class AlarmViewModel internal constructor(private val repository: AlarmRepository)
@@ -23,6 +26,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
      * Cancelling this job will cancel all coroutines started by this ViewModel.
      */
     private val viewModelJob = Job()
+    private val df = SimpleDateFormat("HH:mm", Locale.getDefault())
 
     /**
      * This is the main scope for all coroutines launched by MainViewModel.
@@ -32,9 +36,37 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
      */
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
-    var hasAlarm: Boolean = false
+   val hasAlarm: Boolean
         get() = liveAlarm.value != null
 
+    val isDead: LiveData<Boolean>
+        get() = Transformations.map(liveAlarm) { alarm : Alarm? ->
+            alarm?.run {
+                dead
+            } ?: true
+        }
+
+    val isFiring: LiveData<Boolean>
+        get() = Transformations.map(liveAlarm) { alarm : Alarm? ->
+            alarm?.run {
+                active or missed
+            } ?: false
+        }
+
+    val buttonText : LiveData<String>
+        get() = Transformations.map(liveAlarm) { alarm : Alarm? ->
+            alarm?.run {
+                if(dead) "Start" else "Restart"
+            } ?: "Start"
+        }
+
+    val endTimeString : LiveData<String>
+        get() = Transformations.map(liveAlarm) { alarm ->
+            alarm?.run {
+                (df.format(alarm.endTime))
+            } ?: "No alarm"
+
+        }
 
     fun getCurrentAlarm(): Alarm? {
         return liveAlarm.value
@@ -50,14 +82,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
         var success: Boolean
         getData { alarm: Alarm ->
             launchDataLoad {
-                success = when {
-                    alarm.active or alarm.snoozing or alarm.missed -> {
-                        alarm.kill()
-                        repository.safeUpdate(alarm)
-                    }
-                    alarm.waiting -> repository.safeDelete(alarm)
-                    else -> false
-                }
+                success = AlarmStateChanger.sleep(alarm, repository)
                 if (!success) {
                     if (BuildConfig.DEBUG) {
                         throw Exception("Failed to put alarm to sleep")
@@ -71,8 +96,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
         getData { alarm: Alarm ->
             launchDataLoad {
                 if (!alarm.dead) {
-                    alarm.kill()
-                    repository.safeUpdate(alarm)
+                    AlarmStateChanger.kill(alarm, repository)
                 }
             }
         }
@@ -81,8 +105,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
     fun miss() {
         getData { alarm: Alarm ->
             launchDataLoad {
-                alarm.miss()
-                repository.safeUpdate(alarm)
+                AlarmStateChanger.miss(alarm, repository)
             }
         }
     }
@@ -90,8 +113,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
     fun snooze(endTime: Date) = {
         getData { alarm: Alarm ->
             launchDataLoad {
-                alarm.snooze(endTime)
-                repository.safeUpdate(alarm)
+                AlarmStateChanger.snooze(alarm, endTime, repository)
             }
         }
     }
@@ -121,7 +143,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
 
     private fun getData(block: (Alarm) -> Unit) {
         liveAlarm.value?.let { alarm: Alarm ->
-                block(alarm)
+            block(alarm)
         }
     }
 

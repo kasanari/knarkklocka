@@ -1,7 +1,8 @@
 package se.jakob.knarkklocka.data
 
 import androidx.lifecycle.LiveData
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import se.jakob.knarkklocka.BuildConfig
 
 class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
@@ -17,7 +18,7 @@ class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
         }
 
     suspend fun getAlarmByID(id: Long): Alarm? {
-        return GlobalScope.async { alarmDao.getAlarm(id) }.await()
+        return withContext(Dispatchers.Default) { alarmDao.getAlarm(id) }
     }
 
     internal fun getLiveAlarmsByStates(vararg states: AlarmState): LiveData<List<Alarm>> {
@@ -44,8 +45,8 @@ class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
         }
     }
 
-    internal fun insert(alarm: Alarm): Deferred<Long> {
-        return GlobalScope.async { alarmDao.insert(alarm) }
+    internal suspend fun insert(alarm: Alarm): Long {
+        return withContext(Dispatchers.Default) { alarmDao.insert(alarm) }
     }
 
     private suspend fun delete(alarm: Alarm) {
@@ -63,7 +64,7 @@ class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
     suspend fun safeInsert(alarm: Alarm): Long? {
         return if (alarm.state == AlarmState.STATE_WAITING) {
             ensureUnique(AlarmState.STATE_WAITING)
-            insert(alarm).await()
+            insert(alarm)
         } else {
             if (BuildConfig.DEBUG) {
                 throw Exception("Can only insert waiting Alarms")

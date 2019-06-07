@@ -22,11 +22,13 @@ class HistoryActivity : AppCompatActivity() {
 
     private var currentAlarm: Alarm? = null
 
+    private lateinit var adapter : AlarmListAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_history)
 
-        val adapter = AlarmListAdapter(this)
+        adapter = AlarmListAdapter(this)
         recyclerview.adapter = adapter
         recyclerview.layoutManager = LinearLayoutManager(this)
 
@@ -52,15 +54,13 @@ class HistoryActivity : AppCompatActivity() {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        val id = item.itemId
-
-        return when (id) {
+        return when (item.itemId) {
             R.id.action_clear_history -> {
                 if (viewModel.hasAlarm) {
                     TimerUtils.cancelAlarm(applicationContext, currentAlarm!!.id)
                     AlarmNotificationsUtils.clearAllNotifications(this)
                 }
-
+                adapter.notifyItemRangeRemoved(0, adapter.itemCount)
                 viewModel.clearHistory()
                 true
             }

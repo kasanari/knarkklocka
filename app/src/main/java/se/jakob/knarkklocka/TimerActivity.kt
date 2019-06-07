@@ -2,43 +2,47 @@ package se.jakob.knarkklocka
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.SystemClock
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.content_timer.*
+import kotlinx.android.synthetic.main.timer_main.*
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmState.*
 import se.jakob.knarkklocka.settings.SettingsActivity
+import se.jakob.knarkklocka.ui.ChronometerFragment
+import se.jakob.knarkklocka.ui.ControllerFragment
+import se.jakob.knarkklocka.ui.CustomTimerSettingsFragment
 import se.jakob.knarkklocka.utils.*
+import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.clearAllNotifications
+import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.showSnoozingAlarmNotification
+import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.showWaitingAlarmNotification
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
-import java.util.*
 
-class TimerActivity : AppCompatActivity() {
+class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventListener {
 
     private lateinit var viewModel: MainActivityViewModel
 
     private var currentAlarm: Alarm? = null
 
+    private var chronometerVisible = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_timer)
+        setContentView(R.layout.timer_main)
 
         AlarmNotificationsUtils.setupChannels(this)
-        
+
         Utils.checkIfWhiteListed(this)
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true)
-
-        button_remove_timer.visibility = View.INVISIBLE
-        chronometer_main.visibility = View.INVISIBLE
 
         val factory = InjectorUtils.provideMainActivityViewModelFactory(this)
         viewModel = ViewModelProviders.of(this, factory).get(MainActivityViewModel::class.java)
@@ -49,47 +53,32 @@ class TimerActivity : AppCompatActivity() {
                 val state = alarm.state
                 when (state) {
                     STATE_ACTIVE -> {
-                        setupChronometer(alarm.endTime)
-                        button_snooze_timer.visibility = View.VISIBLE
-                        button_remove_timer.visibility = View.VISIBLE
-                        fab_start_timer.visibility = View.VISIBLE
-                        fab_start_timer.setImageResource(R.drawable.ic_restart_black_24dp)
+                        displayChronometer()
+                        hideSettings()
                     }
                     STATE_DEAD -> {
-                        fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp)
-                        fab_start_timer.visibility = View.VISIBLE
-                        button_remove_timer.visibility = View.INVISIBLE
-                        button_snooze_timer.visibility = View.INVISIBLE
-                        chronometer_main.visibility = View.INVISIBLE
+                        hideChronometer()
+                        displaySettings()
                     }
                     STATE_SNOOZING -> {
-                        setupChronometer(alarm.endTime)
-                        button_snooze_timer.visibility = View.INVISIBLE
-                        button_remove_timer.visibility = View.VISIBLE
-                        fab_start_timer.visibility = View.VISIBLE
-                        fab_start_timer.setImageResource(R.drawable.ic_restart_black_24dp)
+                        hideSettings()
+                        displayChronometer()
+                        showSnoozingAlarmNotification(this, alarm)
                     }
                     STATE_WAITING -> {
-                        setupChronometer(alarm.endTime)
-                        button_snooze_timer.visibility = View.INVISIBLE
-                        button_remove_timer.visibility = View.VISIBLE
-                        fab_start_timer.visibility = View.INVISIBLE
-                        fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp)
+                        hideSettings()
+                        displayChronometer()
+                        showWaitingAlarmNotification(this, alarm)
                     }
                     STATE_MISSED -> {
-                        setupChronometer(alarm.endTime)
-                        button_snooze_timer.visibility = View.VISIBLE
-                        button_remove_timer.visibility = View.VISIBLE
-                        fab_start_timer.visibility = View.VISIBLE
-                        fab_start_timer.setImageResource(R.drawable.ic_restart_black_24dp)
+                        hideSettings()
+                        displayChronometer()
                     }
                 }
             } else {
-                fab_start_timer.setImageResource(R.drawable.ic_alarm_blue_24dp)
-                fab_start_timer.visibility = View.VISIBLE
-                button_remove_timer.visibility = View.INVISIBLE
-                button_snooze_timer.visibility = View.INVISIBLE
-                chronometer_main.visibility = View.INVISIBLE
+                displaySettings()
+                hideChronometer()
+                clearAllNotifications(this)
             }
         })
 
@@ -98,52 +87,86 @@ class TimerActivity : AppCompatActivity() {
         toolbar.title = "Timer control"
         setSupportActionBar(toolbar)
 
-        /* Setting up OnClick listeners */
-        fab_start_timer.setOnLongClickListener { v ->
-            Klaxon.vibrateOnce(this)
-            restartAlarm()
-            Snackbar.make(v, "Started new timer!", Snackbar.LENGTH_LONG).show()
-            true
-        }
-
-        button_remove_timer.setOnLongClickListener { v ->
-            Klaxon.vibrateOnce(this)
-            sleep(v)
-            true
-        }
-
-        button_snooze_timer.setOnClickListener { v -> snooze(v) }
-
     }
 
-    private fun setupChronometer(endTime: Date) {
-        val timeDelta = endTime.time - System.currentTimeMillis()
-        chronometer_main.base = SystemClock.elapsedRealtime() + timeDelta
-        chronometer_main.start()
-        chronometer_main.visibility = View.VISIBLE
+    override fun onControllerEvent(v: View, event: String) {
+        when (event) {
+            ACTION_RESTART_ALARM -> {
+                restartAlarm()
+                showSnackBar(R.string.snackbar_alarm_created)
+            }
+            ACTION_SNOOZE_ALARM -> {
+                snooze()
+                showSnackBar(R.string.snackbar_alarm_snoozed)
+            }
+            ACTION_SLEEP -> {
+                sleep()
+                showSnackBar(R.string.snackbar_alarm_cancelled)
+            }
+        }
+    }
+
+    private fun displaySettings() {
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+        transaction.replace(R.id.settings_fragment_container, CustomTimerSettingsFragment())
+        transaction.commit()
+    }
+
+    private fun hideSettings() {
+        supportFragmentManager.findFragmentById(R.id.settings_fragment_container)?.let { fragment ->
+            val transaction = supportFragmentManager.beginTransaction()
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+            transaction.remove(fragment)
+            transaction.commit()
+        }
+    }
+
+    private fun displayChronometer() {
+        if (!chronometerVisible) {
+            val chronometerFragment = ChronometerFragment()
+            val transaction = supportFragmentManager.beginTransaction()
+            transaction.setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_top)
+            transaction.replace(R.id.fragment_container, chronometerFragment)
+            transaction.commit()
+            chronometerVisible = true
+        }
+    }
+
+    private fun hideChronometer() {
+        if (chronometerVisible) {
+            val chronometerFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+            if (chronometerFragment != null) {
+                val transaction = supportFragmentManager.beginTransaction()
+                transaction.setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_top)
+                transaction.remove(chronometerFragment)
+                transaction.commit()
+            }
+            chronometerVisible = false
+        }
     }
 
     private fun restartAlarm() {
         AlarmBroadcasts.broadcastAlarmHandled(this)
         viewModel.kill() /* Kill any running alarms. */
-        setupChronometer(TimerUtils.startMainTimer(this))
+        TimerUtils.startMainTimer(this)
+        displayChronometer()
     }
 
-    private fun sleep(v: View) {
+    private fun sleep() {
         AlarmBroadcasts.broadcastAlarmHandled(this)
         viewModel.sleep() /* Delete or kill any running alarm */
         currentAlarm?.let {
             TimerUtils.cancelAlarm(this, it.id)
+            hideChronometer()
             Log.d(TAG, "Sleep mode engaged...")
-            Snackbar.make(v, "Goodnight", Snackbar.LENGTH_LONG).show()
         }
     }
 
-    private fun snooze(v: View) {
+    private fun snooze() {
         AlarmBroadcasts.broadcastAlarmHandled(this)
-        currentAlarm?.let {alarm ->
-            setupChronometer(TimerUtils.startSnoozeTimer(this, alarm))
-            Snackbar.make(v, "You are only postponing the inevitable...", Snackbar.LENGTH_LONG).show()
+        currentAlarm?.let { alarm ->
+            TimerUtils.startSnoozeTimer(this, alarm)
         }
     }
 
@@ -152,17 +175,9 @@ class TimerActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (viewModel.hasAlarm) {
-            chronometer_main.start()
-        }
-    }
-
     override fun onPause() {
         super.onPause()
-        chronometer_main.stop()
-        Log.d(TAG, "Application paused, chronometer stopped")
+        Log.d(TAG, "Application paused, chronometer stopped.")
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -188,5 +203,14 @@ class TimerActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "TimerActivity"
+        const val STATE_CHECKED = "customTimerChecked"
+    }
+
+    private fun showSnackBar(message_id: Int) {
+        val message = resources.getString(message_id)
+        Snackbar.make(main_activity, message, Snackbar.LENGTH_LONG).run {
+            view.setBackgroundColor(getColor(R.color.colorPrimary))
+            show()
+        }
     }
 }

@@ -14,6 +14,10 @@
     <string name="pref_timer_length_key">timer_length</string>
     <string name="pref_timer_length">Timer length</string>
 
+    <string name="pref_custom_timer_length_key">custom_timer</string>
+    <string name="pref_custom_timer_length">Custom timer length</string>
+    <string name="pref_custom_timer_enabled_key">custom_timer_enabled</string>
+
     <string name="pref_snooze_length_key">snooze_length</string>
     <string name="pref_snooze_length">Snoozing length</string>
 
@@ -22,11 +26,17 @@
     <string name="waiting_notification_channel_name">Waiting Alarms</string>
     <string name="active_notification_channel_name">Active Alarms</string>
 
-    <string name="snoozing_notification_text">The drug timer is snoozing.</string>
-    <string name="waiting_notification_text">The drug timer is running.</string>
-    <string name="active_notification_text">Time for drugs!</string>
-    <string name="viewholder_no_alarms">No Alarms</string>
-    <string name="missed_notification_text">Oh no! The Alarm was missed, this is not good.</string>
+    <string name="snoozing_notification_text">Drug timer snoozing.</string>
+    <string name="waiting_notification_text">Drug timer running.</string>
+    <string name="active_notification_text">Drug timer expired. Time for drugs.</string>
+    <string name="viewholder_no_alarms">No alarms</string>
+    <string name="missed_notification_text">Alarm missed.</string>
+
+    <string name="snackbar_alarm_cancelled">Timer cancelled. Goodnight.</string>
+    <string name="snackbar_alarm_created">Timer started.</string>
+    <string name="snackbar_alarm_snoozed">Timer snoozed.</string>
+    <string name="restart">Restart</string>
+    <string name="start">Start</string>
 
 
 </resources>

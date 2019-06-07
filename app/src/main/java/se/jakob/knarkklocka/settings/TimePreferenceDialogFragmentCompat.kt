@@ -17,12 +17,12 @@ class TimePreferenceDialogFragmentCompat : PreferenceDialogFragmentCompat() {
         if (preference is TimerLengthPreference) {
             hourPicker = view.findViewById(R.id.np_hours)
             minutePicker = view.findViewById(R.id.np_minutes)
-            hourPicker.maxValue = 100
+            hourPicker.maxValue = 24
             hourPicker.minValue = 0
             minutePicker.maxValue = 59
             minutePicker.minValue = 0
-            hourPicker.wrapSelectorWheel = false
-            minutePicker.wrapSelectorWheel = false
+            hourPicker.wrapSelectorWheel = true
+            minutePicker.wrapSelectorWheel = true
             hourPicker.value = preference.wholeHours
             minutePicker.value = preference.wholeMinutes
         }

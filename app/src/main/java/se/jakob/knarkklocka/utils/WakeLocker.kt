@@ -20,7 +20,7 @@ object WakeLocker {
                 acquire(10 * MINUTE_IN_MILLIS)
                 locked = true
                 if (BuildConfig.DEBUG) {
-                    Log.d(TAG, "Acquired WakeLock")
+                    Log.d(TAG, "Acquired WakeLock.")
                 }
             }
         }
@@ -36,7 +36,7 @@ object WakeLocker {
                 Log.e(TAG, e.message)
             }
             if (BuildConfig.DEBUG) {
-                Log.d(TAG, "Released WakeLock")
+                Log.d(TAG, "Released WakeLock.")
             }
         }
     }

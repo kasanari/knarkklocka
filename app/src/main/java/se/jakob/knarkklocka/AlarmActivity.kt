@@ -16,28 +16,30 @@ import android.text.format.DateUtils.SECOND_IN_MILLIS
 import android.util.Log
 import android.view.View
 import android.view.WindowManager.LayoutParams.*
-import android.widget.Chronometer
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_alarm.*
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmState
-import se.jakob.knarkklocka.utils.InjectorUtils
-import se.jakob.knarkklocka.utils.TimerUtils
+import se.jakob.knarkklocka.ui.ControllerFragment
+import se.jakob.knarkklocka.utils.*
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID
-import se.jakob.knarkklocka.utils.WakeLocker
 import se.jakob.knarkklocka.viewmodels.AlarmActivityViewModel
 
 
-class AlarmActivity : AppCompatActivity() {
+class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventListener {
 
     private lateinit var viewModel: AlarmActivityViewModel
 
     private var alarmIsActive = false
     private var alarmIsHandled = false
     private var mServiceBound: Boolean = false
+
+    // Animation
+    private lateinit var animBlink : Animation
 
     private val timeoutLength = 5 * MINUTE_IN_MILLIS
 
@@ -87,6 +89,13 @@ class AlarmActivity : AppCompatActivity() {
         /*Hide navigation and status bar*/
         hideUIElements()
 
+        /*Get the ID of the Alarm that is going off*/
+        val id = intent.getLongExtra(EXTRA_ALARM_ID, -1)
+
+        /*Setup ViewModel and Observer*/
+        val factory = InjectorUtils.provideAlarmActivityViewModelFactory(this, id)
+        viewModel = ViewModelProviders.of(this, factory).get(AlarmActivityViewModel::class.java)
+
         setContentView(R.layout.activity_alarm)
 
         /* Close dialogs and window shade, so this is fully visible */
@@ -101,33 +110,11 @@ class AlarmActivity : AppCompatActivity() {
             button_miss_alarm.visibility = View.INVISIBLE
         }
 
-        button_snooze_alarm.setOnClickListener {
-            alarmIsHandled = true
-            if (alarmIsActive) {
-                snooze()
-            } else {
-                finish()
-            }
-        }
-        button_dismiss_alarm.setOnLongClickListener {
-            alarmIsHandled = true
-            if (alarmIsActive) {
-                dismiss()
-            } else {
-                finish()
-            }
-            true
-        }
 
         /*Start timeout timer, so that alarm is not going off forever */
         startTimeoutClock()
 
-        /*Get the ID of the Alarm that is going off*/
-        val id = intent.getLongExtra(EXTRA_ALARM_ID, -1)
 
-        /*Setup ViewModel and Observer*/
-        val factory = InjectorUtils.provideAlarmActivityViewModelFactory(this, id)
-        viewModel = ViewModelProviders.of(this, factory).get(AlarmActivityViewModel::class.java)
 
         viewModel.liveAlarm.observe(this, Observer {alarm : Alarm? ->
             if (alarm != null) {
@@ -142,24 +129,51 @@ class AlarmActivity : AppCompatActivity() {
             }
         })
 
+        // load the animation
+        animBlink = AnimationUtils.loadAnimation(this,
+                R.anim.blink)
+
+        // set animation listener
+        //animBlink.setAnimationListener(this)
+
+        tv_alarm_text.startAnimation(animBlink)
+
+    }
+
+    override fun onControllerEvent(v: View, event: String) {
+        when (event) {
+            ACTION_RESTART_ALARM -> {
+                alarmIsHandled = true
+                if (alarmIsActive) {
+                    dismiss()
+                } else {
+                    finish()
+                }
+            }
+            ACTION_SNOOZE_ALARM -> {
+                alarmIsHandled = true
+                if (alarmIsActive) {
+                    snooze()
+                } else {
+                    finish()
+                }
+            }
+            ACTION_SLEEP -> {
+                alarmIsHandled = true
+                if (alarmIsActive) {
+                    sleep()
+                } else {
+                    finish()
+                }
+            }
+        }
     }
 
     private fun setupChronometer(alarm: Alarm) {
         alarm_chronometer.visibility = View.VISIBLE
-        tv_alarm_text.visibility = View.VISIBLE
         val endTime = alarm.endTime
         val timeDelta = endTime.time - System.currentTimeMillis()
         alarm_chronometer.base = SystemClock.elapsedRealtime() + timeDelta
-        alarm_chronometer.onChronometerTickListener = Chronometer.OnChronometerTickListener {
-            val onColor = ContextCompat.getColor(application, R.color.colorAccent)
-            val offColor = ContextCompat.getColor(application, android.R.color.darker_gray)
-            val currentColor = tv_alarm_text.currentTextColor
-            if (currentColor == onColor) {
-                tv_alarm_text.setTextColor(offColor)
-            } else {
-                tv_alarm_text.setTextColor(onColor)
-            }
-        }
         alarm_chronometer.start()
     }
 
@@ -182,8 +196,16 @@ class AlarmActivity : AppCompatActivity() {
     }
 
     private fun dismiss() {
-        viewModel.kill()
-        TimerUtils.startMainTimer(this)
+        viewModel.kill() /* Kill old timer */
+        TimerUtils.startMainTimer(this) /* Start a new timer */
+        finish()
+    }
+
+    private fun sleep() {
+        viewModel.getCurrentAlarm()?.let { alarm ->
+            TimerUtils.cancelAlarm(this, alarm.id) /* Cancel alarm in AlarmManager */
+        }
+        viewModel.sleep() /* Update alarm in DB */
         finish()
     }
 
