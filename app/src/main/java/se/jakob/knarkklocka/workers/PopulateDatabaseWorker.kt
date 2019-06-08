@@ -22,6 +22,6 @@ class PopulateDatabaseWorker(context: Context, workerParams: WorkerParameters) :
         database.alarmDao().insert(alarm)
         alarm = Alarm(AlarmState.STATE_DEAD, Date(600), Date(600))
         database.alarmDao().insert(alarm)
-        return Result.SUCCESS
+        return Result.success()
     }
 }
