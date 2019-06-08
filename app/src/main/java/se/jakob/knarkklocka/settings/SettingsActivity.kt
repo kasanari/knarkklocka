@@ -56,7 +56,7 @@ class SettingsActivity : AppCompatActivity() {
             // If it was one of our custom Preferences, show its dialog
             if (dialogFragment != null) {
                 dialogFragment.setTargetFragment(this, 0)
-                dialogFragment.show(this.fragmentManager,
+                dialogFragment.show(this.fragmentManager!!,
                         "androidx.preference" + ".PreferenceFragment.DIALOG")
             } else {
                 super.onDisplayPreferenceDialog(preference) // Could not be handled here. Try with the super method.

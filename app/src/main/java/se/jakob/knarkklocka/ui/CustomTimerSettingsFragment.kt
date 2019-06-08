@@ -17,8 +17,8 @@ class CustomTimerSettingsFragment : PreferenceFragmentCompat(), SharedPreference
     override fun onCreatePreferences(p0: Bundle?, p1: String?) {
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.custom_preferences)
-        val switcher = preferenceScreen.findPreference("custom_timer_enabled") as SwitchPreferenceCompat
-        preferenceScreen.findPreference("custom_timer").isVisible = switcher.isChecked
+        val switcher = (preferenceScreen.findPreference<SwitchPreferenceCompat>("custom_timer_enabled"))
+        preferenceScreen.findPreference<TimerLengthPreference>("custom_timer")?.isVisible = switcher?.isChecked ?: false
     }
 
 
@@ -34,7 +34,7 @@ class CustomTimerSettingsFragment : PreferenceFragmentCompat(), SharedPreference
         // If it was one of our custom Preferences, show its dialog
         if (dialogFragment != null) {
             dialogFragment.setTargetFragment(this, 0)
-            dialogFragment.show(this.fragmentManager,
+            dialogFragment.show(this.fragmentManager!!,
                     "androidx.preference" + ".PreferenceFragment.DIALOG")
         } else {
             super.onDisplayPreferenceDialog(preference) // Could not be handled here. Try with the super method.
@@ -55,9 +55,9 @@ class CustomTimerSettingsFragment : PreferenceFragmentCompat(), SharedPreference
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if ((key ?: false) == "custom_timer_enabled") {
-            val switcher = preferenceScreen.findPreference("custom_timer_enabled") as SwitchPreferenceCompat
-            switcher.isChecked = sharedPreferences?.getBoolean(key, false)!!
-            preferenceScreen.findPreference("custom_timer").isVisible = switcher.isChecked
+            val switcher = preferenceScreen.findPreference<SwitchPreferenceCompat>("custom_timer_enabled")
+            switcher?.isChecked = sharedPreferences?.getBoolean(key, false) ?: false
+            preferenceScreen.findPreference<TimerLengthPreference>("custom_timer")?.isVisible = switcher?.isChecked ?: false
         }
     }
 }
