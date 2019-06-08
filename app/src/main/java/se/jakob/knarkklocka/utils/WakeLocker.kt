@@ -11,6 +11,9 @@ object WakeLocker {
     private lateinit var wakeLock: PowerManager.WakeLock
     private var locked = false
 
+    /**
+     * Acquire a wakelock, turning on the screen and keeping the device awake.
+     */
     fun acquire(context: Context) {
         if (locked) {
             wakeLock.release()
@@ -26,13 +29,15 @@ object WakeLocker {
         }
     }
 
+    /**
+     * Release the acquired wakelock.
+     */
     fun release() {
         if (locked) {
             try {
                 wakeLock.release()
                 locked = false
-            } catch (e: Exception) {
-                //probably already released
+            } catch (e: Exception) { // If there is an exception here, the wakelock was probably already released.
                 Log.e(TAG, e.message)
             }
             if (BuildConfig.DEBUG) {

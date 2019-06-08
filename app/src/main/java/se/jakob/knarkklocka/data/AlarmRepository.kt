@@ -84,6 +84,7 @@ class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
 
     /**
      * Update an alarm in the DB, and check for inconsistencies
+     * @param alarm The alarm that is to be updated.
      * **/
     suspend fun safeUpdate(alarm: Alarm): Boolean {
         when (alarm.state) {

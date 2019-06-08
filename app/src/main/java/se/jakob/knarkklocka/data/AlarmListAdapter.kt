@@ -1,4 +1,5 @@
 package se.jakob.knarkklocka.data
+
 import android.content.Context
 import android.content.res.Resources
 import android.view.LayoutInflater
@@ -15,10 +16,10 @@ class AlarmListAdapter(context: Context) : RecyclerView.Adapter<AlarmListAdapter
 
     private val mInflater: LayoutInflater = LayoutInflater.from(context)
     var mAlarms: List<Alarm>? = null // Cached copy of alarms
-    set(alarms) {
-        field = alarms
-        notifyDataSetChanged()
-    }
+        set(alarms) {
+            field = alarms
+            notifyDataSetChanged()
+        }
     private val res: Resources = context.resources
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlarmViewHolder {
@@ -52,8 +53,11 @@ class AlarmListAdapter(context: Context) : RecyclerView.Adapter<AlarmListAdapter
         }
     }
 
-    // getItemCount() is called many times, and when it is first called,
-    // mAlarms has not been updated (means initially, it's null, and we can't return null).
+
+    /**
+     * Get number of items in alarm list
+     * @return The number of alarms in the list. 0 if list is null.
+     */
     override fun getItemCount(): Int {
         return mAlarms?.size ?: 0
     }

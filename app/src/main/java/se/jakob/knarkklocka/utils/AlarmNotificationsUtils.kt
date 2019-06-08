@@ -39,6 +39,9 @@ object AlarmNotificationsUtils {
 
     private const val TAG = "AlarmNotificationsUtils"
 
+    /**
+     * Create all notification channels used by the app.
+     */
     fun setupChannels(context: Context) {
         setupNotificationChannel(context, ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID)
         setupNotificationChannel(context, ALARM_MISSED_NOTIFICATION_CHANNEL_ID)
@@ -46,6 +49,9 @@ object AlarmNotificationsUtils {
         setupNotificationChannel(context, ALARM_SNOOZING_NOTIFICATION_CHANNEL_ID)
     }
 
+    /**
+     * Remove all notification channels used by the app.
+     */
     fun removeAllChannels(context: Context) {
         removeChannel(context, ALARM_MISSED_NOTIFICATION_CHANNEL_ID)
         removeChannel(context, ALARM_WAITING_NOTIFICATION_CHANNEL_ID)
@@ -53,25 +59,38 @@ object AlarmNotificationsUtils {
         removeChannel(context, ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID)
     }
 
+    /**
+     * Remove a notification channel.
+     * @param id The ID of the channel to be removed.
+     */
     private fun removeChannel(context: Context, id: String) {
         (context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager).run {
             deleteNotificationChannel(id)
         }
     }
 
+    /**
+     * Generate a base notification, with settings common to all styles of notifications.
+     * @param channel_id The ID of the channel this notification belongs to.
+     * @return A [Notification.Builder] with common settings already applied.
+     */
     private fun baseNotification(context: Context, channel_id: String): Notification.Builder {
         return Notification.Builder(context, channel_id).apply {
-            setOngoing(true)
-            setAutoCancel(false)
-            setLocalOnly(true)
+            setOngoing(true) // Notifications should not be dismissible.
+            setAutoCancel(false) // Notifications should not be dismissed when touched.
+            setLocalOnly(true) // Notifications should not bridge to other devices.
             style = Notification.DecoratedCustomViewStyle()
-            setVisibility(Notification.VISIBILITY_PUBLIC)
+            setVisibility(Notification.VISIBILITY_PUBLIC) // Notification is fully visible on lock screen.
             setSmallIcon(R.drawable.ic_alarm_white_24dp)
             setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.pill))
             setColor(ContextCompat.getColor(context, R.color.colorAccent))
         }
     }
 
+    /**
+     * Set up notification channels used by the app.
+     * @param channel_id The ID of the channel to be created.
+     */
     private fun setupNotificationChannel(context: Context, channel_id: String) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -84,55 +103,71 @@ object AlarmNotificationsUtils {
                     null
                 }
             }
-            channel?.setSound(null, null)
+            channel?.setSound(null, null) // Notification should be silent.
             notificationManager.createNotificationChannel(channel!!)
         }
     }
 
+    /**
+     * Get the notification channel used for notifications when an alarm is firing.
+     * @return The [NotificationChannel] used to indicate an [Alarm] has reached its end time.
+     */
     private fun getActiveNotificationChannel(context: Context): NotificationChannel {
         return NotificationChannel(
                 ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID,
                 context.getString(R.string.active_notification_channel_name),
                 NotificationManager.IMPORTANCE_HIGH).apply {
-            enableLights(true)
-            setBypassDnd(true)
-            setShowBadge(false)
+            enableLights(true) // Notification should make the notification light turn on.
+            setBypassDnd(true) // Notifications should bypass Do Not Disturb mode.
+            setShowBadge(false) // Notifications should not show application badges.
             lightColor = LIGHT_COLOR_RED
         }
     }
 
+    /**
+     * Get the notification channel used for notifications when an alarm has been snoozed.
+     * @return The [NotificationChannel] used to indicate an [Alarm] has reached its end time.
+     */
     private fun getSnoozeNotificationChannel(context: Context): NotificationChannel {
         return NotificationChannel(
                 ALARM_SNOOZING_NOTIFICATION_CHANNEL_ID,
                 context.getString(R.string.snoozing_notification_channel_name),
                 NotificationManager.IMPORTANCE_LOW).apply {
-            setBypassDnd(true)
-            setShowBadge(false)
-            enableLights(false)
+            setBypassDnd(true) // Notifications should bypass Do Not Disturb mode.
+            setShowBadge(false) // Notifications should not show application badges.
+            enableLights(false) // Notifications wont make the notification light turn on.
             lightColor = LIGHT_COLOR_BLUE
         }
     }
 
+    /**
+     * Get the notification channel used for notifications when an alarm has been missed.
+     * @return The [NotificationChannel] used to indicate an [Alarm] has been missed.
+     */
     private fun getMissedNotificationChannel(context: Context): NotificationChannel {
         return NotificationChannel(
                 ALARM_MISSED_NOTIFICATION_CHANNEL_ID,
                 context.getString(R.string.snoozing_notification_channel_name),
                 NotificationManager.IMPORTANCE_HIGH).apply {
-            setBypassDnd(true)
-            setShowBadge(false)
-            enableLights(true)
+            setBypassDnd(true) // Notifications should bypass Do Not Disturb mode.
+            setShowBadge(false) // Notifications should not show application badges.
+            enableLights(true) // Notification should make the notification light turn on.
             lightColor = LIGHT_COLOR_RED
         }
     }
 
+    /**
+     * Get the notification channel used for notifications while an alarm is running in the background.
+     * @return The [NotificationChannel] used to indicate an [Alarm] is waiting for its end time.
+     */
     private fun getWaitingNotificationChannel(context: Context): NotificationChannel {
         return NotificationChannel(
                 ALARM_WAITING_NOTIFICATION_CHANNEL_ID,
                 context.getString(R.string.waiting_notification_channel_name),
                 NotificationManager.IMPORTANCE_LOW).apply {
-            setBypassDnd(true)
-            setShowBadge(false)
-            enableLights(false)
+            setBypassDnd(true) // Notifications should bypass Do Not Disturb mode.
+            setShowBadge(false) // Notifications should not show application badges.
+            enableLights(false) // Notification wont make the notification light turn on.
         }
     }
 
