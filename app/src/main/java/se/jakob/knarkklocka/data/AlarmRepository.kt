@@ -1,7 +1,7 @@
 package se.jakob.knarkklocka.data
 
 import androidx.lifecycle.LiveData
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.withContext
 import se.jakob.knarkklocka.BuildConfig
 
@@ -18,7 +18,7 @@ class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
         }
 
     suspend fun getAlarmByID(id: Long): Alarm? {
-        return withContext(Dispatchers.IO) { alarmDao.getAlarm(id) }
+        return withContext(IO) { alarmDao.getAlarm(id) }
     }
 
     internal fun getLiveAlarmsByStates(vararg states: AlarmState): LiveData<List<Alarm>> {
@@ -34,29 +34,29 @@ class AlarmRepository private constructor(private val alarmDao: AlarmDao) {
     }
 
     suspend fun deleteAll() {
-        withContext(Dispatchers.IO) {
+        withContext(IO) {
             alarmDao.deleteAll()
         }
     }
 
     private suspend fun ensureUnique(state: AlarmState) {
-        withContext(Dispatchers.IO) {
+        withContext(IO) {
             alarmDao.deleteAlarmsByStates(Converters().fromAlarmState(state))
         }
     }
 
     internal suspend fun insert(alarm: Alarm): Long {
-        return withContext(Dispatchers.IO) { alarmDao.insert(alarm) }
+        return withContext(IO) { alarmDao.insert(alarm) }
     }
 
     private suspend fun delete(alarm: Alarm) {
-        withContext(Dispatchers.IO) {
+        withContext(IO) {
             alarmDao.deleteAlarm(alarm)
         }
     }
 
     private suspend fun update(alarm: Alarm) {
-        withContext(Dispatchers.IO) {
+        withContext(IO) {
             alarmDao.updateAlarm(alarm)
         }
     }
