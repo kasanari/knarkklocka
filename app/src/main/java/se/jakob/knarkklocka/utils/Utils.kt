@@ -10,6 +10,7 @@ object Utils {
 
     private const val TAG = "Utils"
 
+    /** Return an attribution with a random emoji **/
     val creditsString: String
         get() {
             val emoji = arrayOf("❤️", "🍷", "🔥", "🖥️", "☠️", "☕", "🌼", "👨‍💻", "🧠", """💖""")
@@ -17,6 +18,7 @@ object Utils {
             return String.format(Locale.getDefault(), "Made with %s by Jakob Nyberg", emoji[number])
         }
 
+    /** Check if the app is ignoring battery optimization **/
     fun checkIfWhiteListed(context: Context) {
         val isWhiteListed = (context.getSystemService(Context.POWER_SERVICE) as PowerManager).isIgnoringBatteryOptimizations(BuildConfig.APPLICATION_ID)
         if (isWhiteListed) {

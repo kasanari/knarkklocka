@@ -4,6 +4,8 @@ import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmRepository
 import java.util.*
 
+/** This object provides functions to change the states of Alarms in a consistent way,
+ * ensuring that the database is updated. **/
 object AlarmStateChanger {
 
     suspend fun sleep(alarm: Alarm, repository: AlarmRepository) : Boolean {

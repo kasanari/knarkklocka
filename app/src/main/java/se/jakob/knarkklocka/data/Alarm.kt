@@ -56,6 +56,9 @@ data class Alarm constructor(
             }
         }
 
+    /** Set an Alarm's state to active, indicating that the end time has been reached and it should be handled.
+     *  Dead or already active alarms cannot be activated.
+     *  **/
     fun activate() {
         if (dead or active) {
             if (BuildConfig.DEBUG) {
@@ -66,6 +69,11 @@ data class Alarm constructor(
         }
     }
 
+    /** Set an Alarm's state to snoozing and update its end time. Will also increment the number of times
+     * the alarm has been snoozed.
+     * Only active and missed alarms can be snoozed.
+     * @param newEndTime The new end time for the alarm
+     * **/
     fun snooze(newEndTime: Date) {
         if (!(active or missed)) {
             if (BuildConfig.DEBUG) {
@@ -78,11 +86,20 @@ data class Alarm constructor(
         }
     }
 
+    /**
+     * Kill an alarm. This means that its state will be set to dead and its end time will be the current time.
+     * Used for alarms that have been active at least once and that are to be saved in the history.
+     **/
     fun kill() {
         this.endTime = Calendar.getInstance().time
         this.state = AlarmState.STATE_DEAD
     }
 
+
+    /**
+     * Set and alarm to be missed. Missing an alarm means that the Alarm was not handled when it was active.
+     *
+     */
     fun miss() {
         if (!(active or snoozing)) {
             if (BuildConfig.DEBUG) {
@@ -93,6 +110,7 @@ data class Alarm constructor(
         }
     }
 
+    /** Increment the number of snoozes of an [Alarm] **/
     private fun incrementSnoozeCount() {
         this.snoozes += 1
     }
@@ -102,6 +120,7 @@ data class Alarm constructor(
                 id, startTime.toString(), endTime.toString(), stateToString)
     }
 
+    /** Exception to signal that an illegal state change was attempted. **/
     class InvalidStateChangeException(message:String) : Exception(message)
 }
 

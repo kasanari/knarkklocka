@@ -38,11 +38,11 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         super.onCreate(savedInstanceState)
         setContentView(R.layout.timer_main)
 
-        AlarmNotificationsUtils.setupChannels(this)
+        AlarmNotificationsUtils.setupChannels(this) // Create notification channels
 
-        Utils.checkIfWhiteListed(this)
+        Utils.checkIfWhiteListed(this) // Check if the app is ignoring battery saving optimizations
 
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, true)
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, true) // Set the default preference values
 
         val factory = InjectorUtils.provideMainActivityViewModelFactory(this)
         viewModel = ViewModelProviders.of(this, factory).get(MainActivityViewModel::class.java)
@@ -82,13 +82,14 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
             }
         })
 
-        /* Setting up Toolbar instead of ActionBar */
+        /* Setting up a Toolbar instead of ActionBar */
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         toolbar.title = "Timer control"
         setSupportActionBar(toolbar)
 
     }
 
+    /** Callback function for the [ControllerFragment] **/
     override fun onControllerEvent(v: View, event: String) {
         when (event) {
             ACTION_RESTART_ALARM -> {
@@ -106,6 +107,7 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         }
     }
 
+    /** Show the settings for creating a custom timer **/
     private fun displaySettings() {
         val transaction = supportFragmentManager.beginTransaction()
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
@@ -113,6 +115,7 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         transaction.commit()
     }
 
+    /** Hide the settings for creating a custom timer **/
     private fun hideSettings() {
         supportFragmentManager.findFragmentById(R.id.settings_fragment_container)?.let { fragment ->
             val transaction = supportFragmentManager.beginTransaction()
@@ -122,6 +125,7 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         }
     }
 
+    /** Display the countdown timer at the top of the screen **/
     private fun displayChronometer() {
         if (!chronometerVisible) {
             val chronometerFragment = ChronometerFragment()
@@ -133,6 +137,7 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         }
     }
 
+    /** Hide the countdown timer at the top of the screen **/
     private fun hideChronometer() {
         if (chronometerVisible) {
             val chronometerFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
@@ -146,6 +151,7 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         }
     }
 
+    /** Kill the current alarm and create a new one **/
     private fun restartAlarm() {
         AlarmBroadcasts.broadcastAlarmHandled(this)
         viewModel.kill() /* Kill any running alarms. */
@@ -153,6 +159,7 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         displayChronometer()
     }
 
+    /** Kill the current alarm **/
     private fun sleep() {
         AlarmBroadcasts.broadcastAlarmHandled(this)
         viewModel.sleep() /* Delete or kill any running alarm */
@@ -163,6 +170,7 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         }
     }
 
+    /** Snooze the current alarm; that is, add the current snooze interval to the current alarm **/
     private fun snooze() {
         AlarmBroadcasts.broadcastAlarmHandled(this)
         currentAlarm?.let { alarm ->
