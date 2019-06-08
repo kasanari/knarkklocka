@@ -210,7 +210,7 @@ class AlarmService : LifecycleService() {
         WakeLocker.release()
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
+    override fun onBind(intent: Intent): IBinder? {
         super.onBind(intent)
         isBound = true
         return binder
