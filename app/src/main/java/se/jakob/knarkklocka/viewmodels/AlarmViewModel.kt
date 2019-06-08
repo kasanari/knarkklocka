@@ -4,8 +4,7 @@ package se.jakob.knarkklocka.viewmodels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import se.jakob.knarkklocka.BuildConfig
@@ -20,21 +19,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
 
     abstract var liveAlarm: LiveData<Alarm>
 
-    /**
-     * This is the job for all coroutines started by this ViewModel.
-     *
-     * Cancelling this job will cancel all coroutines started by this ViewModel.
-     */
-    private val viewModelJob = Job()
     private val df = SimpleDateFormat("HH:mm", Locale.getDefault())
-
-    /**
-     * This is the main scope for all coroutines launched by MainViewModel.
-     *
-     * Since we pass viewModelJob, you can cancel all coroutines launched by uiScope by calling
-     * viewModelJob.cancel()
-     */
-    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
    val hasAlarm: Boolean
         get() = liveAlarm.value != null
@@ -73,7 +58,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
     }
 
     internal fun deleteAll() {
-        launchDataLoad {
+        launchCoroutine {
             repository.deleteAll()
         }
     }
@@ -81,7 +66,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
     fun sleep() {
         var success: Boolean
         getData { alarm: Alarm ->
-            launchDataLoad {
+            launchCoroutine {
                 success = AlarmStateChanger.sleep(alarm, repository)
                 if (!success) {
                     if (BuildConfig.DEBUG) {
@@ -94,7 +79,7 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
 
     fun kill() {
         getData { alarm: Alarm ->
-            launchDataLoad {
+            launchCoroutine {
                 if (!alarm.dead) {
                     AlarmStateChanger.kill(alarm, repository)
                 }
@@ -104,39 +89,22 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
 
     fun miss() {
         getData { alarm: Alarm ->
-            launchDataLoad {
+            launchCoroutine {
                 AlarmStateChanger.miss(alarm, repository)
             }
         }
     }
 
-    fun snooze(endTime: Date) = {
+    fun snooze(endTime: Date) = run {
         getData { alarm: Alarm ->
-            launchDataLoad {
+            launchCoroutine {
                 AlarmStateChanger.snooze(alarm, endTime, repository)
             }
         }
     }
 
-    /**
-     * Cancel all coroutines when the ViewModel is cleared
-     */
-    override fun onCleared() {
-        super.onCleared()
-        viewModelJob.cancel()
-    }
-
-    /**
-     * Helper function to call a data load function with a loading spinner, errors will trigger a
-     * snackbar.
-     *
-     * By marking `block` as `suspend` this creates a suspend lambda which can call suspend
-     * functions.
-     *
-     * @param block lambda to actually load data. It is called in the uiScope.
-     */
-    private fun launchDataLoad(block: suspend () -> Unit): Job {
-        return uiScope.launch {
+    private fun launchCoroutine(block: suspend () -> Unit): Job {
+        return viewModelScope.launch {
             block()
         }
     }

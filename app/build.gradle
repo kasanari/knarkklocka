@@ -91,26 +91,19 @@ dependencies {
     // Test helpers
     testImplementation "androidx.room:room-testing:$rootProject.roomVersion"
 
-    // Lifecycle
+    //////////// Lifecycle Dependencies ////////////
 
     // ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-livedata:$rootProject.lifecycleVersion"
-
-    // alternatively - Lifecycles only (no ViewModel or LiveData). Some UI
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0-alpha01"
 
     // AndroidX libraries use this lightweight import for Lifecycle
     implementation "androidx.lifecycle:lifecycle-runtime:$rootProject.lifecycleVersion"
     kapt "androidx.lifecycle:lifecycle-compiler:$rootProject.lifecycleVersion"
 
-    // use kapt for Kotlin
-
-    // optional - Test helpers for LiveData
-    testImplementation "androidx.arch.core:core-testing:$rootProject.lifecycleVersion"
-
     // WorkManager
     implementation("android.arch.work:work-runtime-ktx:$rootProject.workVersion") {
-        // use -ktx for Kotlin
         exclude group: 'com.google.guava', module: 'listenablefuture'
     }
 
@@ -123,11 +116,7 @@ dependencies {
 
     // Navigation
     implementation "android.arch.navigation:navigation-fragment-ktx:$rootProject.navigationVersion"
-
-    // use -ktx for Kotlin
     implementation "android.arch.navigation:navigation-ui-ktx:$rootProject.navigationVersion"
-
-    // use -ktx for Kotlin
 }
 
 task ktlint(type: JavaExec, group: "verification") {
