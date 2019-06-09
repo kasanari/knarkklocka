@@ -117,6 +117,9 @@ dependencies {
     // Navigation
     implementation "android.arch.navigation:navigation-fragment-ktx:$rootProject.navigationVersion"
     implementation "android.arch.navigation:navigation-ui-ktx:$rootProject.navigationVersion"
+    implementation 'androidx.fragment:fragment-ktx:1.1.0-beta01'
+
+
 }
 
 task ktlint(type: JavaExec, group: "verification") {

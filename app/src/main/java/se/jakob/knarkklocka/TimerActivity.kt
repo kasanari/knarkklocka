@@ -9,6 +9,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.FragmentTransaction
+import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.preference.PreferenceManager
@@ -109,19 +110,19 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
 
     /** Show the settings for creating a custom timer **/
     private fun displaySettings() {
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-        transaction.replace(R.id.settings_fragment_container, CustomTimerSettingsFragment())
-        transaction.commit()
+        supportFragmentManager.commit {
+            setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+            replace(R.id.settings_fragment_container, CustomTimerSettingsFragment())
+        }
     }
 
     /** Hide the settings for creating a custom timer **/
     private fun hideSettings() {
         supportFragmentManager.findFragmentById(R.id.settings_fragment_container)?.let { fragment ->
-            val transaction = supportFragmentManager.beginTransaction()
-            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-            transaction.remove(fragment)
-            transaction.commit()
+            supportFragmentManager.commit {
+                setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                remove(fragment)
+            }
         }
     }
 
@@ -129,10 +130,10 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
     private fun displayChronometer() {
         if (!chronometerVisible) {
             val chronometerFragment = ChronometerFragment()
-            val transaction = supportFragmentManager.beginTransaction()
-            transaction.setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_top)
-            transaction.replace(R.id.fragment_container, chronometerFragment)
-            transaction.commit()
+            supportFragmentManager.commit {
+                setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_top)
+                replace(R.id.fragment_container, chronometerFragment)
+            }
             chronometerVisible = true
         }
     }
@@ -142,10 +143,10 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         if (chronometerVisible) {
             val chronometerFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
             if (chronometerFragment != null) {
-                val transaction = supportFragmentManager.beginTransaction()
-                transaction.setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_top)
-                transaction.remove(chronometerFragment)
-                transaction.commit()
+                supportFragmentManager.commit {
+                    setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_top)
+                    remove(chronometerFragment)
+                }
             }
             chronometerVisible = false
         }
