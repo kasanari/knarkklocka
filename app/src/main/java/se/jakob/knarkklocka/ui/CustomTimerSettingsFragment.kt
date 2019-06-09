@@ -18,27 +18,25 @@ class CustomTimerSettingsFragment : PreferenceFragmentCompat(), SharedPreference
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.custom_preferences)
         val switcher = (preferenceScreen.findPreference<SwitchPreferenceCompat>("custom_timer_enabled"))
-        preferenceScreen.findPreference<TimerLengthPreference>("custom_timer")?.isVisible = switcher?.isChecked ?: false
+        preferenceScreen.findPreference<TimerLengthPreference>("custom_timer")?.isVisible = switcher?.isChecked ?: false // Hide the length selector if the checkbox is not checked
     }
 
 
     override fun onDisplayPreferenceDialog(preference: Preference?) {
-        // Try if the preference is one of our custom Preferences
-        var dialogFragment: DialogFragment? = null
+            var dialogFragment: DialogFragment? = null
 
-        if (preference is TimerLengthPreference) {
-            // Create a new instance of TimePreferenceDialogFragment with the key of the related Preference
-            dialogFragment = TimePreferenceDialogFragmentCompat.getInstance(preference.getKey())
-        }
+            if (preference is TimerLengthPreference) { // Try if the preference is one of our custom Preferences
+                // Create a new instance of TimePreferenceDialogFragment with the key of the related Preference
+                dialogFragment = TimePreferenceDialogFragmentCompat.getInstance(preference.getKey())
+            }
 
-        // If it was one of our custom Preferences, show its dialog
-        if (dialogFragment != null) {
-            dialogFragment.setTargetFragment(this, 0)
-            dialogFragment.show(this.fragmentManager!!,
-                    "androidx.preference" + ".PreferenceFragment.DIALOG")
-        } else {
-            super.onDisplayPreferenceDialog(preference) // Could not be handled here. Try with the super method.
-        }
+            // If it was one of our custom Preferences, show its dialog
+            dialogFragment?.apply {
+                setTargetFragment(this, 0)
+                show(requireFragmentManager(),
+                        "androidx.preference" + ".PreferenceFragment.DIALOG")
+            } ?: super.onDisplayPreferenceDialog(preference) // Could not be handled here. Try with the super method.
+
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -56,8 +54,8 @@ class CustomTimerSettingsFragment : PreferenceFragmentCompat(), SharedPreference
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if ((key ?: false) == "custom_timer_enabled") {
             val switcher = preferenceScreen.findPreference<SwitchPreferenceCompat>("custom_timer_enabled")
-            switcher?.isChecked = sharedPreferences?.getBoolean(key, false) ?: false
-            preferenceScreen.findPreference<TimerLengthPreference>("custom_timer")?.isVisible = switcher?.isChecked ?: false
+            switcher?.isChecked = sharedPreferences?.getBoolean(key, false) ?: false // Change the checkbox to reflect current setting
+            preferenceScreen.findPreference<TimerLengthPreference>("custom_timer")?.isVisible = switcher?.isChecked ?: false // Hide the length selector if the checkbox is not checked
         }
     }
 }

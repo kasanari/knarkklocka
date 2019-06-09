@@ -45,22 +45,21 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         override fun onDisplayPreferenceDialog(preference: Preference?) {
-            // Try if the preference is one of our custom Preferences
-            var dialogFragment: DialogFragment? = null
+                // Try if the preference is one of our custom Preferences
+                var dialogFragment: DialogFragment? = null
 
-            if (preference is TimerLengthPreference) {
-                // Create a new instance of TimePreferenceDialogFragment with the key of the related Preference
-                dialogFragment = TimePreferenceDialogFragmentCompat.getInstance(preference.getKey())
-            }
+                if (preference is TimerLengthPreference) {
+                    // Create a new instance of TimePreferenceDialogFragment with the key of the related Preference
+                    dialogFragment = TimePreferenceDialogFragmentCompat.getInstance(preference.getKey())
+                }
 
-            // If it was one of our custom Preferences, show its dialog
-            if (dialogFragment != null) {
-                dialogFragment.setTargetFragment(this, 0)
-                dialogFragment.show(this.fragmentManager!!,
-                        "androidx.preference" + ".PreferenceFragment.DIALOG")
-            } else {
-                super.onDisplayPreferenceDialog(preference) // Could not be handled here. Try with the super method.
-            }
+                // If it was one of our custom Preferences, show its dialog
+                dialogFragment?.apply {
+                    setTargetFragment(this, 0)
+                    show(requireFragmentManager(),
+                            "androidx.preference" + ".PreferenceFragment.DIALOG")
+                } ?: super.onDisplayPreferenceDialog(preference) // Could not be handled here. Try with the super method.
+
         }
     }
 
