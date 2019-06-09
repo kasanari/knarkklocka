@@ -35,7 +35,7 @@ class AlarmService : LifecycleService() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
 
     private val timeoutLength = 5 * MINUTE_IN_MILLIS
-    private var timeoutRunning = false
+    private lateinit var timeOutClock: TimeOutClock
 
     private val alarmCallback = AlarmManager.OnAlarmListener {
         if (BuildConfig.DEBUG) {
@@ -72,6 +72,9 @@ class AlarmService : LifecycleService() {
         repository = InjectorUtils.getAlarmRepository(this)
         registerReceiver(actionsReceiver, filter)
         isRegistered = true
+
+        timeOutClock = TimeOutClock(timeoutLength, alarmCallback)
+
         Log.d(TAG, "AlarmService was created.")
     }
 
@@ -206,7 +209,7 @@ class AlarmService : LifecycleService() {
             isRegistered = false
         }
         serviceJob.cancel()
-        stopTimeout()
+        timeOutClock.stop(this)
         WakeLocker.release()
     }
 
@@ -225,32 +228,11 @@ class AlarmService : LifecycleService() {
                     AlarmStateChanger.miss(alarm, repository)
                 }
             }
-            if (BuildConfig.DEBUG) {
-                startTimeout(10000)
-            } else {
-                startTimeout(timeoutLength)
-            }
+            timeOutClock.start(this)
         }
         return super.onUnbind(intent)
     }
 
-    private fun startTimeout(length: Long) {
-        if (!timeoutRunning) {
-            getSystemService(AlarmManager::class.java).run {
-                setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + length, "tag", alarmCallback, null)
-                timeoutRunning = true
-            }
-        }
-    }
-
-    private fun stopTimeout() {
-        if (timeoutRunning) {
-            getSystemService(AlarmManager::class.java).run {
-                cancel(alarmCallback)
-                timeoutRunning = false
-            }
-        }
-    }
 
     companion object {
         private const val TAG = "AlarmService"
