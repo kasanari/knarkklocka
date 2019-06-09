@@ -38,6 +38,8 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
     private var alarmIsHandled = false
     private var mServiceBound: Boolean = false
 
+    private lateinit var timeOutClock: TimeOutClock
+
     // Animation
     private lateinit var animBlink : Animation
 
@@ -112,7 +114,8 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
 
 
         /*Start timeout timer, so that alarm is not going off forever */
-        startTimeoutClock()
+        timeOutClock = TimeOutClock(timeoutLength, alarmCallback)
+        timeOutClock.start(this)
 
 
 
@@ -229,27 +232,12 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
     }
 
     private fun stopAlarm() {
-        stopTimeoutClock()
+        timeOutClock.stop(this)
         alarmIsActive = false
         viewModel.liveAlarm.removeObservers(this)
         AlarmBroadcasts.broadcastStopAlarm(this)
     }
 
-    private fun startTimeoutClock() {
-        val alarmManager = getSystemService(AlarmManager::class.java)
-        val timeout = if (BuildConfig.DEBUG) {
-            10 * SECOND_IN_MILLIS
-        } else {
-            timeoutLength
-        }
-
-        alarmManager.setExact(RTC_WAKEUP, System.currentTimeMillis() + timeout, "tag", alarmCallback, null)
-    }
-
-    private fun stopTimeoutClock() {
-        val alarmManager = getSystemService(AlarmManager::class.java)
-        alarmManager.cancel(alarmCallback)
-    }
 
     /**
      * Bind AlarmService if not yet bound.
