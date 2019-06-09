@@ -43,11 +43,9 @@ class ControllerFragment : Fragment() {
             viewModel = alarmViewModel
             lifecycleOwner = this@ControllerFragment
             buttonStartTimer.setOnClickListener { v ->
-                Klaxon.vibrateOnce(activity!!)
                 mListener?.onControllerEvent(v, ACTION_RESTART_ALARM)
             }
             buttonRemoveTimer.setOnClickListener { v ->
-                Klaxon.vibrateOnce(activity!!)
                 mListener?.onControllerEvent(v, ACTION_SLEEP)
             }
             buttonSnoozeTimer.setOnClickListener { v ->

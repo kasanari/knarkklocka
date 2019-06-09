@@ -92,6 +92,7 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
 
     /** Callback function for the [ControllerFragment] **/
     override fun onControllerEvent(v: View, event: String) {
+        Klaxon.vibrateOnce(this)
         when (event) {
             ACTION_RESTART_ALARM -> {
                 restartAlarm()
