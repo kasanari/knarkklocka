@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.fragment.app.activityViewModels
 import se.jakob.knarkklocka.R
 import se.jakob.knarkklocka.viewmodels.AlarmViewModel
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
@@ -18,7 +18,9 @@ import se.jakob.knarkklocka.viewmodels.AlarmActivityViewModel
 
 class ControllerFragment : Fragment() {
 
-    private lateinit var model: AlarmViewModel
+    private val alarmViewModel : MainActivityViewModel by activityViewModels {
+        InjectorUtils.provideMainActivityViewModelFactory(requireActivity())
+    }
 
     interface OnControllerEventListener {
         fun onControllerEvent(v: View, event: String)
@@ -35,18 +37,10 @@ class ControllerFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        if (requireActivity() is TimerActivity) {
-            val factory = InjectorUtils.provideMainActivityViewModelFactory(requireActivity())
-            model = ViewModelProviders.of(this, factory).get(MainActivityViewModel::class.java)
-        } else {
-            model = activity?.run {
-                ViewModelProviders.of(this).get(AlarmActivityViewModel::class.java)
-            } ?: throw Exception("Invalid Activity")
-        }
 
         val binding = DataBindingUtil.inflate<ControllerFragmentBinding>(
                 inflater, R.layout.controller_fragment, container, false).apply {
-            viewModel = model
+            viewModel = alarmViewModel
             lifecycleOwner = this@ControllerFragment
             buttonStartTimer.setOnClickListener { v ->
                 Klaxon.vibrateOnce(activity!!)
