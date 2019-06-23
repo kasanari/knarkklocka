@@ -12,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import se.jakob.knarkklocka.R
 import se.jakob.knarkklocka.data.Alarm
+import se.jakob.knarkklocka.data.AlarmState
 import se.jakob.knarkklocka.databinding.ChronometerFragmentBinding
 import se.jakob.knarkklocka.utils.InjectorUtils
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
@@ -37,10 +38,12 @@ class ChronometerFragment : Fragment() {
 
         alarmViewModel.liveAlarm.observe(this, Observer<Alarm> { alarm ->
             alarm?.run {
-                val timeDelta = alarm.endTime.time - System.currentTimeMillis()
-                chronometer.run {
-                    base = SystemClock.elapsedRealtime() + timeDelta
-                    start()
+                if (alarm.state != AlarmState.STATE_DEAD) {
+                    val timeDelta = alarm.endTime.time - System.currentTimeMillis()
+                    chronometer.run {
+                        base = SystemClock.elapsedRealtime() + timeDelta
+                        start()
+                    }
                 }
             }
         })
