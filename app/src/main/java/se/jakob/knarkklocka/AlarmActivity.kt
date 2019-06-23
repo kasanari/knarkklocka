@@ -1,7 +1,6 @@
 package se.jakob.knarkklocka
 
 import android.app.AlarmManager
-import android.app.AlarmManager.RTC_WAKEUP
 import android.app.KeyguardManager
 import android.content.ComponentName
 import android.content.Context
@@ -12,7 +11,6 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.SystemClock
 import android.text.format.DateUtils.MINUTE_IN_MILLIS
-import android.text.format.DateUtils.SECOND_IN_MILLIS
 import android.util.Log
 import android.view.View
 import android.view.WindowManager.LayoutParams.*
@@ -70,23 +68,7 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
 
         WakeLocker.acquire(this)
 
-        /*Ensure that screen turns on*/
-        if (Build.VERSION.SDK_INT >= 27) {
-            setShowWhenLocked(true)    //Replaces FLAG_SHOW_WHEN_LOCKED
-            setTurnScreenOn(true)      //Replaces FLAG_TURN_SCREEN_ON
-            val keyguardManager = (getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager)
-            keyguardManager.requestDismissKeyguard(this, null)
-            window.addFlags(
-                    FLAG_KEEP_SCREEN_ON
-                            or FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
-        } else {
-            window.addFlags(
-                    FLAG_SHOW_WHEN_LOCKED
-                            or FLAG_TURN_SCREEN_ON
-                            or FLAG_KEEP_SCREEN_ON
-                            or FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
-                            or FLAG_DISMISS_KEYGUARD)
-        }
+        keepScreenOn()
 
         /*Hide navigation and status bar*/
         hideUIElements()
@@ -210,6 +192,26 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         }
         viewModel.sleep() /* Update alarm in DB */
         finish()
+    }
+
+    private fun keepScreenOn() {
+        /*Ensure that screen turns on*/
+        if (Build.VERSION.SDK_INT >= 27) {
+            setShowWhenLocked(true)    //Replaces FLAG_SHOW_WHEN_LOCKED
+            setTurnScreenOn(true)      //Replaces FLAG_TURN_SCREEN_ON
+            val keyguardManager = (getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager)
+            keyguardManager.requestDismissKeyguard(this, null)
+            window.addFlags(
+                    FLAG_KEEP_SCREEN_ON
+                            or FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
+        } else {
+            window.addFlags(
+                    FLAG_SHOW_WHEN_LOCKED
+                            or FLAG_TURN_SCREEN_ON
+                            or FLAG_KEEP_SCREEN_ON
+                            or FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
+                            or FLAG_DISMISS_KEYGUARD)
+        }
     }
 
     private fun hideUIElements() {
