@@ -27,8 +27,8 @@ class TimerActivityTest {
     }
 
     @Test fun pressFABAndThenSleep() {
-        onView(withId(R.id.fab_start_timer)).perform(click())
-        onView(withId(R.id.fab_start_timer)).perform(longClick())
+        onView(withId(R.id.button_start_timer)).perform(click())
+        onView(withId(R.id.button_start_timer)).perform(longClick())
         onView(withId(R.id.button_remove_timer)).perform(click())
         onView(withId(R.id.button_remove_timer)).perform(longClick())
     }

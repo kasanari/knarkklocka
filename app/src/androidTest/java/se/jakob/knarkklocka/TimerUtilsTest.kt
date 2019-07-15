@@ -78,7 +78,7 @@ class TimerUtilsTest {
         val newEndTime = Calendar.getInstance().apply { add(Calendar.MILLISECOND, testSnoozeLength.toInt()) }.time
         alarm.activate()
         runBlocking {
-            val id = repository.insert(alarm).await()
+            val id = repository.safeInsert(alarm)!!
             alarm.id = id
             TimerUtils.startSnoozeTimer(context, alarm)
             Thread.sleep(2000) //Wait a bit for db operation to finish

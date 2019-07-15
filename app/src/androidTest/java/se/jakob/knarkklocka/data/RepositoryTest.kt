@@ -65,8 +65,8 @@ class RepositoryTest {
         var alarm1 = createTestAlarm(testCalendar, testTimerLength)
         var alarm2 = createTestAlarm(testCalendar, testTimerLength)
         runBlocking {
-            alarm1.id = repository.insert(alarm1).await()
-            alarm2.id = repository.insert(alarm2).await()
+            alarm1.id = repository.safeInsert(alarm1)!!
+            alarm2.id = repository.safeInsert(alarm2)!!
             Thread.sleep(2000)
             alarm1.activate()
             alarm2.activate()
