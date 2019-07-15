@@ -29,7 +29,7 @@ class TimePreferenceDialogFragmentCompat : PreferenceDialogFragmentCompat() {
             hourPicker.value = preference.wholeHours
             minutePicker.value = preference.wholeMinutes
         }
-
+        
     }
 
     override fun onBindDialogView(view: View) {
@@ -60,12 +60,13 @@ class TimePreferenceDialogFragmentCompat : PreferenceDialogFragmentCompat() {
         fun getInstance(
                 key: String
         ): TimePreferenceDialogFragmentCompat {
-            val fragment = TimePreferenceDialogFragmentCompat()
-            val b = Bundle(1)
-            b.putString(PreferenceDialogFragmentCompat.ARG_KEY, key)
-            fragment.arguments = b
+            val args: Bundle = Bundle().apply {
+                putString(ARG_KEY, key) // Add key of the preference this dialog belongs to.
+            }
 
-            return fragment
+            return TimePreferenceDialogFragmentCompat().apply {
+                arguments = args
+            }
         }
     }
 
