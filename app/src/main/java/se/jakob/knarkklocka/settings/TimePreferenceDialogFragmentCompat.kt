@@ -6,7 +6,10 @@ import android.widget.NumberPicker
 import androidx.preference.PreferenceDialogFragmentCompat
 import se.jakob.knarkklocka.R
 
-
+/**
+ * Dialog fragment which shows two spinners. Used for setting the number of hours and minutes an alarm should
+ * run for.
+ */
 class TimePreferenceDialogFragmentCompat : PreferenceDialogFragmentCompat() {
 
     private lateinit var hourPicker: NumberPicker

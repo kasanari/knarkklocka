@@ -9,7 +9,7 @@ import androidx.preference.DialogPreference
 import se.jakob.knarkklocka.R
 
 /**
- * A [android.preference.Preference] that displays a number picker as a dialog.
+ * A [android.preference.Preference] that stores the length of a timer and displays a number picker dialog as input.
  */
 class TimerLengthPreference @JvmOverloads constructor(
         context: Context,
@@ -35,7 +35,7 @@ class TimerLengthPreference @JvmOverloads constructor(
         }
 
     init {
-        dialogLayoutResource = R.layout.dialog_numberpicker
+        dialogLayoutResource = R.layout.dialog_numberpicker // Set the dialog window layout
         setPositiveButtonText(R.string.positive)
         setNegativeButtonText(R.string.negative)
     }
@@ -52,6 +52,9 @@ class TimerLengthPreference @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Create a summary string on the form "x hours and y minutes"
+     */
     override fun getSummary(): CharSequence {
         val hours = wholeHours
         val minutes = wholeMinutes

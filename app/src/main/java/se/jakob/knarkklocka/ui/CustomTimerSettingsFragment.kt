@@ -13,6 +13,10 @@ import se.jakob.knarkklocka.R
 import se.jakob.knarkklocka.settings.TimePreferenceDialogFragmentCompat
 import se.jakob.knarkklocka.settings.TimerLengthPreference
 
+/**
+ This is a preference which allows the user the set an alarm with a custom length, overriding the length settings in SharedPreferences. After the custom alarm has fired
+ the setting will be disabled automatically.
+ **/
 class CustomTimerSettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
     override fun onCreatePreferences(p0: Bundle?, p1: String?) {
         // Load the preferences from an XML resource

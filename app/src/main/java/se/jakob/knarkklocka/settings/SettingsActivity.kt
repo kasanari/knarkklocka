@@ -11,7 +11,9 @@ import kotlinx.android.synthetic.main.activity_settings.*
 import se.jakob.knarkklocka.R
 import se.jakob.knarkklocka.utils.Utils
 
-
+/**
+ * Activity for housing settings. Mainly acts as a container for a [PreferenceFragmentCompat].
+ */
 class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

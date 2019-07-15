@@ -16,11 +16,11 @@ import se.jakob.knarkklocka.workers.PopulateDatabaseWorker
 @Database(entities = [Alarm::class], version = 6, exportSchema = false)
 abstract class AlarmDatabase : RoomDatabase() {
 
-    abstract fun alarmDao(): AlarmDao  //Getter for Dao, use to access the database
+    abstract fun alarmDao(): AlarmDao  // Getter for Dao, use to access the database
 
     companion object {
 
-        @Volatile private var instance: AlarmDatabase? = null //Instance of the database
+        @Volatile private var instance: AlarmDatabase? = null // Instance of the database
 
         fun getInstance(context: Context): AlarmDatabase {
             return instance ?: synchronized(this) {
@@ -28,7 +28,7 @@ abstract class AlarmDatabase : RoomDatabase() {
             }
         }
 
-        /*For debug purposes, populates the database with alarms*/
+        /* For debug purposes, populates the database with some alarms */
         private val databaseDebugCallback = object : RoomDatabase.Callback() {
             override fun onOpen(db: SupportSQLiteDatabase) {
                 super.onOpen(db)
@@ -38,13 +38,13 @@ abstract class AlarmDatabase : RoomDatabase() {
         }
 
         private fun buildDatabase(context: Context): AlarmDatabase {
-            return if (BuildConfig.DEBUG) {
+            return if (BuildConfig.DEBUG) { // If we are debugging, populate the database with some alarms for testing.
                  Room.databaseBuilder(context, AlarmDatabase::class.java,
                         "alarm_database_debug")
                         .addCallback(databaseDebugCallback)
                         .fallbackToDestructiveMigration()
                         .build()
-            } else {
+            } else { // Otherwise, keep it empty.
                  Room.databaseBuilder(context,
                         AlarmDatabase::class.java, "alarm_database")
                         .fallbackToDestructiveMigration()

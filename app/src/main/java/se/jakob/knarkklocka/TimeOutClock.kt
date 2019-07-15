@@ -4,6 +4,10 @@ import android.app.AlarmManager
 import android.content.Context
 import android.text.format.DateUtils
 
+/**
+ * This class is used to automatically finish [AlarmActivity] and [AlarmService]. It is a countdown timer which will execute a callback function
+ * once the time has expired.
+ */
 class TimeOutClock(private val timeoutLength: Long, private val alarmCallback : AlarmManager.OnAlarmListener) {
 
     private var running = false
