@@ -5,6 +5,9 @@ import android.text.format.DateUtils.*
 import androidx.preference.PreferenceManager
 import se.jakob.knarkklocka.BuildConfig
 
+/**
+ * Utility functions related to preferences.
+ */
 object PreferenceUtils {
 
     private const val KEY_MAIN_TIMER_LENGTH = "timer_length"

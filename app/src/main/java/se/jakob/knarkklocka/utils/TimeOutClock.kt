@@ -1,8 +1,9 @@
-package se.jakob.knarkklocka
+package se.jakob.knarkklocka.utils
 
 import android.app.AlarmManager
 import android.content.Context
 import android.text.format.DateUtils
+import se.jakob.knarkklocka.BuildConfig
 
 /**
  * This class is used to automatically finish [AlarmActivity] and [AlarmService]. It is a countdown timer which will execute a callback function

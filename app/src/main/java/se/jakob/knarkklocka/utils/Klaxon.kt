@@ -5,6 +5,9 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
 
+/**
+ * Functions for activating vibration.
+ */
 object Klaxon {
     private const val TAG = "Klaxon"
     private val mVibratePattern = longArrayOf(1000, 1500)

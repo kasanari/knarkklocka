@@ -16,6 +16,9 @@ import se.jakob.knarkklocka.databinding.ControllerFragmentBinding
 import se.jakob.knarkklocka.utils.*
 import se.jakob.knarkklocka.viewmodels.AlarmActivityViewModel
 
+/**
+ * [Fragment] which stores buttons that control the timer. The buttons can start, snooze and cancel timers.
+ */
 class ControllerFragment : Fragment() {
 
     private val alarmViewModel : MainActivityViewModel by activityViewModels {

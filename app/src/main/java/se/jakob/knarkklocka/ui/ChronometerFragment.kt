@@ -17,7 +17,9 @@ import se.jakob.knarkklocka.databinding.ChronometerFragmentBinding
 import se.jakob.knarkklocka.utils.InjectorUtils
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
 
-
+/**
+ * [Fragment] to store the countdown clock on the upper part of [TimerActivity]. Also shows the end time and current state of the alarm.
+ */
 class ChronometerFragment : Fragment() {
     
     private val alarmViewModel: MainActivityViewModel by viewModels {

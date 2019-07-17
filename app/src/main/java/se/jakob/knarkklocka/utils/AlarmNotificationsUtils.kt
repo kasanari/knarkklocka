@@ -22,6 +22,9 @@ import se.jakob.knarkklocka.utils.TimerUtils.getAlarmServiceIntent
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * Functions for creating and removing notifications used by the app.
+ */
 object AlarmNotificationsUtils {
 
     private const val ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID = "firing_notification_channel"

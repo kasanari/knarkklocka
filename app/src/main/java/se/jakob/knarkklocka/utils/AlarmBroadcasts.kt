@@ -1,12 +1,12 @@
-package se.jakob.knarkklocka
+package se.jakob.knarkklocka.utils
 
 import android.content.Context
 import android.content.Intent
-import se.jakob.knarkklocka.utils.ACTION_ALARM_HANDLED
-
-import se.jakob.knarkklocka.utils.ACTION_STOP_ALARM
 
 
+/**
+ * Functions for sending broadcasts.
+ */
 object AlarmBroadcasts {
 
     fun broadcastStopAlarm(context: Context) {

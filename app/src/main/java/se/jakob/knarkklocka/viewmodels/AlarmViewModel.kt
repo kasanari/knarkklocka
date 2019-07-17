@@ -14,6 +14,9 @@ import se.jakob.knarkklocka.utils.AlarmStateChanger
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * Abstract base class for the viewmodels used in various places thorough the app.
+ */
 abstract class AlarmViewModel internal constructor(private val repository: AlarmRepository)
     : ViewModel() {
 

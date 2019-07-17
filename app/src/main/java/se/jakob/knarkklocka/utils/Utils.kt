@@ -6,6 +6,9 @@ import android.util.Log
 import se.jakob.knarkklocka.BuildConfig
 import java.util.*
 
+/**
+ * General utility functions.
+ */
 object Utils {
 
     private const val TAG = "Utils"

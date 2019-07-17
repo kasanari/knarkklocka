@@ -6,6 +6,9 @@ import android.text.format.DateUtils.MINUTE_IN_MILLIS
 import android.util.Log
 import se.jakob.knarkklocka.BuildConfig
 
+/**
+ * Functions for making it more convenient to create and cancel wakelocks.
+ */
 object WakeLocker {
     private const val TAG = ":knarkklocka:WakeLocker"
     private lateinit var wakeLock: PowerManager.WakeLock

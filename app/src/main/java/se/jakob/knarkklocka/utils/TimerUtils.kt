@@ -10,7 +10,6 @@ import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import se.jakob.knarkklocka.AlarmBroadcasts
 import se.jakob.knarkklocka.AlarmService
 import se.jakob.knarkklocka.BuildConfig
 import se.jakob.knarkklocka.TimerActivity
@@ -21,6 +20,7 @@ import java.util.*
 
 /**
  * Created by Jakob Nyberg on 2018-03-26.
+ * Various utility functions for managing alarms.
  */
 
 object TimerUtils {
