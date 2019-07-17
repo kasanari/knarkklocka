@@ -10,12 +10,12 @@ import android.content.Intent
 object AlarmBroadcasts {
 
     fun broadcastStopAlarm(context: Context) {
-        val intent = Intent().also { it.action = ACTION_STOP_ALARM }
+        val intent = Intent().also { it.action = ACTION_STOP }
         context.sendBroadcast(intent)
     }
 
     fun broadcastAlarmHandled(context: Context) {
-        val intent = Intent().also { it.action = ACTION_ALARM_HANDLED }
+        val intent = Intent().also { it.action = SIGNAL_ALARM_HANDLED }
         context.sendBroadcast(intent)
     }
 }

@@ -127,7 +127,7 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
 
     override fun onControllerEvent(v: View, event: String) {
         when (event) {
-            ACTION_RESTART_ALARM -> {
+            ACTION_RESTART -> {
                 alarmIsHandled = true
                 if (alarmIsActive) {
                     dismiss()
@@ -135,7 +135,7 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
                     finish()
                 }
             }
-            ACTION_SNOOZE_ALARM -> {
+            ACTION_SNOOZE -> {
                 alarmIsHandled = true
                 if (alarmIsActive) {
                     snooze()

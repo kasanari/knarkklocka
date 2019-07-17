@@ -17,7 +17,7 @@ import se.jakob.knarkklocka.utilities.createTestAlarm
 import se.jakob.knarkklocka.utilities.getValue
 import se.jakob.knarkklocka.utilities.testSnoozeLength
 import se.jakob.knarkklocka.utilities.testTimerLength
-import se.jakob.knarkklocka.utils.ACTION_ACTIVATE_ALARM
+import se.jakob.knarkklocka.utils.ACTION_ACTIVATE
 import se.jakob.knarkklocka.utils.InjectorUtils
 import se.jakob.knarkklocka.utils.PreferenceUtils
 import se.jakob.knarkklocka.utils.TimerUtils
@@ -55,7 +55,7 @@ class AlarmServiceTest {
             id = repository.safeInsert(alarm)!!
             alarm = getValue(repository.getLiveAlarmByID(id))
         }
-        val intent = TimerUtils.getAlarmServiceIntent(context, id, ACTION_ACTIVATE_ALARM)
+        val intent = TimerUtils.getAlarmServiceIntent(context, id, ACTION_ACTIVATE)
         serviceRule.startService(intent)
         Thread.sleep(2000)
         assertEquals(AlarmState.STATE_ACTIVE, alarm.state)

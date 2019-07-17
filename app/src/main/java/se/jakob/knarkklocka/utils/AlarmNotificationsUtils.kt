@@ -296,7 +296,7 @@ object AlarmNotificationsUtils {
     }
 
     private fun getRestartAction(context: Context, alarm: Alarm) : Notification.Action {
-        val intent = getAlarmServiceIntent(context, alarm.id, ACTION_RESTART_ALARM)
+        val intent = getAlarmServiceIntent(context, alarm.id, ACTION_RESTART)
 
         val pendingIntent: PendingIntent =
                 PendingIntent.getService(context, ALARM_INTENT_ID, intent, FLAG_UPDATE_CURRENT)
@@ -308,7 +308,7 @@ object AlarmNotificationsUtils {
     }
 
     private fun getDismissAction(context: Context) : Notification.Action {
-        val intent = Intent().also { it.action = ACTION_DISMISS_ALARM }
+        val intent = Intent().also { it.action = ACTION_DISMISS }
 
         val pendingIntent: PendingIntent =
                 PendingIntent.getBroadcast(context, ALARM_INTENT_ID, intent, FLAG_UPDATE_CURRENT)
@@ -320,7 +320,7 @@ object AlarmNotificationsUtils {
     }
 
     private fun getSnoozeAction(context: Context) : Notification.Action {
-        val intent = Intent().also { it.action = ACTION_SNOOZE_ALARM }
+        val intent = Intent().also { it.action = ACTION_SNOOZE }
 
         val pendingIntent: PendingIntent =
                 PendingIntent.getBroadcast(context, ALARM_INTENT_ID, intent, FLAG_UPDATE_CURRENT)

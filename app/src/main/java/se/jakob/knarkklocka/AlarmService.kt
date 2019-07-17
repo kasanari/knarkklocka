@@ -64,10 +64,10 @@ class AlarmService : LifecycleService() {
         super.onCreate()
         // Register the broadcast receiver
         val filter = IntentFilter().apply {
-            addAction(ACTION_STOP_ALARM)
-            addAction(ACTION_ALARM_HANDLED)
-            addAction(ACTION_DISMISS_ALARM)
-            addAction(ACTION_SNOOZE_ALARM)
+            addAction(ACTION_STOP)
+            addAction(SIGNAL_ALARM_HANDLED)
+            addAction(ACTION_DISMISS)
+            addAction(ACTION_SNOOZE)
         }
         repository = InjectorUtils.getAlarmRepository(this)
         registerReceiver(actionsReceiver, filter)
@@ -130,19 +130,19 @@ class AlarmService : LifecycleService() {
 
     private fun handleBroadcastAction(action: String, alarm: Alarm) {
         when (action) {
-            ACTION_STOP_ALARM -> {
+            ACTION_STOP -> {
                 stopAlarm()
             }
-            ACTION_ALARM_HANDLED -> {
+            SIGNAL_ALARM_HANDLED -> {
                 alarmIsHandled = true
             }
-            ACTION_SNOOZE_ALARM -> {
+            ACTION_SNOOZE -> {
                 alarmIsHandled = true
                 TimerUtils.startSnoozeTimer(applicationContext, alarm)
                 Log.d(TAG, "Service received action to snooze alarm.")
                 stopAlarm()
             }
-            ACTION_DISMISS_ALARM -> {
+            ACTION_DISMISS -> {
                 alarmIsHandled = true
                 serviceScope.launch {
                     TimerUtils.cancelAlarm(applicationContext, alarm.id)
@@ -159,10 +159,10 @@ class AlarmService : LifecycleService() {
     private suspend fun handleIntent(action: String, id: Long) {
         repository.getAlarmByID(id)?.let { alarm ->
             when (action) {
-                ACTION_ACTIVATE_ALARM -> {
+                ACTION_ACTIVATE -> {
                     activateAlarm(alarm)
                 }
-                ACTION_STOP_ALARM -> {
+                ACTION_STOP -> {
                     stopAlarm()
                 }
                 ACTION_SLEEP -> {
@@ -174,7 +174,7 @@ class AlarmService : LifecycleService() {
                     }
                     stopAlarm()
                 }
-                ACTION_RESTART_ALARM -> {
+                ACTION_RESTART -> {
                     if (!alarmIsHandled) {
                         alarmIsHandled = true
                         TimerUtils.startMainTimer(applicationContext)

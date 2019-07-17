@@ -37,7 +37,7 @@ object TimerUtils {
      * Returns whatever pending intent i am using at the moment
      */
     private fun getPI(context: Context, id: Long): PendingIntent {
-        return getAlarmServicePendingIntent(context, id, ACTION_ACTIVATE_ALARM)
+        return getAlarmServicePendingIntent(context, id, ACTION_ACTIVATE)
     }
 
     /**
@@ -46,7 +46,7 @@ object TimerUtils {
      * @param id the id of the alarm to be checked.
      */
     fun alarmIsSet(context: Context, id: Long): Boolean {
-        val alarmIntent = getAlarmServiceIntent(context, id, ACTION_ACTIVATE_ALARM)
+        val alarmIntent = getAlarmServiceIntent(context, id, ACTION_ACTIVATE)
         val service = PendingIntent.getForegroundService(
                 context,
                 ALARM_INTENT_ID,

@@ -9,12 +9,9 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import se.jakob.knarkklocka.R
-import se.jakob.knarkklocka.viewmodels.AlarmViewModel
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
-import se.jakob.knarkklocka.TimerActivity
 import se.jakob.knarkklocka.databinding.ControllerFragmentBinding
 import se.jakob.knarkklocka.utils.*
-import se.jakob.knarkklocka.viewmodels.AlarmActivityViewModel
 
 /**
  * [Fragment] which stores buttons that control the timer. The buttons can start, snooze and cancel timers.
@@ -46,13 +43,13 @@ class ControllerFragment : Fragment() {
             viewModel = alarmViewModel
             lifecycleOwner = this@ControllerFragment
             buttonStartTimer.setOnClickListener { v ->
-                mListener?.onControllerEvent(v, ACTION_RESTART_ALARM)
+                mListener?.onControllerEvent(v, ACTION_RESTART)
             }
             buttonRemoveTimer.setOnClickListener { v ->
                 mListener?.onControllerEvent(v, ACTION_SLEEP)
             }
             buttonSnoozeTimer.setOnClickListener { v ->
-                mListener?.onControllerEvent(v, ACTION_SNOOZE_ALARM)
+                mListener?.onControllerEvent(v, ACTION_SNOOZE)
             }
         }
 

@@ -94,11 +94,11 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
     override fun onControllerEvent(v: View, event: String) {
         Klaxon.vibrateOnce(this)
         when (event) {
-            ACTION_RESTART_ALARM -> {
+            ACTION_RESTART -> {
                 restartAlarm()
                 showSnackBar(R.string.snackbar_alarm_created)
             }
-            ACTION_SNOOZE_ALARM -> {
+            ACTION_SNOOZE -> {
                 snooze()
                 showSnackBar(R.string.snackbar_alarm_snoozed)
             }
