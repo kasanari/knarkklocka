@@ -8,9 +8,12 @@ class MainActivityViewModel(repository: AlarmRepository) : AlarmViewModel(reposi
 
     override var liveAlarm = repository.currentLiveAlarm
 
+    var stringCache : String = " "
+
     fun getStateText(): LiveData<String> {
         return Transformations.map(liveAlarm) { alarm ->
-            (alarm?.stateToString ?: "No alarm")
+            stringCache = alarm?.stateToString ?: stringCache // If there is no string to get, use the previous one
+            (stringCache)
         }
     }
 }

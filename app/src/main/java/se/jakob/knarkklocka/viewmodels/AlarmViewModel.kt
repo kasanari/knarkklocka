@@ -48,11 +48,14 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
             } ?: "Start"
         }
 
+    var endTimeStringCache = " "
+
     val endTimeString : LiveData<String>
         get() = Transformations.map(liveAlarm) { alarm ->
             alarm?.run {
+                endTimeStringCache = df.format(alarm.endTime)
                 (df.format(alarm.endTime))
-            } ?: "No alarm"
+            } ?: endTimeStringCache
 
         }
 
