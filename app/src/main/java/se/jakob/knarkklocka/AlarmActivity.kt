@@ -25,6 +25,7 @@ import se.jakob.knarkklocka.data.AlarmState
 import se.jakob.knarkklocka.ui.ControllerFragment
 import se.jakob.knarkklocka.utils.*
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID
+import se.jakob.knarkklocka.utils.TimerUtils.getAlarmActionIntent
 import se.jakob.knarkklocka.viewmodels.AlarmActivityViewModel
 
 
@@ -37,6 +38,8 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
     private var mServiceBound: Boolean = false
 
     private lateinit var timeOutClock: TimeOutClock
+
+    private var currentAlarm: Alarm? = null
 
     // Animation
     private lateinit var animBlink : Animation
@@ -103,6 +106,7 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
 
         viewModel.liveAlarm.observe(this, Observer {alarm : Alarm? ->
             if (alarm != null) {
+                currentAlarm = alarm
                 if (alarm.state == AlarmState.STATE_ACTIVE) {
                     startAlarm(alarm)
                 } else {
@@ -130,7 +134,9 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
             ACTION_RESTART -> {
                 alarmIsHandled = true
                 if (alarmIsActive) {
-                    dismiss()
+                    currentAlarm?.run {
+                        dismiss(this)
+                    }
                 } else {
                     finish()
                 }
@@ -138,7 +144,9 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
             ACTION_SNOOZE -> {
                 alarmIsHandled = true
                 if (alarmIsActive) {
-                    snooze()
+                    currentAlarm?.run {
+                        snooze(this)
+                    }
                 } else {
                     finish()
                 }
@@ -146,7 +154,9 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
             ACTION_SLEEP -> {
                 alarmIsHandled = true
                 if (alarmIsActive) {
-                    sleep()
+                    currentAlarm?.run {
+                        sleep(this)
+                    }
                 } else {
                     finish()
                 }
@@ -173,24 +183,21 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
     }
 
 
-    private fun snooze() {
-        viewModel.getCurrentAlarm()?.let { alarm ->
-            TimerUtils.startSnoozeTimer(this, alarm)
-        }
+    private fun snooze(alarm: Alarm) {
+        val intent = getAlarmActionIntent(this, ACTION_SNOOZE, alarm)
+        AlarmIntentService.enqueueWork(this, intent)
         finish()
     }
 
-    private fun dismiss() {
-        viewModel.kill() /* Kill old timer */
-        TimerUtils.startMainTimer(this) /* Start a new timer */
+    private fun dismiss(alarm: Alarm) {
+        val intent = getAlarmActionIntent(this, ACTION_RESTART, alarm)
+        AlarmIntentService.enqueueWork(this, intent)
         finish()
     }
 
-    private fun sleep() {
-        viewModel.getCurrentAlarm()?.let { alarm ->
-            TimerUtils.cancelAlarm(this, alarm.id) /* Cancel alarm in AlarmManager */
-        }
-        viewModel.sleep() /* Update alarm in DB */
+    private fun sleep(alarm : Alarm) {
+        val intent = getAlarmActionIntent(this, ACTION_SLEEP, alarm)
+        AlarmIntentService.enqueueWork(this, intent)
         finish()
     }
 
@@ -225,7 +232,9 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
     }
 
     override fun onBackPressed() {
-        snooze()
+        currentAlarm?.run {
+            snooze(this)
+        }
     }
 
     private fun startAlarm(alarm: Alarm) {

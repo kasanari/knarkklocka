@@ -9,6 +9,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.FragmentTransaction
+import androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -25,6 +26,7 @@ import se.jakob.knarkklocka.utils.*
 import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.clearAllNotifications
 import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.showSnoozingAlarmNotification
 import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.showWaitingAlarmNotification
+import se.jakob.knarkklocka.utils.TimerUtils.getAlarmActionIntent
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
 
 class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventListener {
@@ -35,11 +37,17 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
 
     private var chronometerVisible = false
 
+    private var restart = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.timer_main)
 
+        restart = false
+
         AlarmNotificationsUtils.setupChannels(this) // Create notification channels
+
+        hideChronometer()
 
         Utils.checkIfWhiteListed(this) // Check if the app is ignoring battery saving optimizations
 
@@ -55,31 +63,34 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
                 when (state) {
                     STATE_ACTIVE -> {
                         displayChronometer()
-                        hideSettings()
+                        //hideSettings()
                     }
                     STATE_DEAD -> {
                         hideChronometer()
-                        displaySettings()
+                        //displaySettings()
+                        clearAllNotifications(this)
                     }
                     STATE_SNOOZING -> {
-                        hideSettings()
+                        //hideSettings()
                         displayChronometer()
                         showSnoozingAlarmNotification(this, alarm)
                     }
                     STATE_WAITING -> {
-                        hideSettings()
+                        //hideSettings()
                         displayChronometer()
                         showWaitingAlarmNotification(this, alarm)
+
                     }
                     STATE_MISSED -> {
-                        hideSettings()
+                        //hideSettings()
                         displayChronometer()
                     }
                 }
             } else {
-                displaySettings()
-                hideChronometer()
-                clearAllNotifications(this)
+                if (!restart) {
+                    hideChronometer()
+                    clearAllNotifications(this)
+                }
             }
         })
 
@@ -95,15 +106,25 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         Klaxon.vibrateOnce(this)
         when (event) {
             ACTION_RESTART -> {
-                restartAlarm()
-                showSnackBar(R.string.snackbar_alarm_created)
+                currentAlarm?.run {
+                    if (this.state == STATE_DEAD) {
+                        startAlarm()
+                    } else {
+                        restartAlarm(this)
+                    }
+                } ?: startAlarm()
+
             }
             ACTION_SNOOZE -> {
-                snooze()
+                currentAlarm?.run {
+                    snooze(this)
+                }
                 showSnackBar(R.string.snackbar_alarm_snoozed)
             }
             ACTION_SLEEP -> {
-                sleep()
+                currentAlarm?.run {
+                    sleep(this)
+                }
                 showSnackBar(R.string.snackbar_alarm_cancelled)
             }
         }
@@ -129,55 +150,64 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
 
     /** Display the countdown timer at the top of the screen **/
     private fun displayChronometer() {
-        if (!chronometerVisible) {
-            val chronometerFragment = ChronometerFragment()
+            val settingsFragment = supportFragmentManager.findFragmentById(R.id.settings_fragment_container)
             supportFragmentManager.commit {
-                setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_top)
-                replace(R.id.fragment_container, chronometerFragment)
+                setCustomAnimations(R.anim.slide_in_top, R.anim.abc_fade_out)
+                setReorderingAllowed(true)
+                if (!chronometerVisible) {
+                    val chronometerFragment = ChronometerFragment()
+                    replace(R.id.fragment_container, chronometerFragment)
+                }
+                settingsFragment?.run { remove(settingsFragment) }
             }
             chronometerVisible = true
         }
-    }
 
     /** Hide the countdown timer at the top of the screen **/
     private fun hideChronometer() {
-        if (chronometerVisible) {
             val chronometerFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
-            if (chronometerFragment != null) {
                 supportFragmentManager.commit {
-                    setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_top)
-                    remove(chronometerFragment)
+                    setTransition(TRANSIT_FRAGMENT_FADE)
+                    setReorderingAllowed(true)
+                    if (chronometerVisible) {
+                        chronometerFragment?.run { remove(chronometerFragment) }
+                        chronometerVisible = false
+                    }
+                    replace(R.id.settings_fragment_container, CustomTimerSettingsFragment())
                 }
-            }
-            chronometerVisible = false
-        }
     }
 
     /** Kill the current alarm and create a new one **/
-    private fun restartAlarm() {
-        AlarmBroadcasts.broadcastAlarmHandled(this)
-        viewModel.kill() /* Kill any running alarms. */
-        TimerUtils.startMainTimer(this)
+    private fun restartAlarm(alarm: Alarm) {
+        val intent = getAlarmActionIntent(this, ACTION_RESTART, alarm)
+        AlarmIntentService.enqueueWork(this, intent)
+        showSnackBar(R.string.snackbar_alarm_restarted)
+        restart = true
+    }
+
+
+    private fun startAlarm() {
+        val intent = Intent().apply {
+            action = ACTION_RESTART
+        }
+        AlarmIntentService.enqueueWork(this, intent)
         displayChronometer()
+        showSnackBar(R.string.snackbar_alarm_created)
+        restart = false
     }
 
     /** Kill the current alarm **/
-    private fun sleep() {
-        AlarmBroadcasts.broadcastAlarmHandled(this)
-        viewModel.sleep() /* Delete or kill any running alarm */
-        currentAlarm?.let {
-            TimerUtils.cancelAlarm(this, it.id)
-            hideChronometer()
-            Log.d(TAG, "Sleep mode engaged...")
-        }
+    private fun sleep(alarm: Alarm) {
+        val intent = getAlarmActionIntent(this, ACTION_SLEEP, alarm)
+        AlarmIntentService.enqueueWork(this, intent)
+        hideChronometer()
+        Log.d(TAG, "Sleep mode engaged...")
     }
 
     /** Snooze the current alarm; that is, add the current snooze interval to the current alarm **/
-    private fun snooze() {
-        AlarmBroadcasts.broadcastAlarmHandled(this)
-        currentAlarm?.let { alarm ->
-            TimerUtils.startSnoozeTimer(this, alarm)
-        }
+    private fun snooze(alarm: Alarm) {
+        val intent = getAlarmActionIntent(this, ACTION_SNOOZE, alarm)
+        AlarmIntentService.enqueueWork(this, intent)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

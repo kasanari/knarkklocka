@@ -56,53 +56,9 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
 
         }
 
-    fun getCurrentAlarm(): Alarm? {
-        return liveAlarm.value
-    }
-
     internal fun deleteAll() {
         launchCoroutine {
             repository.deleteAll()
-        }
-    }
-
-    fun sleep() {
-        var success: Boolean
-        getData { alarm: Alarm ->
-            launchCoroutine {
-                success = AlarmStateChanger.sleep(alarm, repository)
-                if (!success) {
-                    if (BuildConfig.DEBUG) {
-                        throw Exception("Failed to put alarm to sleep")
-                    }
-                }
-            }
-        }
-    }
-
-    fun kill() {
-        getData { alarm: Alarm ->
-            launchCoroutine {
-                if (!alarm.dead) {
-                    AlarmStateChanger.kill(alarm, repository)
-                }
-            }
-        }
-    }
-
-    fun miss() {
-        getData { alarm: Alarm ->
-            launchCoroutine {
-                AlarmStateChanger.miss(alarm, repository)
-            }
-        }
-    }
-
-    fun snooze(endTime: Date) = run {
-        getData { alarm: Alarm ->
-            launchCoroutine {
-                AlarmStateChanger.snooze(alarm, endTime, repository)
-            }
         }
     }
 
@@ -111,11 +67,4 @@ abstract class AlarmViewModel internal constructor(private val repository: Alarm
             block()
         }
     }
-
-    private fun getData(block: (Alarm) -> Unit) {
-        liveAlarm.value?.let { alarm: Alarm ->
-            block(alarm)
-        }
-    }
-
 }

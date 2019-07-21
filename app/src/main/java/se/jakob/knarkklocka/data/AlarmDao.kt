@@ -27,7 +27,7 @@ interface AlarmDao {
     @Query("SELECT * FROM alarm_table ORDER BY start_time DESC, end_time DESC")
     fun getAllAlarms(): LiveData<List<Alarm>>
 
-    @Query("SELECT * FROM alarm_table ORDER BY start_time DESC, end_time DESC LIMIT 1")
+    @Query("SELECT * FROM alarm_table WHERE alarm_state != 1 ORDER BY start_time DESC, end_time DESC LIMIT 1 ")
     fun getMostRecentLiveAlarm(): LiveData<Alarm>
 
     @Query("SELECT * FROM alarm_table ORDER BY start_time DESC, end_time DESC LIMIT 1")

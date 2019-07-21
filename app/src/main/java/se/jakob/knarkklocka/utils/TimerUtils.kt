@@ -9,7 +9,7 @@ import android.icu.util.Calendar
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import se.jakob.knarkklocka.AlarmBroadcastReceiver
 import se.jakob.knarkklocka.AlarmService
 import se.jakob.knarkklocka.BuildConfig
 import se.jakob.knarkklocka.TimerActivity
@@ -32,12 +32,18 @@ object TimerUtils {
     const val ALARM_INTENT_ID = 76          //Arbitrary unique ID for the alarm intent
     private const val TIMER_ACTIVITY_INTENT_ID = 34 //Arbitrary unique ID for the TimerActivity intent
 
-    private val utilScope = CoroutineScope(Dispatchers.IO)
     /**
      * Returns whatever pending intent i am using at the moment
      */
     private fun getPI(context: Context, id: Long): PendingIntent {
         return getAlarmServicePendingIntent(context, id, ACTION_ACTIVATE)
+    }
+
+    fun getAlarmActionIntent(context : Context, action_id: String, alarm: Alarm): Intent {
+        return Intent(context, AlarmBroadcastReceiver::class.java).apply {
+            action = action_id
+            putExtra(EXTRA_ALARM_ID, alarm.id)
+        }
     }
 
     /**
@@ -129,8 +135,8 @@ object TimerUtils {
      * @param context
      * @return The expiration time of the started alarm
      */
-    fun startMainTimer(context: Context): Date {
-        val timerDuration : Long = if (PreferenceUtils.getCustomTimerEnabled(context)) {
+    suspend fun startMainTimer(context: Context): Date {
+        val timerDuration: Long = if (PreferenceUtils.getCustomTimerEnabled(context)) {
             PreferenceUtils.getCustomTimerLength(context)
         } else {
             PreferenceUtils.getMainTimerLength(context)
@@ -139,15 +145,14 @@ object TimerUtils {
         val startTime = Calendar.getInstance().time
         val endTime = Calendar.getInstance().apply { add(Calendar.MILLISECOND, timerDuration.toInt()) }.time
         val alarm = Alarm(AlarmState.STATE_WAITING, startTime, endTime)
-        utilScope.launch {
-            InjectorUtils.getAlarmRepository(context).run {
-                safeInsert(alarm)?.let { id ->
-                    alarm.id = id
-                    setNewAlarm(context, id, alarm.endTime)
-                    AlarmNotificationsUtils.showWaitingAlarmNotification(context, alarm)
-                }
+        InjectorUtils.getAlarmRepository(context).run {
+            safeInsert(alarm)?.let { id ->
+                alarm.id = id
+                setNewAlarm(context, id, alarm.endTime)
+                AlarmNotificationsUtils.showWaitingAlarmNotification(context, alarm)
             }
         }
+
         return endTime
     }
 
@@ -159,15 +164,13 @@ object TimerUtils {
      *  @param alarm The alarm that is to be snoozed.
      *  @return The new due time of the snoozed alarm.
      */
-    fun startSnoozeTimer(context: Context, alarm: Alarm): Date {
+    suspend fun startSnoozeTimer(context: Context, alarm: Alarm): Date {
         val snoozeDuration = PreferenceUtils.getSnoozeTimerLength(context)
         val newEndTime = Calendar.getInstance().apply { add(Calendar.MILLISECOND, snoozeDuration.toInt()) }.time
         setNewAlarm(context, alarm.id, newEndTime)
-        utilScope.launch {
-            InjectorUtils.getAlarmRepository(context).let { repository ->
-                AlarmStateChanger.snooze(alarm, newEndTime, repository)
-                AlarmNotificationsUtils.showSnoozingAlarmNotification(context, alarm)
-            }
+        InjectorUtils.getAlarmRepository(context).let { repository ->
+            AlarmStateChanger.snooze(alarm, newEndTime, repository)
+            AlarmNotificationsUtils.showSnoozingAlarmNotification(context, alarm)
         }
         return newEndTime
     }

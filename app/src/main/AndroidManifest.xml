@@ -69,6 +69,10 @@
             android:enabled="true"
             android:exported="false"
             android:stopWithTask="false" />
+        <service android:name=".AlarmIntentService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:enabled="true"
+            android:exported="true"/>
 
         <!-- *********Broadcast Receivers******** -->
         <receiver android:name=".AlarmBootReceiver"
@@ -80,7 +84,9 @@
             <action android:name="android.intent.action.TIME_SET" />
             <action android:name="android.intent.action.TIMEZONE_CHANGED" />
         </intent-filter>
-            </receiver>
+        </receiver>
+        <receiver android:name=".AlarmBroadcastReceiver" android:exported="true">
+        </receiver>
     </application>
 
 </manifest>
