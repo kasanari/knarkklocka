@@ -172,6 +172,7 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         alarm_chronometer.start()
     }
 
+    /* This code has to be in onDestroy and not in onStop, otherwise the activity will end prematurely */
     override fun onDestroy() {
         super.onDestroy()
         if (alarmIsHandled) {
