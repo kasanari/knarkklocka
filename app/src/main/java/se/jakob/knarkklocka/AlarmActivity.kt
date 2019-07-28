@@ -247,7 +247,6 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         timeOutClock.stop(this)
         alarmIsActive = false
         viewModel.liveAlarm.removeObservers(this)
-        AlarmBroadcasts.broadcastStopAlarm(this)
     }
 
 
