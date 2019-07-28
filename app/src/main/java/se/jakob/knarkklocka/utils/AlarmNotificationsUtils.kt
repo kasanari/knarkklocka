@@ -326,7 +326,7 @@ object AlarmNotificationsUtils {
     fun clearAllNotifications(context: Context) {
         val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancelAll()
-        Log.d(TAG, "Notifications cleared.")
+        Log.d(TAG, "Notifications cleared by $context")
     }
 
 
