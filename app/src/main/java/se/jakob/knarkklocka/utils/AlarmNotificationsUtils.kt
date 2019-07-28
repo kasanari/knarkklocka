@@ -179,7 +179,7 @@ object AlarmNotificationsUtils {
         clearAllNotifications(service.applicationContext)
         val notification = getMissedAlarmNotification(service, alarm)
         service.startForeground(ALARM_MISSED_NOTIFICATION_ID, notification)
-        Log.d(TAG, "Showing MISSED notification.")
+        Log.d(TAG, "$service showing MISSED notification.")
     }
 
     private fun getMissedAlarmNotification(context: Context, alarm: Alarm) : Notification {
@@ -231,7 +231,7 @@ object AlarmNotificationsUtils {
 
         val notification = getActiveAlarmNotification(service, alarm)
         service.startForeground(ALARM_ACTIVE_NOTIFICATION_ID, notification)
-        Log.d(TAG, "Showing ACTIVE notification.")
+        Log.d(TAG, "$service showing ACTIVE notification.")
     }
 
     @Synchronized
@@ -256,7 +256,7 @@ object AlarmNotificationsUtils {
         (context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager).run {
             notify(ALARM_SNOOZING_NOTIFICATION_ID, notification.build())
         }
-        Log.d(TAG, "Showing SNOOZING notification.")
+        Log.d(TAG, "$context showing SNOOZING notification.")
     }
 
     @Synchronized
@@ -279,7 +279,7 @@ object AlarmNotificationsUtils {
         (context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager).run {
             notify(ALARM_WAITING_NOTIFICATION_ID, notification.build())
         }
-        Log.d(TAG, "Showing WAITING notification.")
+        Log.d(TAG, "$context showing WAITING notification.")
     }
 
 
