@@ -63,26 +63,21 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
                 when (state) {
                     STATE_ACTIVE -> {
                         displayChronometer()
-                        //hideSettings()
                     }
                     STATE_DEAD -> {
                         hideChronometer()
-                        //displaySettings()
                         clearAllNotifications(this)
                     }
                     STATE_SNOOZING -> {
-                        //hideSettings()
                         displayChronometer()
                         showSnoozingAlarmNotification(this, alarm)
                     }
                     STATE_WAITING -> {
-                        //hideSettings()
                         displayChronometer()
                         showWaitingAlarmNotification(this, alarm)
 
                     }
                     STATE_MISSED -> {
-                        //hideSettings()
                         displayChronometer()
                     }
                 }
