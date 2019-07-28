@@ -37,17 +37,13 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
 
     private var chronometerVisible = false
 
-    private var restart = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.timer_main)
 
-        restart = false
-
         AlarmNotificationsUtils.setupChannels(this) // Create notification channels
 
-        hideChronometer()
+        hideChronometer() // Hide chronometer initially, it will be opened if there is an alarm running
 
         Utils.checkIfWhiteListed(this) // Check if the app is ignoring battery saving optimizations
 
@@ -59,8 +55,7 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         viewModel.liveAlarm.observe(this, Observer { alarm ->
             if (alarm != null) {
                 currentAlarm = alarm
-                val state = alarm.state
-                when (state) {
+                when (alarm.state) {
                     STATE_ACTIVE -> {
                         displayChronometer()
                     }
@@ -82,16 +77,14 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
                     }
                 }
             } else {
-                if (!restart) {
-                    hideChronometer()
-                    clearAllNotifications(this)
-                }
+                hideChronometer()
+                clearAllNotifications(this)
             }
         })
 
         /* Setting up a Toolbar instead of ActionBar */
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        toolbar.title = "Timer control"
+        toolbar.title = getString(R.string.timeractivity_title)
         setSupportActionBar(toolbar)
 
     }
@@ -159,7 +152,6 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         val intent = getAlarmActionIntent(this, ACTION_RESTART, alarm)
         AlarmIntentService.enqueueWork(this, intent)
         showSnackBar(R.string.snackbar_alarm_restarted)
-        restart = true
     }
 
 
@@ -170,7 +162,6 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         AlarmIntentService.enqueueWork(this, intent)
         displayChronometer()
         showSnackBar(R.string.snackbar_alarm_created)
-        restart = false
     }
 
     /** Kill the current alarm **/
@@ -201,9 +192,8 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        val id = item.itemId
 
-        return when (id) {
+        return when (item.itemId) {
             R.id.action_settings -> {
                 val settingsIntent = Intent(this, SettingsActivity::class.java)
                 startActivity(settingsIntent)
@@ -220,7 +210,6 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
 
     companion object {
         private const val TAG = "TimerActivity"
-        const val STATE_CHECKED = "customTimerChecked"
     }
 
     private fun showSnackBar(message_id: Int) {
