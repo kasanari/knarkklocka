@@ -41,10 +41,7 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         super.onCreate(savedInstanceState)
         setContentView(R.layout.timer_main)
 
-        AlarmNotificationsUtils.setupChannels(this) // Create notification channels
-
         hideChronometer() // Hide chronometer initially, it will be opened if there is an alarm running
-        clearAllNotifications(this)
 
         Utils.checkIfWhiteListed(this) // Check if the app is ignoring battery saving optimizations
 
@@ -62,16 +59,12 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
                     }
                     STATE_DEAD -> {
                         hideChronometer()
-                        clearAllNotifications(this)
                     }
                     STATE_SNOOZING -> {
                         displayChronometer()
-                        showSnoozingAlarmNotification(this, alarm)
                     }
                     STATE_WAITING -> {
                         displayChronometer()
-                        showWaitingAlarmNotification(this, alarm)
-
                     }
                     STATE_MISSED -> {
                         displayChronometer()

@@ -176,6 +176,7 @@ object AlarmNotificationsUtils {
 
     @Synchronized
     fun showMissedAlarmNotification(service : Service, alarm: Alarm) {
+        setupNotificationChannel(service.applicationContext, ALARM_MISSED_NOTIFICATION_CHANNEL_ID)
         clearAllNotifications(service.applicationContext)
         val notification = getMissedAlarmNotification(service, alarm)
         service.startForeground(ALARM_MISSED_NOTIFICATION_ID, notification)
@@ -227,6 +228,8 @@ object AlarmNotificationsUtils {
 
     @Synchronized
     fun showActiveAlarmNotification(service: Service, alarm: Alarm) {
+        setupNotificationChannel(service.applicationContext, ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID)
+
         clearAllNotifications(service.applicationContext)
 
         val notification = getActiveAlarmNotification(service, alarm)
@@ -236,6 +239,8 @@ object AlarmNotificationsUtils {
 
     @Synchronized
     fun showSnoozingAlarmNotification(context: Context, alarm: Alarm) {
+        setupNotificationChannel(context.applicationContext, ALARM_SNOOZING_NOTIFICATION_CHANNEL_ID)
+
         clearAllNotifications(context)
 
         val pendingShowAlarm = TimerUtils.getTimerActivityIntent(context)
@@ -261,6 +266,8 @@ object AlarmNotificationsUtils {
 
     @Synchronized
     fun showWaitingAlarmNotification(context: Context, alarm: Alarm) {
+        setupNotificationChannel(context.applicationContext, ALARM_WAITING_NOTIFICATION_CHANNEL_ID)
+
         clearAllNotifications(context)
 
         val packageName = context.packageName
@@ -269,7 +276,7 @@ object AlarmNotificationsUtils {
 
         val action = getSleepAction(context, alarm)
 
-        val notification = baseNotification(context, ALARM_ACTIVE_NOTIFICATION_CHANNEL_ID).apply {
+        val notification = baseNotification(context, ALARM_WAITING_NOTIFICATION_CHANNEL_ID).apply {
             setCategory(Notification.CATEGORY_SERVICE)
             setContentIntent(pendingShowAlarm)
             setCustomContentView(buildWaitingNotificationView(packageName, alarm.endTime, true, stateText))
