@@ -14,7 +14,7 @@ class AlarmIntentService : JobIntentService() {
      */
 
     override fun onDestroy() {
-        Log.d(TAG, "All work complete")
+        Log.d(TAG, "All work complete.")
         super.onDestroy()
     }
 
@@ -28,7 +28,7 @@ class AlarmIntentService : JobIntentService() {
                         repository.getAlarmByID(id)?.let { alarm ->
                             TimerUtils.cancelAlarm(applicationContext, alarm.id)
                             AlarmStateChanger.sleep(alarm, repository)
-                            Log.d(TAG, "AlarmIntentService received action to cancel alarm.")
+                            Log.d(TAG, "Received action to cancel alarm.")
                             AlarmBroadcasts.broadcastAlarmHandled(this@AlarmIntentService)
                         }
                     }
@@ -37,7 +37,7 @@ class AlarmIntentService : JobIntentService() {
                     runBlocking {
                         repository.getAlarmByID(id)?.let { alarm ->
                             TimerUtils.startSnoozeTimer(applicationContext, alarm)
-                            Log.d(TAG, "AlarmIntentService received action to snooze alarm.")
+                            Log.d(TAG, "Received action to snooze alarm.")
                             AlarmBroadcasts.broadcastAlarmHandled(this@AlarmIntentService)
                         }
                     }
@@ -49,7 +49,7 @@ class AlarmIntentService : JobIntentService() {
                             AlarmStateChanger.sleep(alarm, repository)
                         }
                         TimerUtils.startMainTimer(applicationContext)
-                        Log.d(TAG, "AlarmIntentService received action to restart alarm.")
+                        Log.d(TAG, "Received action to restart alarm.")
                         AlarmBroadcasts.broadcastAlarmHandled(this@AlarmIntentService)
                     }
                 }
