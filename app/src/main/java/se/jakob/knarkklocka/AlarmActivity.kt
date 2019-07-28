@@ -34,7 +34,6 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
     private lateinit var viewModel: AlarmActivityViewModel
 
     private var alarmIsActive = false
-    private var alarmIsHandled = false
     private var mServiceBound: Boolean = false
 
     private lateinit var timeOutClock: TimeOutClock
@@ -132,7 +131,7 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
     override fun onControllerEvent(v: View, event: String) {
         when (event) {
             ACTION_RESTART -> {
-                alarmIsHandled = true
+                AlarmBroadcasts.broadcastAlarmHandled(this)
                 if (alarmIsActive) {
                     currentAlarm?.run {
                         dismiss(this)
@@ -142,7 +141,7 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
                 }
             }
             ACTION_SNOOZE -> {
-                alarmIsHandled = true
+                AlarmBroadcasts.broadcastAlarmHandled(this)
                 if (alarmIsActive) {
                     currentAlarm?.run {
                         snooze(this)
@@ -152,7 +151,7 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
                 }
             }
             ACTION_SLEEP -> {
-                alarmIsHandled = true
+                AlarmBroadcasts.broadcastAlarmHandled(this)
                 if (alarmIsActive) {
                     currentAlarm?.run {
                         sleep(this)
@@ -175,11 +174,8 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
     /* This code has to be in onDestroy and not in onStop, otherwise the activity will end prematurely */
     override fun onDestroy() {
         super.onDestroy()
-        if (alarmIsHandled) {
-            AlarmBroadcasts.broadcastAlarmHandled(this)
-            stopAlarm()
-            WakeLocker.release()
-        }
+        stopAlarm()
+        WakeLocker.release()
         unbindAlarmService()
     }
 
