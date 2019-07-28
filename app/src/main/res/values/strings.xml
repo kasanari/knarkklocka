@@ -38,6 +38,7 @@
     <string name="restart">Restart</string>
     <string name="start">Start</string>
     <string name="snackbar_alarm_restarted">Timer restarted.</string>
+    <string name="timeractivity_title">Timer control</string>
 
 
 </resources>
