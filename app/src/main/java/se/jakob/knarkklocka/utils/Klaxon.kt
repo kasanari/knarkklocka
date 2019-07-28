@@ -4,6 +4,8 @@ import android.content.Context
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
+import android.media.AudioAttributes
+import android.media.AudioAttributes.USAGE_ALARM
 
 /**
  * Functions for activating vibration.
@@ -23,8 +25,9 @@ object Klaxon {
 
     fun vibrateAlarm(context: Context) {
         val effect = VibrationEffect.createWaveform(mVibratePattern, amps, 0)
+        val attribute = AudioAttributes.Builder().setUsage(USAGE_ALARM).build()
         getVibrator(context).run {
-            vibrate(effect)
+            vibrate(effect, attribute)
             Log.d(TAG, "Vibration started.")
             activated = true
         }
