@@ -44,6 +44,7 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         AlarmNotificationsUtils.setupChannels(this) // Create notification channels
 
         hideChronometer() // Hide chronometer initially, it will be opened if there is an alarm running
+        clearAllNotifications(this)
 
         Utils.checkIfWhiteListed(this) // Check if the app is ignoring battery saving optimizations
 
@@ -78,7 +79,6 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
                 }
             } else {
                 hideChronometer()
-                clearAllNotifications(this)
             }
         })
 
