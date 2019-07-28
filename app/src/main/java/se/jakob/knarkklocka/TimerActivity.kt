@@ -160,7 +160,6 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
             action = ACTION_RESTART
         }
         AlarmIntentService.enqueueWork(this, intent)
-        displayChronometer()
         showSnackBar(R.string.snackbar_alarm_created)
     }
 
