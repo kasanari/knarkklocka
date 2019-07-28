@@ -54,7 +54,7 @@ class AlarmIntentService : JobIntentService() {
                     }
                 }
                 else -> {
-
+                    Log.e(TAG, "Received invalid action.")
                 }
             }
         }
