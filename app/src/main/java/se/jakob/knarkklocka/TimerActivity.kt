@@ -125,24 +125,6 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         }
     }
 
-    /** Show the settings for creating a custom timer **/
-    private fun displaySettings() {
-        supportFragmentManager.commit {
-            setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-            replace(R.id.settings_fragment_container, CustomTimerSettingsFragment())
-        }
-    }
-
-    /** Hide the settings for creating a custom timer **/
-    private fun hideSettings() {
-        supportFragmentManager.findFragmentById(R.id.settings_fragment_container)?.let { fragment ->
-            supportFragmentManager.commit {
-                setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                remove(fragment)
-            }
-        }
-    }
-
     /** Display the countdown timer at the top of the screen **/
     private fun displayChronometer() {
             val settingsFragment = supportFragmentManager.findFragmentById(R.id.settings_fragment_container)
