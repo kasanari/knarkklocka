@@ -142,7 +142,7 @@ class AlarmService : LifecycleService() {
                         activateAlarm(alarm)
                     }
                     else -> {
-                        Log.d(TAG, "Service received invalid action.")
+                        Log.e(TAG, "Service received invalid action.")
                         stopSelf()
                     }
                 }
@@ -183,7 +183,7 @@ class AlarmService : LifecycleService() {
     override fun onUnbind(intent: Intent?): Boolean {
         isBound = false
         if (!alarmIsHandled) {
-            Log.d(TAG, "AlarmActivity stopped but alarm was not handled!")
+            Log.e(TAG, "AlarmActivity stopped but alarm was not handled!")
             serviceScope.launch {
                 currentAlarm?.let { alarm ->
                     AlarmStateChanger.miss(alarm, repository)
