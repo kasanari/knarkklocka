@@ -24,32 +24,32 @@ class AlarmIntentService : JobIntentService() {
         intent.action?.let { action ->
             when (action) {
                 ACTION_SLEEP -> {
+                    Log.d(TAG, "Received action to cancel alarm.")
                     runBlocking {
                         repository.getAlarmByID(id)?.let { alarm ->
                             TimerUtils.cancelAlarm(applicationContext, alarm.id)
                             AlarmStateChanger.sleep(alarm, repository)
-                            Log.d(TAG, "Received action to cancel alarm.")
                             AlarmBroadcasts.broadcastAlarmHandled(this@AlarmIntentService)
                         }
                     }
                 }
                 ACTION_SNOOZE -> {
+                    Log.d(TAG, "Received action to snooze alarm.")
                     runBlocking {
                         repository.getAlarmByID(id)?.let { alarm ->
                             TimerUtils.startSnoozeTimer(applicationContext, alarm)
-                            Log.d(TAG, "Received action to snooze alarm.")
                             AlarmBroadcasts.broadcastAlarmHandled(this@AlarmIntentService)
                         }
                     }
                 }
                 ACTION_RESTART -> {
+                    Log.d(TAG, "Received action to restart alarm.")
                     runBlocking {
                         repository.getAlarmByID(id)?.let { alarm ->
                             TimerUtils.cancelAlarm(applicationContext, alarm.id)
                             AlarmStateChanger.sleep(alarm, repository)
                         }
                         TimerUtils.startMainTimer(applicationContext)
-                        Log.d(TAG, "Received action to restart alarm.")
                         AlarmBroadcasts.broadcastAlarmHandled(this@AlarmIntentService)
                     }
                 }
