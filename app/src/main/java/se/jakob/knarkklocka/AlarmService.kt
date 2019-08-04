@@ -19,6 +19,7 @@ import se.jakob.knarkklocka.data.AlarmRepository
 import se.jakob.knarkklocka.data.AlarmState
 import se.jakob.knarkklocka.utils.*
 import se.jakob.knarkklocka.utils.TimerUtils.EXTRA_ALARM_ID
+import se.jakob.knarkklocka.utils.TimerUtils.doBackgroundWork
 import java.text.DateFormat
 import java.util.*
 
@@ -43,8 +44,7 @@ class AlarmService : LifecycleService() {
         }
         if (!alarmIsHandled) {
             currentAlarm?.let { alarm ->
-                val intent = TimerUtils.getAlarmActionIntent(this, ACTION_SNOOZE, alarm)
-                AlarmIntentService.enqueueWork(this, intent)
+                doBackgroundWork(this, ACTION_SNOOZE, alarm.id)
             }
         }
     }

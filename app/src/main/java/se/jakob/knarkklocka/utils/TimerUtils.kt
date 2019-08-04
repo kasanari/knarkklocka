@@ -9,10 +9,7 @@ import android.icu.util.Calendar
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import se.jakob.knarkklocka.AlarmBroadcastReceiver
-import se.jakob.knarkklocka.AlarmService
-import se.jakob.knarkklocka.BuildConfig
-import se.jakob.knarkklocka.TimerActivity
+import se.jakob.knarkklocka.*
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmState
 import java.text.DateFormat
@@ -39,11 +36,16 @@ object TimerUtils {
         return getAlarmServicePendingIntent(context, id, ACTION_ACTIVATE)
     }
 
-    fun getAlarmActionIntent(context : Context, action_id: String, alarm: Alarm): Intent {
-        return Intent(context, AlarmBroadcastReceiver::class.java).apply {
+    fun getAlarmActionIntent(context : Context, action_id: String, alarm_id: Long): Intent {
+        return Intent(context, AlarmIntentService::class.java).apply {
             action = action_id
-            putExtra(EXTRA_ALARM_ID, alarm.id)
+            putExtra(EXTRA_ALARM_ID, alarm_id)
         }
+    }
+
+    fun doBackgroundWork(context: Context, action_id: String, alarm_id: Long) {
+        val intent = getAlarmActionIntent(context, action_id, alarm_id)
+        context.startService(intent)
     }
 
     /**

@@ -1,5 +1,6 @@
 package se.jakob.knarkklocka
 
+import android.app.IntentService
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -7,7 +8,7 @@ import androidx.core.app.JobIntentService
 import kotlinx.coroutines.runBlocking
 import se.jakob.knarkklocka.utils.*
 
-class AlarmIntentService : JobIntentService() {
+class AlarmIntentService : IntentService("AlarmIntentService") {
 
     /**
      * Convenience method for enqueuing work in to this service.
@@ -18,10 +19,10 @@ class AlarmIntentService : JobIntentService() {
         super.onDestroy()
     }
 
-    override fun onHandleWork(intent: Intent) {
-        val id = intent.getLongExtra(TimerUtils.EXTRA_ALARM_ID, -1)
-        val repository = InjectorUtils.getAlarmRepository(this)
-        intent.action?.let { action ->
+    override fun onHandleIntent(intent: Intent?) {
+        intent?.action?.let { action ->
+            val repository = InjectorUtils.getAlarmRepository(this)
+            val id = intent.getLongExtra(TimerUtils.EXTRA_ALARM_ID, -1)
             when (action) {
                 ACTION_SLEEP -> {
                     Log.d(TAG, "Received action to cancel alarm.")
@@ -62,11 +63,5 @@ class AlarmIntentService : JobIntentService() {
 
     companion object {
         private const val TAG = "AlarmIntentService"
-        private const val JOB_ID = 1000
-
-        fun enqueueWork(context: Context, work: Intent) {
-            enqueueWork(context, AlarmIntentService::class.java, JOB_ID, work)
-        }
-
     }
 }

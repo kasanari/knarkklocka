@@ -26,6 +26,7 @@ import se.jakob.knarkklocka.utils.*
 import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.clearAllNotifications
 import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.showSnoozingAlarmNotification
 import se.jakob.knarkklocka.utils.AlarmNotificationsUtils.showWaitingAlarmNotification
+import se.jakob.knarkklocka.utils.TimerUtils.doBackgroundWork
 import se.jakob.knarkklocka.utils.TimerUtils.getAlarmActionIntent
 import se.jakob.knarkklocka.viewmodels.MainActivityViewModel
 
@@ -142,32 +143,26 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
 
     /** Kill the current alarm and create a new one **/
     private fun restartAlarm(alarm: Alarm) {
-        val intent = getAlarmActionIntent(this, ACTION_RESTART, alarm)
-        AlarmIntentService.enqueueWork(this, intent)
+        doBackgroundWork(this, ACTION_RESTART, alarm.id)
         showSnackBar(R.string.snackbar_alarm_restarted)
     }
 
 
     private fun startAlarm() {
-        val intent = Intent().apply {
-            action = ACTION_RESTART
-        }
-        AlarmIntentService.enqueueWork(this, intent)
+        doBackgroundWork(this, ACTION_RESTART, -1)
         showSnackBar(R.string.snackbar_alarm_created)
     }
 
     /** Kill the current alarm **/
     private fun sleep(alarm: Alarm) {
-        val intent = getAlarmActionIntent(this, ACTION_SLEEP, alarm)
-        AlarmIntentService.enqueueWork(this, intent)
+        doBackgroundWork(this, ACTION_SLEEP, alarm.id)
         hideChronometer()
         Log.d(TAG, "Sleep mode engaged...")
     }
 
     /** Snooze the current alarm; that is, add the current snooze interval to the current alarm **/
     private fun snooze(alarm: Alarm) {
-        val intent = getAlarmActionIntent(this, ACTION_SNOOZE, alarm)
-        AlarmIntentService.enqueueWork(this, intent)
+        doBackgroundWork(this, ACTION_SNOOZE, alarm.id)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

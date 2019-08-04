@@ -292,10 +292,10 @@ object AlarmNotificationsUtils {
 
     private fun getSleepAction(context: Context, alarm: Alarm) : Notification.Action {
 
-        val intent = getAlarmActionIntent(context, ACTION_SLEEP, alarm)
+        val intent = getAlarmActionIntent(context, ACTION_SLEEP, alarm.id)
 
         val pendingIntent: PendingIntent =
-                getBroadcast(context, ALARM_INTENT_ID, intent, FLAG_UPDATE_CURRENT)
+                getService(context, ALARM_INTENT_ID, intent, FLAG_UPDATE_CURRENT)
 
         return  Notification.Action.Builder(
                 Icon.createWithResource(context, R.drawable.ic_remove_black),
@@ -305,10 +305,10 @@ object AlarmNotificationsUtils {
 
     private fun getRestartAction(context: Context, alarm: Alarm) : Notification.Action {
 
-        val intent = getAlarmActionIntent(context, ACTION_RESTART, alarm)
+        val intent = getAlarmActionIntent(context, ACTION_RESTART, alarm.id)
 
         val pendingIntent: PendingIntent =
-                getBroadcast(context, ALARM_INTENT_ID, intent, FLAG_UPDATE_CURRENT)
+                getService(context, ALARM_INTENT_ID, intent, FLAG_UPDATE_CURRENT)
 
         return Notification.Action.Builder(
                 Icon.createWithResource(context, R.drawable.ic_remove_black),
@@ -318,10 +318,10 @@ object AlarmNotificationsUtils {
 
     private fun getSnoozeAction(context: Context, alarm: Alarm) : Notification.Action {
 
-        val intent = getAlarmActionIntent(context, ACTION_SNOOZE, alarm)
+        val intent = getAlarmActionIntent(context, ACTION_SNOOZE, alarm.id)
 
         val pendingIntent: PendingIntent =
-                getBroadcast(context, ALARM_INTENT_ID, intent, FLAG_UPDATE_CURRENT)
+                getService(context, ALARM_INTENT_ID, intent, FLAG_UPDATE_CURRENT)
 
         return Notification.Action.Builder(
                 Icon.createWithResource(context, R.drawable.ic_remove_black),

@@ -181,20 +181,17 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
 
 
     private fun snooze(alarm: Alarm) {
-        val intent = getAlarmActionIntent(this, ACTION_SNOOZE, alarm)
-        AlarmIntentService.enqueueWork(this, intent)
+        TimerUtils.doBackgroundWork(this, ACTION_SNOOZE, alarm.id)
         finish()
     }
 
     private fun dismiss(alarm: Alarm) {
-        val intent = getAlarmActionIntent(this, ACTION_RESTART, alarm)
-        AlarmIntentService.enqueueWork(this, intent)
+        TimerUtils.doBackgroundWork(this, ACTION_RESTART, alarm.id)
         finish()
     }
 
     private fun sleep(alarm : Alarm) {
-        val intent = getAlarmActionIntent(this, ACTION_SLEEP, alarm)
-        AlarmIntentService.enqueueWork(this, intent)
+        TimerUtils.doBackgroundWork(this, ACTION_SLEEP, alarm.id)
         finish()
     }
 
