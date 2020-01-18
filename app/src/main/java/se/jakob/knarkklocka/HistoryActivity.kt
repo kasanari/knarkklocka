@@ -6,7 +6,7 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_history.*
 import se.jakob.knarkklocka.data.Alarm
@@ -34,7 +34,7 @@ class HistoryActivity : AppCompatActivity() {
 
         // Get a new or existing ViewModel from the ViewModelProvider.
         val factory = InjectorUtils.provideAlarmHistoryViewModelFactory(this)
-        viewModel = ViewModelProviders.of(this, factory).get(AlarmHistoryViewModel::class.java)
+        viewModel = ViewModelProvider(this, factory).get(AlarmHistoryViewModel::class.java)
 
         viewModel.allAlarms.observe(this, Observer { alarms: List<Alarm> ->
             // Update the cached copy of the words in the adapter.

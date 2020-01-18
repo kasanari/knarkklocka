@@ -12,7 +12,7 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.timer_main.*
@@ -49,7 +49,7 @@ class TimerActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true) // Set the default preference values
 
         val factory = InjectorUtils.provideMainActivityViewModelFactory(this)
-        viewModel = ViewModelProviders.of(this, factory).get(MainActivityViewModel::class.java)
+        viewModel = ViewModelProvider(this, factory).get(MainActivityViewModel::class.java)
 
         viewModel.liveAlarm.observe(this, Observer { alarm ->
             if (alarm != null) {

@@ -18,7 +18,7 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import kotlinx.android.synthetic.main.activity_alarm.*
 import se.jakob.knarkklocka.data.Alarm
 import se.jakob.knarkklocka.data.AlarmState
@@ -80,7 +80,7 @@ class AlarmActivity : AppCompatActivity(), ControllerFragment.OnControllerEventL
 
         /*Setup ViewModel and Observer*/
         val factory = InjectorUtils.provideAlarmActivityViewModelFactory(this, id)
-        viewModel = ViewModelProviders.of(this, factory).get(AlarmActivityViewModel::class.java)
+        viewModel = ViewModelProvider(this, factory).get(AlarmActivityViewModel::class.java)
 
         setContentView(R.layout.activity_alarm)
 

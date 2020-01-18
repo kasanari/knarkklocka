@@ -88,10 +88,10 @@ class AlarmService : LifecycleService() {
         })
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         WakeLocker.acquire(this)
-        val id = intent.getLongExtra(EXTRA_ALARM_ID, -1)
-        intent.action?.let { action ->
+        intent?.action?.let { action ->
+            val id = intent.getLongExtra(EXTRA_ALARM_ID, -1)
             listenToAlarm(id)
             serviceScope.launch {
                 handleIntent(action, id)

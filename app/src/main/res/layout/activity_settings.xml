@@ -37,7 +37,7 @@
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:text="© 2018"
+        android:text="© 2020"
         android:textAlignment="textEnd"
         android:textColor="@color/colorDecorative"
         android:theme="@style/Preference.Information.Material"
